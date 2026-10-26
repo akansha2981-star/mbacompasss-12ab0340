@@ -225,6 +225,13 @@
       "when": 1792919955683,
       "tag": "0031_filtered_public_college_hubs",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793028159519,
+      "tag": "0032_add_email_to_profiles",
+      "breakpoints": true
     }
   ]
 }

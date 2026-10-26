@@ -9246,6 +9246,7 @@ export type Database = {
           city: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
           onboarding_completed: boolean | null
           phone: string | null
@@ -9262,6 +9263,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           onboarding_completed?: boolean | null
           phone?: string | null
@@ -9278,6 +9280,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           onboarding_completed?: boolean | null
           phone?: string | null

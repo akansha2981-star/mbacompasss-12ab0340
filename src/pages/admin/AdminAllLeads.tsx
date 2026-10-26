@@ -76,7 +76,7 @@ const AdminAllLeads = () => {
         if (p.target_exams?.length) extras.push(`Exams: ${p.target_exams.join(", ")}`);
         if (p.work_experience) extras.push(`Exp: ${p.work_experience}`);
         unified.push({
-          id: `signup-${p.id}`, name: p.display_name || "—", email: "—",
+          id: `signup-${p.id}`, name: p.display_name || p.email?.split("@")[0] || "—", email: p.email || "—",
           phone: p.phone || "—", source: "signup",
           source_page: p.signup_page_url || p.signup_page_name || "Direct Signup",
           created_at: p.created_at, extras: extras.join(" | "),
