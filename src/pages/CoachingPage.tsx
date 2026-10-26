@@ -54,7 +54,30 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
   const selectedExam = searchParams.get("exam") || hub?.exam || "";
   const page = directoryPage(searchParams.get("page"));
 
+  // Hub pages lock city/state/mode/exam. Changing or clearing a locked filter
+  // leaves the hub for the open /coaching directory with the hub's other values
+  // carried as ordinary, freely editable query params.
+  const hubLockedKeys = useMemo(() => {
+    const keys: Record<string, string> = {};
+    if (hub?.state) keys.state = hub.state;
+    if (hub?.city) keys.city = hub.city;
+    if (hub?.mode) keys.mode = hub.mode;
+    if (hub?.exam) keys.exam = hub.exam;
+    return keys;
+  }, [hub]);
+
+  const leaveHub = useCallback((key: string, value: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    for (const [k, v] of Object.entries(hubLockedKeys)) if (!next.has(k)) next.set(k, v);
+    if (value === null || value === "all" || value === "") next.delete(key); else next.set(key, value);
+    if (key === "state") next.delete("city");
+    next.delete("page");
+    const qs = next.toString();
+    navigate(`/coaching${qs ? `?${qs}` : ""}`);
+  }, [searchParams, hubLockedKeys, navigate]);
+
   const setFilter = useCallback((key: string, value: string) => {
+    if (key in hubLockedKeys && value !== hubLockedKeys[key]) return leaveHub(key, value);
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       if (value === "all" || value === "" || value === "rating") {
@@ -66,9 +89,10 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
       next.delete("page");
       return next;
     }, { replace: true });
-  }, [setSearchParams]);
+  }, [setSearchParams, hubLockedKeys, leaveHub]);
 
   const removeFilter = useCallback((key: string) => {
+    if (key in hubLockedKeys) return leaveHub(key, null);
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       next.delete(key);
@@ -76,11 +100,12 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
       if (key === "state") next.delete("city");
       return next;
     }, { replace: true });
-  }, [setSearchParams]);
+  }, [setSearchParams, hubLockedKeys, leaveHub]);
 
   const clearAllFilters = useCallback(() => {
+    if (hub) { navigate("/coaching"); return; }
     setSearchParams({}, { replace: true });
-  }, [setSearchParams]);
+  }, [setSearchParams, hub, navigate]);
 
   const currentCityPage = useMemo(() => {
     if (selectedCity === "all") return null;
