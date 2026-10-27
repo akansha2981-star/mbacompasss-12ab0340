@@ -30,6 +30,7 @@ import InstituteSectionRenderer from "@/components/institute/InstituteSectionRen
 import { INSTITUTE_SECTIONS, getSection, isSectionEmpty } from "@/lib/instituteSections";
 import NotFound from "@/pages/NotFound";
 import { slugify } from "@/lib/slugify";
+import { instituteEnquirySchema } from "@/lib/instituteEnquiry";
 
 function stripHtml(html: string, max = 160): string {
   if (!html) return "";
@@ -736,29 +737,33 @@ const EnquiryForm = ({ instituteId, instituteName }: { instituteId: string; inst
   const [loading, setLoading] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.phone.trim()) {
-      toast({ title: "Name and phone are required", variant: "destructive" });
+    const parsed = instituteEnquirySchema.safeParse(form);
+    if (!parsed.success) {
+      toast({ title: "Check your enquiry", description: parsed.error.issues[0]?.message, variant: "destructive" });
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("inquiries").insert({
-      institute_id: instituteId,
-      name: form.name,
-      phone: form.phone,
-      email: form.email || null,
-      message: form.message || `Enquiry for ${instituteName}`,
-    } as any);
-    setLoading(false);
-    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
-    toast({ title: "Sent!", description: "We'll be in touch shortly." });
-    setForm({ name: "", phone: "", email: "", message: "" });
+    try {
+      const { error } = await supabase.from("inquiries").insert({
+        institute_id: instituteId,
+        ...parsed.data,
+        message: parsed.data.message || `Enquiry for ${instituteName}`,
+      });
+      if (error) throw error;
+      toast({ title: "Sent!", description: "We'll be in touch shortly." });
+      setForm({ name: "", phone: "", email: "", message: "" });
+    } catch {
+      toast({ title: "Enquiry not sent", description: "Please try again shortly. If it still fails, contact the institute directly.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <form onSubmit={submit} className="grid md:grid-cols-2 gap-3 mt-4">
-      <Input placeholder="Your name *" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
-      <Input placeholder="Phone *" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
-      <Input className="md:col-span-2" type="email" placeholder="Email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
-      <Textarea className="md:col-span-2" rows={3} placeholder="Tell us about your target exam and current prep level (optional)" value={form.message} onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))} />
+      <Input required maxLength={255} aria-label="Your name" placeholder="Your name *" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
+      <Input required maxLength={30} type="tel" aria-label="Phone" placeholder="Phone *" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} />
+      <Input required maxLength={255} aria-label="Email" className="md:col-span-2" type="email" placeholder="Email *" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
+      <Textarea maxLength={5000} className="md:col-span-2" rows={3} placeholder="Tell us about your target exam and current prep level (optional)" value={form.message} onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))} />
       <Button type="submit" className="md:col-span-2 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700" disabled={loading}>
         {loading ? "Sending…" : "Submit Enquiry"}
       </Button>
