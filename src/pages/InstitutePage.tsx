@@ -735,13 +735,16 @@ const EnquiryForm = ({ instituteId, instituteName }: { instituteId: string; inst
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = instituteEnquirySchema.safeParse(form);
     if (!parsed.success) {
+      setFeedback(parsed.error.issues[0]?.message || "Please check your enquiry.");
       toast({ title: "Check your enquiry", description: parsed.error.issues[0]?.message, variant: "destructive" });
       return;
     }
+    setFeedback("");
     setLoading(true);
     try {
       const { error } = await supabase.from("inquiries").insert({
@@ -750,9 +753,11 @@ const EnquiryForm = ({ instituteId, instituteName }: { instituteId: string; inst
         message: parsed.data.message || `Enquiry for ${instituteName}`,
       });
       if (error) throw error;
+      setFeedback("Enquiry sent. We'll be in touch shortly.");
       toast({ title: "Sent!", description: "We'll be in touch shortly." });
       setForm({ name: "", phone: "", email: "", message: "" });
     } catch {
+      setFeedback("Enquiry not sent. Please try again shortly or contact the institute directly.");
       toast({ title: "Enquiry not sent", description: "Please try again shortly. If it still fails, contact the institute directly.", variant: "destructive" });
     } finally {
       setLoading(false);
@@ -767,6 +772,7 @@ const EnquiryForm = ({ instituteId, instituteName }: { instituteId: string; inst
       <Button type="submit" className="md:col-span-2 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700" disabled={loading}>
         {loading ? "Sending…" : "Submit Enquiry"}
       </Button>
+      {feedback && <p role="status" className="md:col-span-2 text-sm text-foreground">{feedback}</p>}
     </form>
   );
 };
