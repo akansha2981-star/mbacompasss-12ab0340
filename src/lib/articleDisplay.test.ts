@@ -1,4 +1,6 @@
 import { expect, it } from "vitest";
+import { DomUtils, parseDocument } from "htmlparser2";
+import { enhanceAIContent } from "./aiContentEnhancer";
 import { prepareArticleDisplay, resolveArticleDisplay, validArticleDisplay } from "./articleDisplay";
 it("retains all long-article content and links in the safe prepared display", () => {
   const content = '<h2>Admissions</h2><p>Verified requirements <a href="/exam/cat">CAT</a>.</p>'.repeat(500);
@@ -38,4 +40,34 @@ it("keeps image sanitization when restoring URL-bearing attributes", () => {
   const prepared = prepareArticleDisplay('<img src="javascript:alert(1)" onerror="alert(2)"><img src="https://images.example.org/chart.png" onload="alert(3)"><script src="https://example.org/script.js"></script>');
   expect(prepared.html).toContain('src="https://images.example.org/chart.png"');
   expect(prepared.html).not.toMatch(/javascript:|onerror|onload|<script/);
+});
+
+it.each([true, false])("preserves compact table cells after bare URLs (editorial=%s)", (editorial) => {
+  const output = enhanceAIContent('<table><tr><td>Visit https://x.com</td><td>Fees verified</td></tr><tr><td>See www.example.org</td><td>Admissions verified</td></tr></table>', undefined, { editorial });
+  const doc = parseDocument(output);
+  expect(DomUtils.getElementsByTagName("tr", doc.children)).toHaveLength(2);
+  const cells = DomUtils.getElementsByTagName("td", doc.children);
+  expect(cells.map(DomUtils.textContent)).toEqual(["Visit ", "Fees verified", "See ", "Admissions verified"]);
+});
+
+it("preserves paragraphs and list entries after stripping URL-labelled non-editorial links", () => {
+  const output = enhanceAIContent('<p>Visit <a href="https://x.com">https://x.com</a></p><p>Next paragraph.</p><ul><li>See www.example.org</li><li>Next entry.</li></ul>');
+  const doc = parseDocument(output);
+  expect(DomUtils.getElementsByTagName("p", doc.children).map(DomUtils.textContent)).toEqual(["Visit ", "Next paragraph."]);
+  expect(DomUtils.getElementsByTagName("li", doc.children).map(DomUtils.textContent)).toEqual(["See ", "Next entry."]);
+});
+
+it("preserves editorial links directly following a removed URL", () => {
+  const output = prepareArticleDisplay('<p>https://x.com<a href="https://example.org/review">Review</a></p>').html;
+  const links = DomUtils.getElementsByTagName("a", parseDocument(output).children);
+  expect(links.map(DomUtils.textContent)).toEqual(["Review"]);
+  expect(links[0]?.attribs.href).toBe("https://example.org/review");
+});
+
+it("rebuilds version-three displays damaged by prose URL cleanup", () => {
+  const content = '<table><tr><td>https://x.com</td><td>Verified fees</td></tr></table>';
+  const older = { ...prepareArticleDisplay(content), version: 3, html: '<table>Verified fees</table>' };
+  expect(validArticleDisplay(content, older)).toBe(false);
+  const cells = DomUtils.getElementsByTagName("td", parseDocument(resolveArticleDisplay(content, older).html).children);
+  expect(cells.map(DomUtils.textContent)).toEqual(["", "Verified fees"]);
 });
