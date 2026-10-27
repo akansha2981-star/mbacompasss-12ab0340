@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Named monitoring fixes — October 27
-- [ ] Align institute enquiry validation with the existing required-email policy and verify submission
-- [ ] Reproduce URL cleanup damage, preserve article structure and refresh stale prepared displays; run regression tests
+- [x] Align institute enquiry validation with the existing required-email policy; browser confirms blank/invalid emails blocked and valid submission saved with visible confirmation; temporary test leads removed
+- [x] Reproduce URL cleanup damage, preserve article structure and refresh stale prepared displays; 28 focused tests pass and preview build OK
 
 ## Search Console breadcrumb validation failure — October 26
 - [x] Inspect Google's current records for all three screenshot URLs: indexed with successful fetches, but Breadcrumbs fails with a second item missing itemListElement
