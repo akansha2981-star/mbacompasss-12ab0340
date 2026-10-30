@@ -1,5 +1,9 @@
 # Roadmap
 
+## Advertisement extension — October 30
+- [ ] Correct linked end/goal editing and extension without changing view budgets or paused status
+- [ ] Verify regression tests and public eligibility; authenticated save requires requester preview sign-in
+
 ## Named monitoring fixes — October 27
 - [x] Align institute enquiry validation with the existing required-email policy; browser confirms blank/invalid emails blocked and valid submission saved with visible confirmation; temporary test leads removed
 - [x] Reproduce URL cleanup damage, preserve article structure and refresh stale prepared displays; 28 focused tests pass and preview build OK
