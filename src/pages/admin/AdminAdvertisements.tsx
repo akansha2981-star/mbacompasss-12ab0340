@@ -18,7 +18,7 @@ import AdLivePreview from "@/components/ads/AdLivePreview";
 import AdPageFrame from "@/components/ads/AdPageFrame";
 import AdSizeUploads from "@/components/ads/AdSizeUploads";
 import { AD_FORMATS } from "@/lib/ads/formats";
-import { smartDeliverySchedule } from "@/lib/ads/schedule";
+import { adLocalDateTime, editAdDeadline, extendAdSchedule, smartDeliverySchedule } from "@/lib/ads/schedule";
 import { PAGE_TYPES, PLACEMENTS, type AdCampaign } from "@/lib/ads/engine";
 import { AlertTriangle, CalendarPlus, Copy, Download, Eye, Monitor, Pause, Pencil, Play, Plus, Smartphone, Trash2 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -49,7 +49,7 @@ const effectiveStatus = (a: AdCampaign) => {
   return a.status;
 };
 const toLines = (v: string) => v.split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
-const toLocal = (iso: string | null | undefined) => (iso ? new Date(iso).toISOString().slice(0, 16) : "");
+const toLocal = adLocalDateTime;
 
 type Stat = { campaign_id: string; day: string; event_type: string; device: string; placement: string; n: number };
 
@@ -152,8 +152,9 @@ export default function AdminAdvertisements() {
   const duplicate = (a: AdCampaign) => { const { id, ad_code, ...rest } = a; setEditing({ ...rest, name: `${a.name} (copy)`, status: "draft" }); };
 
   const extend = async (a: AdCampaign, extraDays = 7) => {
-    const base = a.end_at && Date.parse(a.end_at) > Date.now() ? Date.parse(a.end_at) : Date.now();
-    const { error } = await supabase.from("ad_campaigns").update({ end_at: new Date(base + extraDays * 86400_000).toISOString() }).eq("id", a.id);
+    const { data: current, error: readError } = await supabase.from("ad_campaigns").select("end_at, goal_end_at, smart_mode").eq("id", a.id).single();
+    if (readError || !current) return toast({ title: "Could not check current dates", variant: "destructive" });
+    const { error } = await supabase.from("ad_campaigns").update({ ...extendAdSchedule(current, extraDays, Date.now()), updated_at: new Date().toISOString() }).eq("id", a.id);
     if (error) toast({ title: "Could not extend", description: error.message, variant: "destructive" });
     else { toast({ title: `Extended ${extraDays} days` }); refresh(); }
   };
@@ -507,7 +508,7 @@ export default function AdminAdvertisements() {
                 <p className="text-sm text-muted-foreground">The system shows this ad wherever visitors are right now, favours spots people click, speeds up when it falls behind and stops itself when the goal is reached. Visitor limits below still apply.</p>
                 {e.smart_mode && (<div className="grid gap-3 md:grid-cols-2">
                   <div><Label>Target views</Label><Input type="number" min={0} value={e.impression_budget ?? 0} onChange={(ev) => set({ impression_budget: Number(ev.target.value) })} placeholder="50000" /></div>
-                  <div><Label>Reach the goal by (optional)</Label><Input type="datetime-local" value={toLocal(e.goal_end_at ?? null)} onChange={(ev) => set({ goal_end_at: ev.target.value ? new Date(ev.target.value).toISOString() : null })} /></div>
+                  <div><Label>Reach the goal by (optional)</Label><Input type="datetime-local" value={toLocal(e.goal_end_at ?? null)} onChange={(ev) => set(editAdDeadline(e, "goal_end_at", ev.target.value ? new Date(ev.target.value).toISOString() : null))} /></div>
                   {e.id && <div className="md:col-span-2"><SmartProgress ad={e as AdCampaign} /></div>}
                 </div>)}
               </section>
@@ -515,7 +516,8 @@ export default function AdminAdvertisements() {
               <section className="grid gap-3 md:grid-cols-4">
                 <div className="md:col-span-4 font-semibold">Schedule and priority</div>
                 <div className="md:col-span-2"><Label>Start</Label><Input type="datetime-local" value={toLocal(e.start_at)} onChange={(ev) => set({ start_at: ev.target.value ? new Date(ev.target.value).toISOString() : null })} /></div>
-                <div className="md:col-span-2"><Label>End</Label><Input type="datetime-local" value={toLocal(e.end_at)} onChange={(ev) => set({ end_at: ev.target.value ? new Date(ev.target.value).toISOString() : null })} /></div>
+                <div className="md:col-span-2"><Label>End</Label><Input type="datetime-local" value={toLocal(e.end_at)} onChange={(ev) => set(editAdDeadline(e, "end_at", ev.target.value ? new Date(ev.target.value).toISOString() : null))} /></div>
+                {e.smart_mode && e.goal_end_at && e.end_at && Date.parse(e.goal_end_at) < Date.parse(e.end_at) && <p role="status" className="md:col-span-4 text-sm text-destructive">The goal deadline is earlier than End. Delivery stops at {new Date(e.goal_end_at).toLocaleString("en-IN")}; change the goal deadline to extend delivery.</p>}
                 <div><Label>Priority (1–10)</Label><Input type="number" min={1} max={10} value={e.priority} onChange={(ev) => set({ priority: Number(ev.target.value) })} /></div>
                 <div><Label>Rotation weight</Label><Input type="number" min={1} max={100} value={e.weight} onChange={(ev) => set({ weight: Number(ev.target.value) })} /></div>
                 <div><Label>Max per visitor / day</Label><Input type="number" min={0} value={e.cap_per_day} onChange={(ev) => set({ cap_per_day: Number(ev.target.value) })} /></div>
