@@ -14,6 +14,7 @@
 - Share blog completeness and estimate rules across generation paths, and remove incomplete table rows rather than inventing fallback numbers, because labelled calculations need real evidence.
 - AI blog outlines use intent-led chapters with editor-approved table, alert, and link plans, because long articles must remain distinct, scannable, evidence-led, and mobile-readable.
 - Public ads share one client engine; clicks use saved campaign URLs to prevent open redirects. Smart scheduling honors the earlier booked or goal deadline so goals never extend bookings.
+- Advertisement deadline edits keep matching end/goal dates linked; explicit extensions read current dates and advance limiting deadlines without changing status or budgets, preventing later saves from undoing an extension.
 - Store campaign artwork variants by display size and resolve them with one shared format selector in both public ads and admin previews, because finished artwork must fit without cropping or stretching.
 - AdSlots discovers runtime editorial placements after interaction; current-tab relevance never bypasses targeting/caps, preserving privacy and initial-load performance.
 - Resolve public editorial entity links and admin blog dossiers through one shared matcher and a cached, paginated slim entity pool; preserve existing links and skip ambiguous names, headings and controls to avoid incorrect or excessive linking.

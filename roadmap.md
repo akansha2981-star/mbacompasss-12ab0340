@@ -1,5 +1,10 @@
 # Roadmap
 
+## Advertisement extension — October 30
+- [x] Correct linked end/goal editing and seven-day extension using current saved dates; budgets and paused status remain unchanged; local date fields no longer shift UTC times
+- [x] Twenty-seven ad regression tests pass, including expired GIM deadline extension surviving resave and public eligibility; homepage renders without browser errors; preview build OK
+- [ ] Verify authenticated save and publish the correction — requester has no matching preview account; saved GIM dates remain October 22 until the desired date is resaved
+
 ## Named monitoring fixes — October 27
 - [x] Align institute enquiry validation with the existing required-email policy; browser confirms blank/invalid emails blocked and valid submission saved with visible confirmation; temporary test leads removed
 - [x] Reproduce URL cleanup damage, preserve article structure and refresh stale prepared displays; 28 focused tests pass and preview build OK
