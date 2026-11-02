@@ -1,5 +1,8 @@
 import CatDetailsDialog, { type CatContact } from "@/components/CatDetailsDialog";
 import PercentileCountdown from "@/components/PercentileCountdown";
+import CatManualCalculator from "@/components/cat/CatManualCalculator";
+import CatAlertSignup from "@/components/cat/CatAlertSignup";
+import CatHubSections from "@/components/cat/CatHubSections";
 import { saveCatScoreSubmission } from "@/lib/catScore.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { deriveCatSlot } from "@/lib/catSlot";
@@ -247,7 +250,7 @@ const CATScoreCalculatorPage: React.FC = () => {
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState("");
-  const [inputMode, setInputMode] = useState<"url" | "paste" | "upload">("url");
+  const [inputMode, setInputMode] = useState<"url" | "manual" | "paste" | "upload">("url");
   const [showQuestions, setShowQuestions] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -395,6 +398,7 @@ const CATScoreCalculatorPage: React.FC = () => {
               <div className="mb-4 flex rounded-xl bg-muted p-1" role="tablist">
                 {([
                   ["url", "Paste Link", Globe],
+                  ["manual", "Enter Manually", Calculator],
                   ["paste", "Paste Code", ClipboardPaste],
                   ["upload", "Upload File", Upload],
                 ] as const).map(([mode, label, Icon]) => (
@@ -418,6 +422,8 @@ const CATScoreCalculatorPage: React.FC = () => {
                     {urlFetching ? "Reading sheet..." : (<><Zap className="mr-2 h-5 w-5" /> Calculate My Score</>)}
                   </Button>
                 </form>
+              ) : inputMode === "manual" ? (
+                <CatManualCalculator />
               ) : inputMode === "paste" ? (
                 <div className="space-y-3">
                   <Textarea value={htmlInput} onChange={(e) => setHtmlInput(e.target.value)}
@@ -468,6 +474,7 @@ const CATScoreCalculatorPage: React.FC = () => {
                 <ExternalLink className="h-4 w-4" /> Open iimcat.ac.in
               </a>
             </details>
+            <div className="mt-3"><CatAlertSignup compact /></div>
 
             {(liveStats?.total ?? 0) >= 100 && (
               <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
