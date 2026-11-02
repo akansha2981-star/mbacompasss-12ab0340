@@ -35,7 +35,6 @@ export default function CoachingReportPage({ slug, initialData }: { slug: string
     <main className="min-h-screen bg-background">
       <section className="border-b border-border bg-accent/40">
         <div className="container max-w-4xl py-10">
-          {demo && <p role="status" className="mb-4 border-l-4 border-primary bg-accent p-4 text-base font-semibold text-foreground">DEMO DATA — Fictional comments and ratings for layout testing only. Not real student feedback or institute reputation.</p>}
           <h1 className="text-3xl font-bold text-foreground">{institute.canonical_name}</h1>
           <p className="mt-1 text-base text-muted-foreground">Student ratings and reviews</p>
           <div className="mt-6 flex flex-wrap items-end gap-6">
