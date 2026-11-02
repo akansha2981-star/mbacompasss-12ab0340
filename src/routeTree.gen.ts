@@ -76,6 +76,7 @@ import { Route as AdminCoachingInstitutesRouteImport } from './routes/admin.coac
 import { Route as AdminCoachingOfWeekRouteImport } from './routes/admin.coaching-of-week'
 import { Route as AdminCoachingRefreshHubRouteImport } from './routes/admin.coaching-refresh-hub'
 import { Route as AdminCoachingResultsRouteImport } from './routes/admin.coaching-results'
+import { Route as AdminCoachingReviewsRouteImport } from './routes/admin.coaching-reviews'
 import { Route as AdminCoachingSeoReportsRouteImport } from './routes/admin.coaching-seo-reports'
 import { Route as AdminCollegeApplicationsRouteImport } from './routes/admin.college-applications'
 import { Route as AdminCollegeSectionsRouteImport } from './routes/admin.college-sections'
@@ -683,6 +684,11 @@ const AdminCoachingRefreshHubRoute = AdminCoachingRefreshHubRouteImport.update({
 const AdminCoachingResultsRoute = AdminCoachingResultsRouteImport.update({
   id: '/coaching-results',
   path: '/coaching-results',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCoachingReviewsRoute = AdminCoachingReviewsRouteImport.update({
+  id: '/coaching-reviews',
+  path: '/coaching-reviews',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCoachingSeoReportsRoute = AdminCoachingSeoReportsRouteImport.update({
@@ -2170,6 +2176,7 @@ export interface FileRoutesByFullPath {
   '/admin/coaching-of-week': typeof AdminCoachingOfWeekRoute
   '/admin/coaching-refresh-hub': typeof AdminCoachingRefreshHubRoute
   '/admin/coaching-results': typeof AdminCoachingResultsRoute
+  '/admin/coaching-reviews': typeof AdminCoachingReviewsRoute
   '/admin/coaching-seo-reports': typeof AdminCoachingSeoReportsRoute
   '/admin/college-applications': typeof AdminCollegeApplicationsRoute
   '/admin/college-sections': typeof AdminCollegeSectionsRoute
@@ -2501,6 +2508,7 @@ export interface FileRoutesByTo {
   '/admin/coaching-of-week': typeof AdminCoachingOfWeekRoute
   '/admin/coaching-refresh-hub': typeof AdminCoachingRefreshHubRoute
   '/admin/coaching-results': typeof AdminCoachingResultsRoute
+  '/admin/coaching-reviews': typeof AdminCoachingReviewsRoute
   '/admin/coaching-seo-reports': typeof AdminCoachingSeoReportsRoute
   '/admin/college-applications': typeof AdminCollegeApplicationsRoute
   '/admin/college-sections': typeof AdminCollegeSectionsRoute
@@ -2830,6 +2838,7 @@ export interface FileRoutesById {
   '/admin/coaching-of-week': typeof AdminCoachingOfWeekRoute
   '/admin/coaching-refresh-hub': typeof AdminCoachingRefreshHubRoute
   '/admin/coaching-results': typeof AdminCoachingResultsRoute
+  '/admin/coaching-reviews': typeof AdminCoachingReviewsRoute
   '/admin/coaching-seo-reports': typeof AdminCoachingSeoReportsRoute
   '/admin/college-applications': typeof AdminCollegeApplicationsRoute
   '/admin/college-sections': typeof AdminCollegeSectionsRoute
@@ -3172,6 +3181,7 @@ export interface FileRouteTypes {
     | '/admin/coaching-of-week'
     | '/admin/coaching-refresh-hub'
     | '/admin/coaching-results'
+    | '/admin/coaching-reviews'
     | '/admin/coaching-seo-reports'
     | '/admin/college-applications'
     | '/admin/college-sections'
@@ -3503,6 +3513,7 @@ export interface FileRouteTypes {
     | '/admin/coaching-of-week'
     | '/admin/coaching-refresh-hub'
     | '/admin/coaching-results'
+    | '/admin/coaching-reviews'
     | '/admin/coaching-seo-reports'
     | '/admin/college-applications'
     | '/admin/college-sections'
@@ -3831,6 +3842,7 @@ export interface FileRouteTypes {
     | '/admin/coaching-of-week'
     | '/admin/coaching-refresh-hub'
     | '/admin/coaching-results'
+    | '/admin/coaching-reviews'
     | '/admin/coaching-seo-reports'
     | '/admin/college-applications'
     | '/admin/college-sections'
@@ -4599,6 +4611,13 @@ declare module '@tanstack/react-router' {
       path: '/coaching-results'
       fullPath: '/admin/coaching-results'
       preLoaderRoute: typeof AdminCoachingResultsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/coaching-reviews': {
+      id: '/admin/coaching-reviews'
+      path: '/coaching-reviews'
+      fullPath: '/admin/coaching-reviews'
+      preLoaderRoute: typeof AdminCoachingReviewsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/coaching-seo-reports': {
@@ -6781,6 +6800,7 @@ interface AdminRouteChildren {
   AdminCoachingOfWeekRoute: typeof AdminCoachingOfWeekRoute
   AdminCoachingRefreshHubRoute: typeof AdminCoachingRefreshHubRoute
   AdminCoachingResultsRoute: typeof AdminCoachingResultsRoute
+  AdminCoachingReviewsRoute: typeof AdminCoachingReviewsRoute
   AdminCoachingSeoReportsRoute: typeof AdminCoachingSeoReportsRoute
   AdminCollegeApplicationsRoute: typeof AdminCollegeApplicationsRoute
   AdminCollegeSectionsRoute: typeof AdminCollegeSectionsRoute
@@ -6904,6 +6924,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCoachingOfWeekRoute: AdminCoachingOfWeekRoute,
   AdminCoachingRefreshHubRoute: AdminCoachingRefreshHubRoute,
   AdminCoachingResultsRoute: AdminCoachingResultsRoute,
+  AdminCoachingReviewsRoute: AdminCoachingReviewsRoute,
   AdminCoachingSeoReportsRoute: AdminCoachingSeoReportsRoute,
   AdminCollegeApplicationsRoute: AdminCollegeApplicationsRoute,
   AdminCollegeSectionsRoute: AdminCollegeSectionsRoute,
