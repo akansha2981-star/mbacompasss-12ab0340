@@ -777,6 +777,8 @@ const CATScoreCalculatorPage: React.FC = () => {
         )}
       </AnimatePresence>
 
+      <CatHubSections />
+
       {/* ═══════ AGGREGATED TREND CHARTS ═══════ */}
       <section className="bg-muted/30 py-8 md:py-14">
         <div className="max-w-5xl mx-auto px-4">
