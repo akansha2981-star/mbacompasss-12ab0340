@@ -36,3 +36,6 @@
 - Type/exam college hubs filter the safe public listing projection before pagination, preserving existing predicates; canonical directory page numbers remain distinct, and known host/path aliases redirect before SSR and caching.
 - College related reads prefetch safe summary columns and existing recommendations into initial HTML, never full article bodies, to preserve discovery without inflating payloads.
 - Coaching directory is an index leaf; regional/exam/mode leaves render shared filtered results without client redirect shells and retain the full query for filter options, preventing masked children and competing canonicals.
+
+## Coaching review platform
+- The "Rate Your Coaching Institute" feature uses dedicated tables (coaching_review_institutes, coaching_review_aliases, coaching_student_reviews, coaching_review_audit_logs), never the older institutes/reviews tables, because it is anonymous, 10-parameter and moderated; student emails stay private via the coaching_public_reviews view, and public stats come only from approved reviews through coaching_institute_stats.
