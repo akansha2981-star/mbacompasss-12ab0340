@@ -31,6 +31,12 @@ export const adminNavGroups: AdminNavGroup[] = [
     ],
   },
   {
+    label: "Score Calculator",
+    items: [
+      { label: "CAT Score Calculator", path: "/admin/cat-scores", icon: Calculator },
+    ],
+  },
+  {
     label: "Institutes & Coaching",
     items: [
       { label: "Coaching Institutes", path: "/admin/coaching-institutes", icon: Building2 },
@@ -180,7 +186,6 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "All Site Links", path: "/admin/all-links", icon: Link2 },
       { label: "Editorial Backlinks", path: "/admin/editorial-backlinks", icon: Link2 },
       { label: "Profile Analyzer", path: "/admin/profile-analyzer", icon: BarChart3 },
-      { label: "CAT Score Submissions", path: "/admin/cat-scores", icon: Calculator },
       { label: "College Shortlister Submissions", path: "/admin/shortlister-submissions", icon: BarChart3 },
       { label: "MBA ROI Analyses", path: "/admin/roi-analyses", icon: TrendingUp },
       // Citation Sources Audit removed
