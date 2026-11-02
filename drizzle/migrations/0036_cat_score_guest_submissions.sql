@@ -1,0 +1,1 @@
+ALTER TABLE public.cat_score_submissions ALTER COLUMN user_id DROP NOT NULL;
