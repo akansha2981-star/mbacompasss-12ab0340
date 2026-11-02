@@ -1,3 +1,5 @@
+import PhoneOtpVerifyDialog from "@/components/PhoneOtpVerifyDialog";
+import { deriveCatSlot } from "@/lib/catSlot";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import type { CATResult } from "@/lib/catParser";
@@ -188,7 +190,8 @@ const CATScoreCalculatorPage: React.FC = () => {
 
   const [showOtpDialog, setShowOtpDialog] = useState(false);
   const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
-  const pendingRef = useRef<null | (() => void)>(null);
+  const pendingRef = useRef<null | ((phone: string) => void)>(null);
+  const otpContinueRef = useRef<null | ((phone: string) => void)>(null);
 
   // Remember a phone verified earlier by this account (a past verified submission).
   useEffect(() => {
@@ -201,9 +204,11 @@ const CATScoreCalculatorPage: React.FC = () => {
   // Resume the calculation once login completes.
   useEffect(() => {
     if (user && pendingRef.current && !showLoginDialog) {
-      const fn = pendingRef.current; pendingRef.current = null; fn();
+      const fn = pendingRef.current; pendingRef.current = null;
+      if (verifiedPhone) fn(verifiedPhone);
+      else { otpContinueRef.current = fn; setShowOtpDialog(true); }
     }
-  }, [user, showLoginDialog]);
+  }, [user, showLoginDialog, verifiedPhone]);
 
   const saveSubmission = async (parsed: CATResult, sheetUrl: string | null, phone: string) => {
     const getSectionData = (name: string) => parsed.sections.find((s) => s.section === name);
@@ -254,16 +259,14 @@ const CATScoreCalculatorPage: React.FC = () => {
 
   /** Login → verified mobile → run. */
   const requireAccess = (run: (phone: string) => void) => {
-    if (!user) { pendingRef.current = () => requireAccess(run); setShowLoginDialog(true); return; }
+    if (!user) { pendingRef.current = run; setShowLoginDialog(true); return; }
     if (!verifiedPhone) {
-      pendingRef.current = null;
       otpContinueRef.current = run;
       setShowOtpDialog(true);
       return;
     }
     run(verifiedPhone);
   };
-  const otpContinueRef = useRef<null | ((phone: string) => void)>(null);
 
   const analyse = async (html: string, sheetUrl: string | null, phone: string) => {
     setError(""); setLoading(true); setLoadingStep(0); setLoadingProgress(0); setResult(null);
@@ -349,6 +352,13 @@ const CATScoreCalculatorPage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog}
         message="Sign in to calculate your CAT score. Your name, email, and phone number are required." />
+      <PhoneOtpVerifyDialog open={showOtpDialog} onOpenChange={setShowOtpDialog}
+        initialPhone={user?.user_metadata?.phone || ""}
+        onVerified={(phone) => {
+          setVerifiedPhone(phone);
+          const fn = otpContinueRef.current; otpContinueRef.current = null;
+          fn?.(phone);
+        }} />
 
       {/* ═══════ HERO ═══════ */}
       <section className="relative overflow-hidden pt-8 pb-14" style={{ background: "var(--hero-gradient)" }}>
@@ -488,7 +498,7 @@ const CATScoreCalculatorPage: React.FC = () => {
                     {urlFetching ? (
                       <><motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 mr-2 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> Fetching...</>
                     ) : (
-                      <><Zap className="w-5 h-5 mr-2" /> Auto-Fetch & Calculate</>
+                      <><Zap className="w-5 h-5 mr-2" /> Calculate My Score</>
                     )}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-3">
