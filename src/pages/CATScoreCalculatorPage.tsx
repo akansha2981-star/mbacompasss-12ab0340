@@ -155,10 +155,10 @@ const useLiveStats = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cat_score_submissions")
-        .select("total_score, estimated_percentile, accuracy");
+        .select("total_score, estimated_percentile, accuracy, created_at, varc_score, dilr_score, qa_score");
 
       if (error || !data || data.length === 0) {
-        return { total: 0, highest: 0, avgScore: 0, ninety9Plus: 0 };
+        return { total: 0, highest: 0, avgScore: 0, ninety9Plus: 0, year: { count: 0, avg: 0, highest: 0, sections: {} as Record<string, number> } };
       }
 
       const scores = data.map(d => Number(d.total_score) || 0);
@@ -167,7 +167,21 @@ const useLiveStats = () => {
       const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
       const ninety9Plus = percentiles.filter(p => p >= 99).length;
 
-      return { total: data.length, highest, avgScore, ninety9Plus };
+      // Real averages for this exam cycle (submissions made in 2026)
+      const yr = data.filter(d => new Date(d.created_at).getFullYear() === 2026);
+      const mean = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : 0);
+      const year = {
+        count: yr.length,
+        avg: mean(yr.map(d => Number(d.total_score) || 0)),
+        highest: yr.length ? Math.max(...yr.map(d => Number(d.total_score) || 0)) : 0,
+        sections: yr.length ? {
+          VARC: mean(yr.map(d => Number(d.varc_score) || 0)),
+          DILR: mean(yr.map(d => Number(d.dilr_score) || 0)),
+          QA: mean(yr.map(d => Number(d.qa_score) || 0)),
+        } : ({} as Record<string, number>),
+      };
+
+      return { total: data.length, highest, avgScore, ninety9Plus, year };
     },
     staleTime: 60_000,
   });
