@@ -65,7 +65,7 @@ export const AttemptBreakdownPie: React.FC<{ result: CATResult }> = ({ result })
       <h3 className="text-foreground font-bold mb-4 text-sm">Attempt Breakdown</h3>
       <ResponsiveContainer width="100%" height={260}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="value") => `${name}: ${value}`}>
+          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="value">
             {data.map((entry, i) => (
               <Cell key={i} fill={entry.color} />
             ))}
@@ -373,7 +373,7 @@ export const AccuracyDistributionPie: React.FC = () => {
       <p className="mb-3 text-sm text-muted-foreground">Percentage of students by accuracy range</p>
       <ResponsiveContainer width="100%" height={260}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="value") => `${name}: ${value}%`}>
+          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="value">
             {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
           </Pie>
           <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
@@ -540,7 +540,7 @@ export const MistakeAnalysisChart: React.FC<{ result: CATResult }> = ({ result }
       <p className="mb-3 text-sm text-muted-foreground">Categorized incorrect answers (estimated)</p>
       <ResponsiveContainer width="100%" height={260}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="count") => `${type}: ${count}`}>
+          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="count">
             {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
           </Pie>
           <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />

@@ -49,7 +49,6 @@ const DailySubmissionTrend = lazyChart("DailySubmissionTrend");
 const SectionAvgComparison = lazyChart("SectionAvgComparison");
 const AccuracyDistributionPie = lazyChart("AccuracyDistributionPie");
 const DifficultyPerformanceChart = lazyChart("DifficultyPerformanceChart");
-const ScoreVsAttemptsScatter = lazyChart("ScoreVsAttemptsScatter");
 const SectionDifficultyHeatmap = lazyChart("SectionDifficultyHeatmap");
 const PercentilePredictorPanel = lazyChart("PercentilePredictorPanel");
 const MistakeAnalysisChart = lazyChart("MistakeAnalysisChart");
@@ -746,7 +745,6 @@ const CATScoreCalculatorPage: React.FC = () => {
             <SectionInView delay={0.1}><ScoreDistributionHistogram /></SectionInView>
             <SectionInView delay={0.2}><DailySubmissionTrend /></SectionInView>
             <SectionInView delay={0.3}><AccuracyDistributionPie /></SectionInView>
-            <SectionInView delay={0.4}><ScoreVsAttemptsScatter /></SectionInView>
           </div>
 
           <SectionInView delay={0.5} className="mt-6">
