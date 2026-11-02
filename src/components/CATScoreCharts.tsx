@@ -498,7 +498,7 @@ export const PercentilePredictorPanel: React.FC = () => {
       <h3 className="mb-0.5 text-base font-semibold text-foreground">Score → Percentile → College Predictor</h3>
       <p className="mb-3 text-sm text-muted-foreground">Estimated based on CAT 2025 trends</p>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[420px] text-sm">
           <thead>
             <tr className="border-b border-border">
               <th className="text-left py-2 text-muted-foreground font-medium">Score Range</th>
