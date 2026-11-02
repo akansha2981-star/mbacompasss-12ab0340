@@ -337,7 +337,7 @@ const CATScoreCalculatorPage: React.FC = () => {
                 ] as const).map(([mode, label, Icon]) => (
                   <button key={mode} role="tab" aria-selected={inputMode === mode} onClick={() => setInputMode(mode)}
                     className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold transition-all ${inputMode === mode ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-                    <Icon className="h-4 w-4" /> {label}
+                    <Icon className="hidden h-4 w-4 sm:block" /> <span className="whitespace-nowrap">{label}</span>
                   </button>
                 ))}
               </div>
