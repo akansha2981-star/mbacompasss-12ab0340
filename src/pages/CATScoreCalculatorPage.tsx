@@ -310,191 +310,114 @@ const CATScoreCalculatorPage: React.FC = () => {
         defaultPhone={user?.user_metadata?.phone || ""}
         onSubmit={submitDetails} />
 
-      {/* ═══════ HERO ═══════ */}
-      <section className="relative overflow-hidden pt-8 pb-14" style={{ background: "var(--hero-gradient)" }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-10 left-[15%] hidden w-72 h-72 bg-white/10 rounded-full blur-3xl md:block" />
-          <div className="absolute bottom-0 right-[20%] hidden w-96 h-96 bg-white/5 rounded-full blur-3xl md:block" />
-          <div className="absolute top-1/2 left-1/2 hidden w-[600px] h-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5 md:block" />
-        </div>
-
-        <div className="relative max-w-5xl mx-auto px-4 text-center">
-          <motion.div initial={false}>
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2 mb-6">
-              <Zap className="w-4 h-4 text-white" />
-              <span className="text-sm text-white font-semibold">AI-Powered • Instant Analysis • Free</span>
+      {/* ═══════ HERO + INPUT (first thing students see) ═══════ */}
+      {!result && !loading && (
+        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-primary/10 via-primary/5 to-background">
+          <div className="relative max-w-3xl mx-auto px-4 pt-6 pb-8 md:pt-8 md:pb-10">
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-sm font-semibold text-destructive">
+                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-destructive" /></span>
+                CAT 2026 Live
+              </span>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">Free • Instant • Section-wise</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight leading-tight">
-              CAT Score Calculator <span className="text-white/80">2026</span>
+            <h1 className="text-center text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+              CAT 2026 Score Calculator <span className="text-primary">&amp; Percentile Predictor</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-2 font-medium">
-              Get Your CAT Percentile Prediction Instantly!
+            <p className="mt-2 text-center text-base text-muted-foreground">
+              Paste your response sheet link. Get your exact score, VARC, DILR and QA breakdown in seconds.
             </p>
-            <p className="text-sm text-white/60 max-w-xl mx-auto">
-              Accurate Scores • Section-wise VARC DILR QA Analysis • Real-Time Charts • Peer Comparison • AI-Powered Insights
-            </p>
-          </motion.div>
 
-          {/* Live Stats from DB */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
-            className="flex flex-wrap justify-center gap-4 mt-8">
-            {(liveStats?.total ?? 0) >= 100 && statsData.map((stat) => (
-              <div key={stat.label} className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl px-5 py-3 text-center min-w-[140px]">
-                <stat.icon className="w-5 h-5 text-white/70 mx-auto mb-1" />
-                <p className="text-2xl font-black text-white"><AnimatedCounter end={stat.value} suffix={stat.suffix} /></p>
-                <p className="text-xs text-white/60">{stat.label}</p>
+            <Card className="mt-5 rounded-2xl border border-primary/20 bg-card p-4 md:p-6 shadow-lg">
+              <div className="mb-4 flex rounded-xl bg-muted p-1" role="tablist">
+                {([
+                  ["url", "Paste Link", Globe],
+                  ["paste", "Paste Code", ClipboardPaste],
+                  ["upload", "Upload File", Upload],
+                ] as const).map(([mode, label, Icon]) => (
+                  <button key={mode} role="tab" aria-selected={inputMode === mode} onClick={() => setInputMode(mode)}
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold transition-all ${inputMode === mode ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                    <Icon className="hidden h-4 w-4 sm:block" /> <span className="whitespace-nowrap">{label}</span>
+                  </button>
+                ))}
               </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
 
-      {/* ═══════ HOW TO GET RESPONSE SHEET ═══════ */}
-      {!result && !loading && (
-        <SectionInView className="max-w-5xl mx-auto px-4 -mt-8 mb-10 relative z-10">
-          <div className="bg-card border border-border rounded-2xl shadow-lg p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <HelpCircle className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-foreground">How to Download Your CAT Response Sheet</h2>
-                <p className="text-xs text-muted-foreground">Follow these 5 simple steps to get your score</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-              {STEPS.map((step, i) => (
-                <motion.div
-                  key={step.number}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.1 }}
-                  className="relative text-center group"
-                >
-                  <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-all group-hover:scale-110 duration-300">
-                    <span className="text-primary font-bold text-xl">{step.number}</span>
+              {inputMode === "url" ? (
+                <form onSubmit={(e) => { e.preventDefault(); handleFetchUrl(); }} className="flex flex-col gap-3 md:flex-row">
+                  <div className="relative flex-1">
+                    <Globe className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <input type="url" value={urlInput} onChange={(e) => setUrlInput(e.target.value)}
+                      placeholder="https://cdn.digialm.com/...  paste your response sheet link"
+                      aria-label="CAT response sheet link"
+                      className="w-full rounded-xl border border-border bg-background py-4 pl-10 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20" />
                   </div>
-                  <h3 className="text-sm font-bold text-foreground mb-1">{step.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{step.description}</p>
-                  {i < STEPS.length - 1 && (
-                    <ArrowRight className="hidden lg:block absolute top-7 -right-4 w-5 h-5 text-primary/30" />
-                  )}
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-border flex flex-wrap items-center gap-4 justify-center">
-              <a href="https://iimcat.ac.in" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-primary/5 text-primary text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors">
-                <ExternalLink className="w-4 h-4" /> Visit iimcat.ac.in
-              </a>
-              <p className="text-xs text-muted-foreground">
-                💡 Paste the URL of the updated response sheet with TITA Answers for best results
-              </p>
-            </div>
-          </div>
-        </SectionInView>
-      )}
-
-      {/* ═══════ INPUT SECTION ═══════ */}
-      {!result && !loading && (
-        <SectionInView delay={0.1} className="max-w-3xl mx-auto px-4 mb-12">
-          <Card className="bg-card border border-border shadow-lg rounded-2xl p-6 md:p-8">
-            <div className="text-center mb-5">
-              <h2 className="text-xl font-bold text-foreground mb-1">Enter Your Response Sheet</h2>
-              <p className="text-sm text-muted-foreground">Paste your response sheet URL for auto-analysis, or use manual methods</p>
-            </div>
-
-            <div className="flex justify-center gap-2 mb-5 flex-wrap">
-              <button onClick={() => setInputMode("url")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${inputMode === "url" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                <Globe className="w-4 h-4" /> Paste URL
-                <span className="text-xs bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold ml-1">EASY</span>
-              </button>
-              <button onClick={() => setInputMode("paste")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${inputMode === "paste" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                <ClipboardPaste className="w-4 h-4" /> Paste HTML
-              </button>
-              <button onClick={() => setInputMode("upload")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${inputMode === "upload" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                <Upload className="w-4 h-4" /> Upload File
-              </button>
-            </div>
-
-            {inputMode === "url" ? (
-              <div className="space-y-4">
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="url"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="https://cdn.digialm.com/...  (Paste your CAT response sheet link here)"
-                    className="w-full pl-10 pr-4 py-4 bg-muted/20 border border-border text-foreground placeholder:text-muted-foreground rounded-xl text-sm focus:border-primary/50 focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all"
-                  />
-                </div>
-                <div className="bg-primary/5 border border-primary/10 rounded-lg p-3">
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">💡 How to get the URL:</span> Login to iimcat.ac.in → Open your Response Sheet → Copy the page URL from browser address bar and paste above.
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Supported domains: <span className="font-mono text-primary">cdn.digialm.com</span>, <span className="font-mono text-primary">iimcat.ac.in</span>
-                  </p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <Button onClick={handleFetchUrl} disabled={!urlInput.trim() || urlFetching} size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-12 py-7 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
-                    {urlFetching ? (
-                      <><motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 mr-2 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> Fetching...</>
-                    ) : (
-                      <><Zap className="w-5 h-5 mr-2" /> Calculate My Score</>
-                    )}
+                  <Button type="submit" disabled={!urlInput.trim() || urlFetching} size="lg" className="h-auto rounded-xl px-8 py-4 text-base font-bold shadow-md">
+                    {urlFetching ? "Reading sheet..." : (<><Zap className="mr-2 h-5 w-5" /> Calculate My Score</>)}
                   </Button>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    ⚡ If auto-fetch doesn't work, switch to <button onClick={() => setInputMode("paste")} className="text-primary font-semibold underline">Paste HTML</button> method
-                  </p>
-                </div>
-              </div>
-            ) : inputMode === "paste" ? (
-              <>
-                <Textarea value={htmlInput} onChange={(e) => setHtmlInput(e.target.value)}
-                  placeholder="Right-click on your CAT response sheet → View Page Source → Copy all → Paste here..."
-                  className="min-h-[200px] bg-muted/20 border-border text-foreground placeholder:text-muted-foreground font-mono text-xs focus:border-primary/50 rounded-xl resize-y" />
-                <div className="flex flex-col items-center mt-6">
-                  <Button onClick={handleCalculate} disabled={!htmlInput.trim() && !!user} size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-12 py-7 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
-                    <Calculator className="w-5 h-5 mr-2" /> Calculate My Score
+                </form>
+              ) : inputMode === "paste" ? (
+                <div className="space-y-3">
+                  <Textarea value={htmlInput} onChange={(e) => setHtmlInput(e.target.value)}
+                    placeholder="Open your response sheet → Right-click → View Page Source → Copy all → Paste here"
+                    className="min-h-[140px] rounded-xl border-border bg-background font-mono text-sm" />
+                  <Button onClick={handleCalculate} disabled={!htmlInput.trim()} size="lg" className="w-full rounded-xl py-6 text-base font-bold">
+                    <Calculator className="mr-2 h-5 w-5" /> Calculate My Score
                   </Button>
-                  {!user && (
-                    <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
-                      <Shield className="w-3.5 h-3.5" /> Login required to calculate your score
-                    </p>
-                  )}
                 </div>
-              </>
-            ) : (
-              <>
-                <div onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-border hover:border-primary/40 rounded-xl p-12 cursor-pointer transition-all bg-muted/10 group">
-                  <Upload className="w-12 h-12 text-muted-foreground group-hover:text-primary mx-auto mb-3 transition-colors" />
-                  <p className="text-muted-foreground group-hover:text-foreground transition-colors text-sm text-center">
-                    {htmlInput ? "✓ File loaded — click Calculate" : "Click to upload saved HTML file (.html)"}
-                  </p>
+              ) : (
+                <div className="space-y-3">
+                  <button type="button" onClick={() => fileInputRef.current?.click()}
+                    className="w-full rounded-xl border-2 border-dashed border-border bg-muted/20 p-6 text-center text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
+                    <Upload className="mx-auto mb-2 h-8 w-8" />
+                    {htmlInput ? "File loaded. Click Calculate." : "Upload saved response sheet (.html)"}
+                  </button>
                   <input ref={fileInputRef} type="file" accept=".html,.htm" onChange={handleFileUpload} className="hidden" />
-                </div>
-                <div className="flex flex-col items-center mt-6">
-                  <Button onClick={handleCalculate} disabled={!htmlInput.trim() && !!user} size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-12 py-7 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">
-                    <Calculator className="w-5 h-5 mr-2" /> Calculate My Score
+                  <Button onClick={handleCalculate} disabled={!htmlInput.trim()} size="lg" className="w-full rounded-xl py-6 text-base font-bold">
+                    <Calculator className="mr-2 h-5 w-5" /> Calculate My Score
                   </Button>
                 </div>
-              </>
-            )}
+              )}
 
-            {error && <p className="text-destructive text-sm mt-3 flex items-center gap-1"><XCircle className="w-4 h-4" /> {error}</p>}
-          </Card>
-        </SectionInView>
+              {error && <p className="mt-3 flex items-center gap-1 text-sm text-destructive"><XCircle className="h-4 w-4" /> {error}</p>}
+
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-primary" /> Official marking scheme</span>
+                <span className="inline-flex items-center gap-1"><Shield className="h-4 w-4 text-primary" /> Private &amp; secure</span>
+                <span className="inline-flex items-center gap-1"><TrendingUp className="h-4 w-4 text-primary" /> Percentile on email in 24 hrs</span>
+              </div>
+            </Card>
+
+            {/* Compact how-to tab */}
+            <details className="group mt-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xs">
+              <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-foreground">
+                <span className="inline-flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary" /> How to get your response sheet link?</span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-90" />
+              </summary>
+              <ol className="mt-3 space-y-2 text-sm text-muted-foreground">
+                {STEPS.map((s) => (
+                  <li key={s.number} className="flex gap-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{s.number}</span>
+                    <span><span className="font-semibold text-foreground">{s.title}:</span> {s.description}</span>
+                  </li>
+                ))}
+              </ol>
+              <a href="https://iimcat.ac.in" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                <ExternalLink className="h-4 w-4" /> Open iimcat.ac.in
+              </a>
+            </details>
+
+            {(liveStats?.total ?? 0) >= 100 && (
+              <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+                {statsData.map((stat) => (
+                  <div key={stat.label} className="rounded-xl border border-border bg-card px-3 py-2 text-center">
+                    <p className="text-xl font-bold text-primary"><AnimatedCounter end={stat.value} suffix={stat.suffix} /></p>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       )}
 
       {/* ═══════ LOADING ═══════ */}
