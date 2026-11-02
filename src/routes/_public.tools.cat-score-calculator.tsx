@@ -14,6 +14,12 @@ export const Route = createFileRoute("/_public/tools/cat-score-calculator")({
   pendingComponent: PublicPageSkeleton,
   head: () => ({
     ...publicPageHead("/tools/cat-score-calculator", TITLE, DESC),
+    links: [
+      ...publicPageHead("/tools/cat-score-calculator", TITLE, DESC).links,
+      { rel: "alternate", hrefLang: "en-IN", href: URL },
+      { rel: "alternate", hrefLang: "hi-IN", href: "https://mbacompass.in/hi/cat-score-calculator" },
+      { rel: "alternate", hrefLang: "x-default", href: URL },
+    ],
     scripts: [
       {
         type: "application/ld+json",
