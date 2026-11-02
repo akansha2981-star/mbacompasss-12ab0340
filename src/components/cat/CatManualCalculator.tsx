@@ -142,7 +142,7 @@ export default function CatManualCalculator() {
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <Link to="/iim-call-predictor" className="flex items-center justify-between rounded-lg border border-border p-3 text-sm font-semibold text-foreground hover:border-primary/40">Check your IIM call chances <ArrowRight className="h-4 w-4 text-primary" /></Link>
-            <Link to="/colleges" className="flex items-center justify-between rounded-lg border border-border p-3 text-sm font-semibold text-foreground hover:border-primary/40">Find colleges for your percentile <ArrowRight className="h-4 w-4 text-primary" /></Link>
+            <Link to="/colleges" search={{} as never} className="flex items-center justify-between rounded-lg border border-border p-3 text-sm font-semibold text-foreground hover:border-primary/40">Find colleges for your percentile <ArrowRight className="h-4 w-4 text-primary" /></Link>
           </div>
           <Link to="/contact" className="block text-center text-sm text-primary underline">Want help with your shortlist? Get free counselling (optional)</Link>
         </div>
