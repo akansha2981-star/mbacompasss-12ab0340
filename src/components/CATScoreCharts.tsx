@@ -331,8 +331,8 @@ export const DailySubmissionTrend: React.FC = () => {
   );
 };
 
-export const SectionAvgComparison: React.FC<{ result: CATResult }> = ({ result }) => {
-  const avgScores = { VARC: 28, DILR: 22, QA: 25 };
+export const SectionAvgComparison: React.FC<{ result: CATResult; averages?: Partial<Record<string, number>> }> = ({ result, averages }) => {
+  const avgScores: Record<string, number> = { VARC: 28, DILR: 22, QA: 25, ...(averages || {}) } as Record<string, number>;
   const data = result.sections.map((s) => ({
     section: s.section,
     "Your Score": s.score,
