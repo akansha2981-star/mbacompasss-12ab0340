@@ -246,6 +246,13 @@
       "when": 1793593741602,
       "tag": "0034_create_coaching_review_platform",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1793650850415,
+      "tag": "0035_cat_score_link_slot",
+      "breakpoints": true
     }
   ]
 }
