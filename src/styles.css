@@ -2046,11 +2046,11 @@ html, body, #root {
 
 /* CAT score calculator: faint graph-paper grid with scattered exam marks */
 .cat-score-pattern {
-  background-color: var(--background);
+  background-color: hsl(var(--background));
   background-image:
     radial-gradient(circle at 15% 10%, hsl(var(--primary) / 0.10), transparent 45%),
     url("/patterns/cat-score.svg"),
-    linear-gradient(hsl(var(--primary) / 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--primary) / 0.09) 1px, transparent 1px);
+    linear-gradient(hsl(var(--primary) / 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.13) 1px, transparent 1px);
   background-size: auto, 240px 240px, 28px 28px, 28px 28px;
 }
