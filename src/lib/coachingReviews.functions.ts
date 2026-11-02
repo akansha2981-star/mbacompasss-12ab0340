@@ -510,7 +510,10 @@ export const moderateCoachingReviewFn = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
     } else {
       const newStatus: ReviewStatus = data.action === "approve" ? "approved" : data.action === "reject" ? "rejected" : "flagged";
-      const update: Record<string, unknown> = { moderation_status: newStatus, updated_at: new Date().toISOString() };
+      const update: Database["public"]["Tables"]["coaching_student_reviews"]["Update"] = {
+        moderation_status: newStatus,
+        updated_at: new Date().toISOString(),
+      };
       if (data.action === "approve") update.flag_reasons = null;
       if (data.edits?.student_name) update.student_name = data.edits.student_name;
       if (data.edits?.review_comment) update.review_comment = stripHtml(data.edits.review_comment);

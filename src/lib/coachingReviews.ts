@@ -69,7 +69,7 @@ export const reviewSubmissionSchema = z
       .min(30, "Please write at least 30 characters about your experience")
       .max(2000, "Please keep your review under 2,000 characters")
       .refine((v) => !/<\s*(script|iframe|object|embed)|javascript:/i.test(v), "HTML and scripts are not allowed in reviews"),
-    confirmGenuine: z.literal(true, { error: "Please confirm your review is based on your genuine experience" }),
+    confirmGenuine: z.literal(true, { message: "Please confirm your review is based on your genuine experience" }),
   })
   .refine((v) => v.instituteId || v.newInstituteName, {
     message: "Please select or add your coaching institute",
