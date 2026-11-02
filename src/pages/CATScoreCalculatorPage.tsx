@@ -395,7 +395,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </p>
 
             <Card className="mt-5 rounded-2xl border border-primary/20 bg-card p-4 md:p-6 shadow-lg">
-              <div className="mb-4 flex rounded-xl bg-muted p-1" role="tablist">
+              <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 sm:flex" role="tablist">
                 {([
                   ["url", "Paste Link", Globe],
                   ["manual", "Enter Manually", Calculator],
