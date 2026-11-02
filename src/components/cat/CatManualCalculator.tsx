@@ -116,9 +116,9 @@ export default function CatManualCalculator() {
       {shown && (
         <div className="space-y-4 rounded-xl border border-primary/20 bg-card p-4 shadow-sm" aria-live="polite">
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-lg bg-primary p-3 text-primary-foreground"><p className="text-sm opacity-80">Total</p><p className="text-2xl font-bold tabular-nums">{total}</p><p className="text-sm opacity-80">/ {CAT_MAX_SCORE}</p></div>
-            <div className="rounded-lg bg-muted/50 p-3"><p className="text-sm text-muted-foreground">Attempts</p><p className="text-2xl font-bold tabular-nums text-foreground">{attempted}</p><p className="text-sm text-muted-foreground">/ 68</p></div>
-            <div className="rounded-lg bg-muted/50 p-3"><p className="text-sm text-muted-foreground">Accuracy</p><p className="text-2xl font-bold tabular-nums text-foreground">{attempted ? Math.round((correct / attempted) * 100) : 0}%</p></div>
+            <div className="rounded-lg bg-primary p-2 text-primary-foreground"><p className="text-sm opacity-80">Total</p><p className="text-2xl font-bold tabular-nums">{total}</p><p className="text-sm opacity-80">/ {CAT_MAX_SCORE}</p></div>
+            <div className="rounded-lg bg-muted/50 p-2"><p className="text-sm text-muted-foreground">Tried</p><p className="text-2xl font-bold tabular-nums text-foreground">{attempted}</p><p className="text-sm text-muted-foreground">/ 68</p></div>
+            <div className="rounded-lg bg-muted/50 p-2"><p className="text-sm text-muted-foreground">Correct %</p><p className="text-2xl font-bold tabular-nums text-foreground">{attempted ? Math.round((correct / attempted) * 100) : 0}%</p></div>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-sm">
             {sections.map((s, i) => (

@@ -40,3 +40,4 @@
 ## Coaching review platform
 - Synthetic coaching reviews live only in isolated noindex demo fixtures and reuse the report presentation; never insert them into student-review tables or include them in real institute statistics.
 - The "Rate Your Coaching Institute" feature uses dedicated tables (coaching_review_institutes, coaching_review_aliases, coaching_student_reviews, coaching_review_audit_logs), never the older institutes/reviews tables, because it is anonymous, 10-parameter and moderated; student emails stay private via the coaching_public_reviews view, and public stats come only from approved reviews through coaching_institute_stats.
+- CAT calculator scoring, percentile interpolation and response-sheet host checks live in src/lib/catScoreEngine.ts; percentile model, cutoffs and status text are admin-edited in cat_calculator_settings, and spoke pages render from src/lib/catSpokes.ts, so numbers change without code edits.
