@@ -2061,3 +2061,13 @@ html, body, #root {
 .cat-table td { padding: 10px 14px; border-bottom: 1px solid hsl(var(--border)); color: hsl(var(--foreground)); font-size: 14px; }
 .cat-table tbody tr:last-child td { border-bottom: 0; }
 .cat-table tbody tr:nth-child(even) td { background: hsl(var(--muted) / 0.25); }
+
+/* Highlighted "Calculate Your CAT 2026 Score" button */
+.cat-cta { position: relative; overflow: hidden; isolation: isolate; animation: cat-cta-glow 2.2s ease-in-out infinite; transition: transform .2s ease; }
+.cat-cta:hover { transform: translateY(-2px); }
+.cat-cta::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / .35) 50%, transparent 70%); transform: translateX(-100%); animation: cat-cta-shine 2.8s ease-in-out infinite; }
+.cat-cta-arrow { display: inline-block; animation: cat-cta-nudge 1.2s ease-in-out infinite; }
+@keyframes cat-cta-glow { 0%,100% { box-shadow: 0 0 0 0 hsl(var(--primary) / .45); } 50% { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); } }
+@keyframes cat-cta-shine { 0% { transform: translateX(-100%); } 60%,100% { transform: translateX(100%); } }
+@keyframes cat-cta-nudge { 0%,100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { .cat-cta, .cat-cta::after, .cat-cta-arrow { animation: none; } }

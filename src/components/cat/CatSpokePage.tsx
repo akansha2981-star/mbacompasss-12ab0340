@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Calculator } from "lucide-react";
 import type { CatSpoke } from "@/lib/catSpokes";
 import { CAT_HUB_PATH } from "@/lib/catSpokes";
 import CatManualCalculator from "./CatManualCalculator";
@@ -15,8 +15,9 @@ export default function CatSpokePage({ spoke }: { spoke: CatSpoke }) {
           <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-sm font-semibold text-destructive">CAT 2026 · 29 November</span>
           <h1 className="mt-3 text-2xl font-bold leading-tight text-foreground md:text-4xl">{spoke.h1}</h1>
           <p className="mt-3 text-base text-muted-foreground">{spoke.intro}</p>
-          <a href={CAT_HUB_PATH} className="mt-4 inline-flex items-center gap-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
-            {hi ? "Response sheet link से score निकालें" : "Calculate from your response sheet link"} <ArrowRight className="h-4 w-4" />
+          <a href={CAT_HUB_PATH} className="cat-cta mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground">
+            <Calculator className="h-5 w-5" />
+            {hi ? "अपना CAT 2026 Score निकालें" : "Calculate Your CAT 2026 Score"} <ArrowRight className="cat-cta-arrow h-5 w-5" />
           </a>
         </header>
 
