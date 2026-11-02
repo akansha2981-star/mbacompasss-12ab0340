@@ -12,7 +12,7 @@ export function CatPercentileTable() {
   const rows = [...s.overall].filter(([sc]) => sc > 0 && sc < 204).sort((a, b) => b[0] - a[0]);
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full text-sm">
+      <table className="cat-table w-full">
         <thead className="bg-muted/50"><tr><th className="px-4 py-2 text-left font-medium text-muted-foreground">Raw score (out of 204)</th><th className="px-4 py-2 text-left font-medium text-muted-foreground">Estimated percentile</th></tr></thead>
         <tbody>{rows.map(([sc, p]) => <tr key={sc} className="border-t border-border"><td className="px-4 py-2 tabular-nums text-foreground">{sc}</td><td className="px-4 py-2 tabular-nums font-semibold text-primary">{p}</td></tr>)}</tbody>
       </table>
@@ -26,7 +26,7 @@ export function CatCutoffTable() {
   if (!s.cutoffs.length) return <Todo>Expected IIM-wise cut-offs for CAT 2026 will be published here once verified. We do not show unverified figures.</Todo>;
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full text-sm">
+      <table className="cat-table w-full">
         <thead className="bg-muted/50"><tr>{["Institute", "Overall", "VARC", "DILR", "QA"].map((h) => <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground whitespace-nowrap">{h}</th>)}</tr></thead>
         <tbody>{s.cutoffs.map((c) => <tr key={c.institute} className="border-t border-border"><td className="px-3 py-2 font-semibold text-foreground">{c.institute}</td><td className="px-3 py-2">{c.overall}</td><td className="px-3 py-2">{c.varc}</td><td className="px-3 py-2">{c.dilr}</td><td className="px-3 py-2">{c.qa}</td></tr>)}</tbody>
       </table>
@@ -65,7 +65,7 @@ export function CatStatusBanner() {
 export function CatSectionMarksTable() {
   return (
     <div className="overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full text-sm">
+      <table className="cat-table w-full">
         <thead className="bg-muted/50"><tr>{["Section", "Questions", "Marks", "Time"].map((h) => <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>)}</tr></thead>
         <tbody>
           {CAT_SECTIONS.map((s) => <tr key={s.key} className="border-t border-border"><td className="px-3 py-2 font-semibold text-foreground">{s.key}</td><td className="px-3 py-2">{s.questions}</td><td className="px-3 py-2">{s.marks}</td><td className="px-3 py-2">40 min</td></tr>)}
