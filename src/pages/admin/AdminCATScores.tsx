@@ -54,6 +54,28 @@ interface CATSubmission {
   questions_data: any;
   created_at: string;
   test_date: string | null;
+  slot: string | null;
+  response_sheet_url: string | null;
+  phone_verified: boolean | null;
+}
+
+async function downloadResponseSheet(s: { response_sheet_url: string | null; candidate_name: string }) {
+  if (!s.response_sheet_url) return;
+  const { toast } = await import("sonner");
+  try {
+    const { data, error } = await supabase.functions.invoke("fetch-response-sheet", { body: { url: s.response_sheet_url } });
+    if (error || !data?.success || !data?.html) throw new Error();
+    const blob = new Blob([data.html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(s.candidate_name || "candidate").replace(/[^a-z0-9]+/gi, "-")}-cat-response-sheet.html`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  } catch {
+    toast.error("Could not download this sheet. The link may have expired; opening it instead.");
+    window.open(s.response_sheet_url, "_blank", "noopener,noreferrer");
+  }
 }
 
 const CHART_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
@@ -160,12 +182,12 @@ const AdminCATScores = () => {
 
   const downloadCSV = () => {
     const headers = [
-      "Name", "Email", "Phone", "State", "Test Date", "Total Score", "Max Score", "Percentile",
+      "Name", "Email", "Phone", "Phone Verified", "Slot", "Response Sheet Link", "State", "Test Date", "Total Score", "Max Score", "Percentile",
       "Total Qs", "Attempted", "Correct", "Incorrect", "Accuracy%", "Negative Marks",
       "VARC Score", "VARC Acc%", "DILR Score", "DILR Acc%", "QA Score", "QA Acc%", "Date",
     ];
     const rows = filtered.map((s) => [
-      s.candidate_name, s.email || "", s.phone || "", s.state || "", s.test_date || "",
+      s.candidate_name, s.email || "", s.phone || "", s.phone_verified ? "Yes" : "No", s.slot || "", s.response_sheet_url || "", s.state || "", s.test_date || "",
       s.total_score, s.max_score, s.estimated_percentile,
       s.total_questions, s.attempted, s.correct, s.incorrect, s.accuracy?.toFixed(1), s.negative_marks,
       s.varc_score, s.varc_accuracy?.toFixed(1), s.dilr_score, s.dilr_accuracy?.toFixed(1),
@@ -296,12 +318,14 @@ const AdminCATScores = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>Slot</TableHead>
                 <TableHead className="text-center">Score</TableHead>
                 <TableHead className="text-center">Percentile</TableHead>
                 <TableHead className="text-center">Accuracy</TableHead>
                 <TableHead className="text-center">VARC</TableHead>
                 <TableHead className="text-center">DILR</TableHead>
                 <TableHead className="text-center">QA</TableHead>
+                <TableHead className="text-center">Response Sheet</TableHead>
                 <TableHead className="text-center">Date</TableHead>
                 <TableHead className="text-center">Action</TableHead>
               </TableRow>
@@ -311,13 +335,24 @@ const AdminCATScores = () => {
                 <TableRow key={s.id}>
                   <TableCell className="font-medium">{s.candidate_name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{s.email || "—"}</TableCell>
-                  <TableCell className="text-sm">{s.phone || "—"}</TableCell>
+                  <TableCell className="text-sm">{s.phone || "—"}{s.phone_verified ? <span className="ml-1 text-xs text-emerald-600">Verified</span> : null}</TableCell>
+                  <TableCell className="text-sm">{s.slot || "—"}</TableCell>
                   <TableCell className="text-center font-bold">{s.total_score}</TableCell>
                   <TableCell className="text-center">{s.estimated_percentile}</TableCell>
                   <TableCell className="text-center">{s.accuracy?.toFixed(1)}%</TableCell>
                   <TableCell className="text-center text-blue-600">{s.varc_score}</TableCell>
                   <TableCell className="text-center text-emerald-600">{s.dilr_score}</TableCell>
                   <TableCell className="text-center text-amber-600">{s.qa_score}</TableCell>
+                  <TableCell className="text-center">
+                    {s.response_sheet_url ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <a href={s.response_sheet_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">Open</a>
+                        <Button variant="ghost" size="sm" title="Download response sheet" onClick={() => downloadResponseSheet(s)}>
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : "—"}
+                  </TableCell>
                   <TableCell className="text-center text-sm text-muted-foreground">
                     {new Date(s.created_at).toLocaleDateString()}
                   </TableCell>
@@ -330,7 +365,7 @@ const AdminCATScores = () => {
               ))}
               {paged.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
                     No submissions found
                   </TableCell>
                 </TableRow>
@@ -372,6 +407,8 @@ const AdminCATScores = () => {
                   ["State", selected.state || "—"],
                   ["Test Date", selected.test_date || "—"],
                   ["Application No", selected.application_no || "—"],
+                  ["Slot", selected.slot || "—"],
+                  ["Response Sheet", selected.response_sheet_url || "—"],
                 ].map(([k, v]) => (
                   <div key={k}>
                     <span className="text-muted-foreground">{k}: </span>

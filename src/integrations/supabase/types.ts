@@ -1656,13 +1656,16 @@ export type Database = {
           max_score: number
           negative_marks: number | null
           phone: string | null
+          phone_verified: boolean
           qa_accuracy: number | null
           qa_attempted: number | null
           qa_correct: number | null
           qa_incorrect: number | null
           qa_score: number | null
           questions_data: Json | null
+          response_sheet_url: string | null
           sections_data: Json | null
+          slot: string | null
           state: string | null
           subject: string | null
           test_date: string | null
@@ -1696,13 +1699,16 @@ export type Database = {
           max_score?: number
           negative_marks?: number | null
           phone?: string | null
+          phone_verified?: boolean
           qa_accuracy?: number | null
           qa_attempted?: number | null
           qa_correct?: number | null
           qa_incorrect?: number | null
           qa_score?: number | null
           questions_data?: Json | null
+          response_sheet_url?: string | null
           sections_data?: Json | null
+          slot?: string | null
           state?: string | null
           subject?: string | null
           test_date?: string | null
@@ -1736,13 +1742,16 @@ export type Database = {
           max_score?: number
           negative_marks?: number | null
           phone?: string | null
+          phone_verified?: boolean
           qa_accuracy?: number | null
           qa_attempted?: number | null
           qa_correct?: number | null
           qa_incorrect?: number | null
           qa_score?: number | null
           questions_data?: Json | null
+          response_sheet_url?: string | null
           sections_data?: Json | null
+          slot?: string | null
           state?: string | null
           subject?: string | null
           test_date?: string | null
