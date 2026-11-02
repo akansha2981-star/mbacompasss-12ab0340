@@ -21,23 +21,48 @@ export default function CatSpokePage({ spoke }: { spoke: CatSpoke }) {
           </a>
         </header>
 
+        {spoke.keyFacts && (
+          <aside className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+            <p className="text-sm font-semibold uppercase tracking-wider text-primary">{hi ? "मुख्य बातें" : "Key facts"}</p>
+            <ul className="mt-2 space-y-1.5 text-base text-foreground">
+              {spoke.keyFacts.map((f) => <li key={f} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{f}</li>)}
+            </ul>
+          </aside>
+        )}
+
+        <nav aria-label={hi ? "इस पेज पर" : "On this page"} className="rounded-xl border border-border bg-card p-4">
+          <p className="text-sm font-semibold text-foreground">{hi ? "इस पेज पर" : "On this page"}</p>
+          <ol className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
+            {spoke.sections.map((s, i) => <li key={s.heading}><a href={`#s-${i}`} className="text-primary hover:underline">{s.heading}</a></li>)}
+            <li><a href="#faqs" className="text-primary hover:underline">{hi ? "अक्सर पूछे जाने वाले सवाल" : "FAQs"}</a></li>
+          </ol>
+        </nav>
+
         {spoke.widget === "manual" && <section className="rounded-xl border border-border bg-card p-4 shadow-sm"><CatManualCalculator /></section>}
         {spoke.widget === "percentileTable" && <CatPercentileTable />}
         {spoke.widget === "cutoffs" && <CatCutoffTable />}
         {spoke.widget === "answerKey" && spoke.slot && <CatAnswerKeyStatus slot={spoke.slot} />}
         {spoke.widget === "slotDifficulty" && <CatSlotDifficulty />}
 
-        {spoke.sections.map((s) => (
-          <section key={s.heading}>
+        {spoke.sections.map((s, i) => (
+          <section key={s.heading} id={`s-${i}`} className="scroll-mt-24">
             <h2 className="text-xl font-bold text-foreground">{s.heading}</h2>
             {s.body.map((p) => <p key={p.slice(0, 40)} className="mt-2 text-base text-muted-foreground">{p}</p>)}
             {s.list && <ol className="mt-2 list-decimal space-y-1 pl-5 text-base text-muted-foreground">{s.list.map((l) => <li key={l}>{l}</li>)}</ol>}
+            {s.table && (
+              <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-card">
+                <table className="cat-table w-full">
+                  <thead><tr>{s.table.head.map((h) => <th key={h} className="text-left">{h}</th>)}</tr></thead>
+                  <tbody>{s.table.rows.map((r) => <tr key={r.join("|")}>{r.map((c, j) => <td key={j} className={j === 0 ? "font-semibold" : ""}>{c}</td>)}</tr>)}</tbody>
+                </table>
+              </div>
+            )}
           </section>
         ))}
 
         <section><h2 className="mb-2 text-xl font-bold text-foreground">{hi ? "CAT 2026 परीक्षा पैटर्न" : "CAT 2026 marking scheme"}</h2><CatSectionMarksTable /></section>
 
-        <section>
+        <section id="faqs" className="scroll-mt-24">
           <h2 className="mb-2 text-xl font-bold text-foreground">{hi ? "अक्सर पूछे जाने वाले सवाल" : "Frequently asked questions"}</h2>
           <div className="space-y-2">
             {spoke.faqs.map((f) => (
