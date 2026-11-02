@@ -164,6 +164,7 @@ Deno.serve(async (req) => {
       mockTests,
       mbaCompass,
       coachingCourses,
+      coachingReviewInstitutes,
     ] = await Promise.all([
       fetchAll("institutes", "id, slug, updated_at"),
       fetchAll("colleges", "id, slug, updated_at"),
@@ -175,6 +176,7 @@ Deno.serve(async (req) => {
       fetchAll("mock_tests", "slug, updated_at", (q) => q.eq("is_published", true)),
       fetchAll("mba_compass_courses", "slug, updated_at", (q) => q.eq("is_active", true)),
       fetchAll("courses", "id, name, institute_id, updated_at"),
+      fetchAll("coaching_review_institutes", "slug, updated_at", (q) => q.eq("status", "active")),
     ]);
 
     // Build slug helper inline (matches src/lib/slugify.ts behaviour)
@@ -293,6 +295,8 @@ Deno.serve(async (req) => {
       colleges: withImages(collegeEntries),
       "coaching-hubs": withImages(coachingHubEntries),
       "coaching-institutes": withImages(coachingInstituteEntries),
+      "coaching-reviews": withImages((coachingReviewInstitutes ?? []).flatMap((i: any) => i.slug
+        ? [{ loc: `/coaching-review/${i.slug}`, lastmod: fmtDate(i.updated_at), changefreq: "weekly" as const, priority: 0.6 }] : [])),
       "coaching-articles": withImages(coachingArticles),
       exams: withImages(examEntries),
       courses: withImages([...courseEntries, ...compassEntries]),

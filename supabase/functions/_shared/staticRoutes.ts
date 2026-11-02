@@ -55,6 +55,8 @@ export const STATIC_ROUTES: StaticRoute[] = [
   { path: "/cat-composite-score-calculator", changefreq: "monthly", priority: 0.7 },
   { path: "/cat-cutoff-2026",           changefreq: "weekly",  priority: 0.8 },
   { path: "/hi/cat-score-calculator",   changefreq: "weekly",  priority: 0.8 },
+  { path: "/start-here",                changefreq: "monthly", priority: 0.7 },
+  { path: "/rate-coaching",             changefreq: "weekly",  priority: 0.7 },
   { path: "/freebies",                  changefreq: "weekly",  priority: 0.7 },
   { path: "/exam",                      changefreq: "daily",   priority: 0.9 },
   { path: "/authors",                   changefreq: "monthly", priority: 0.5 },
