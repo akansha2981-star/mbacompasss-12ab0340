@@ -79,6 +79,7 @@ import { Route as AdminBulkSeoRouteImport } from './routes/admin.bulk-seo'
 import { Route as AdminBusinessInquiriesRouteImport } from './routes/admin.business-inquiries'
 import { Route as AdminCacheDiagnosticsRouteImport } from './routes/admin.cache-diagnostics'
 import { Route as AdminCallbacksRouteImport } from './routes/admin.callbacks'
+import { Route as AdminCatCalculatorSettingsRouteImport } from './routes/admin.cat-calculator-settings'
 import { Route as AdminCatScoresRouteImport } from './routes/admin.cat-scores'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminClearCacheRouteImport } from './routes/admin.clear-cache'
@@ -720,6 +721,12 @@ const AdminCallbacksRoute = AdminCallbacksRouteImport.update({
   path: '/callbacks',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCatCalculatorSettingsRoute =
+  AdminCatCalculatorSettingsRouteImport.update({
+    id: '/cat-calculator-settings',
+    path: '/cat-calculator-settings',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminCatScoresRoute = AdminCatScoresRouteImport.update({
   id: '/cat-scores',
   path: '/cat-scores',
@@ -2254,6 +2261,7 @@ export interface FileRoutesByFullPath {
   '/admin/business-inquiries': typeof AdminBusinessInquiriesRoute
   '/admin/cache-diagnostics': typeof AdminCacheDiagnosticsRoute
   '/admin/callbacks': typeof AdminCallbacksRoute
+  '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -2597,6 +2605,7 @@ export interface FileRoutesByTo {
   '/admin/business-inquiries': typeof AdminBusinessInquiriesRoute
   '/admin/cache-diagnostics': typeof AdminCacheDiagnosticsRoute
   '/admin/callbacks': typeof AdminCallbacksRoute
+  '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -2938,6 +2947,7 @@ export interface FileRoutesById {
   '/admin/business-inquiries': typeof AdminBusinessInquiriesRoute
   '/admin/cache-diagnostics': typeof AdminCacheDiagnosticsRoute
   '/admin/callbacks': typeof AdminCallbacksRoute
+  '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -3292,6 +3302,7 @@ export interface FileRouteTypes {
     | '/admin/business-inquiries'
     | '/admin/cache-diagnostics'
     | '/admin/callbacks'
+    | '/admin/cat-calculator-settings'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -3635,6 +3646,7 @@ export interface FileRouteTypes {
     | '/admin/business-inquiries'
     | '/admin/cache-diagnostics'
     | '/admin/callbacks'
+    | '/admin/cat-calculator-settings'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -3975,6 +3987,7 @@ export interface FileRouteTypes {
     | '/admin/business-inquiries'
     | '/admin/cache-diagnostics'
     | '/admin/callbacks'
+    | '/admin/cat-calculator-settings'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -4773,6 +4786,13 @@ declare module '@tanstack/react-router' {
       path: '/callbacks'
       fullPath: '/admin/callbacks'
       preLoaderRoute: typeof AdminCallbacksRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cat-calculator-settings': {
+      id: '/admin/cat-calculator-settings'
+      path: '/cat-calculator-settings'
+      fullPath: '/admin/cat-calculator-settings'
+      preLoaderRoute: typeof AdminCatCalculatorSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/cat-scores': {
@@ -7034,6 +7054,7 @@ interface AdminRouteChildren {
   AdminBusinessInquiriesRoute: typeof AdminBusinessInquiriesRoute
   AdminCacheDiagnosticsRoute: typeof AdminCacheDiagnosticsRoute
   AdminCallbacksRoute: typeof AdminCallbacksRoute
+  AdminCatCalculatorSettingsRoute: typeof AdminCatCalculatorSettingsRoute
   AdminCatScoresRoute: typeof AdminCatScoresRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminClearCacheRoute: typeof AdminClearCacheRoute
@@ -7158,6 +7179,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBusinessInquiriesRoute: AdminBusinessInquiriesRoute,
   AdminCacheDiagnosticsRoute: AdminCacheDiagnosticsRoute,
   AdminCallbacksRoute: AdminCallbacksRoute,
+  AdminCatCalculatorSettingsRoute: AdminCatCalculatorSettingsRoute,
   AdminCatScoresRoute: AdminCatScoresRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminClearCacheRoute: AdminClearCacheRoute,
