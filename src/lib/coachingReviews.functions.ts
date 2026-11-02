@@ -74,9 +74,24 @@ async function aiSemanticMatch(input: string, candidates: InstituteMatch[]): Pro
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "openai/gpt-4o",
-      temperature: 0.1,
-      response_format: { type: "json_object" },
+      model: "openai/gpt-6-astra",
+      reasoning_effort: "low",
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "institute_match",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              matched_id: { type: ["string", "null"] },
+              confidence: { type: "number" },
+            },
+            required: ["matched_id", "confidence"],
+            additionalProperties: false,
+          },
+        },
+      },
       messages: [
         {
           role: "system",
@@ -84,7 +99,7 @@ async function aiSemanticMatch(input: string, candidates: InstituteMatch[]): Pro
             "You match a student's typed coaching institute name to the correct canonical institute from a candidate list. " +
             "Handle spelling variations, abbreviations and punctuation differences. " +
             "Never merge different institutes that merely sound similar (e.g. a city branch vs an online arm are different unless obviously the same brand). " +
-            "Return only JSON: {\"matched_id\": string|null, \"confidence\": number 0-100}. Use null when none of the candidates is the same institute.",
+            "Return matched_id as null when none of the candidates is the same institute. Confidence is 0-100.",
         },
         {
           role: "user",
