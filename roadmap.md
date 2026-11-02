@@ -3,7 +3,7 @@
 ## Coaching demo reports — November 2
 - [x] Create six isolated fictional report fixtures with 41–98 comments and requested sentiment ratios; assume IMS 83% positive
 - [x] Reuse report layout with prominent demo labelling, institute picker, sorting, exam filters and pagination; exclude demo from search indexing
-- [ ] Run fixture tests and verify the demo report flow in preview
+- [x] Twenty-three tests pass; preview verifies institute switching, pagination and exam filtering with no runtime errors; build OK
 
 ## Rate Your Coaching Institute — November 2
 - [x] Database: coaching_review_institutes, aliases, student_reviews, audit logs, public safe view, stats/search functions with RLS and grants
