@@ -1999,6 +1999,219 @@ export type Database = {
           },
         ]
       }
+      coaching_review_aliases: {
+        Row: {
+          alias_name: string
+          created_at: string
+          id: string
+          institute_id: string
+          normalized_alias: string
+        }
+        Insert: {
+          alias_name: string
+          created_at?: string
+          id?: string
+          institute_id: string
+          normalized_alias: string
+        }
+        Update: {
+          alias_name?: string
+          created_at?: string
+          id?: string
+          institute_id?: string
+          normalized_alias?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_review_aliases_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_review_institutes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_review_audit_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string
+          id: string
+          new_status: string | null
+          previous_status: string | null
+          review_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          previous_status?: string | null
+          review_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          previous_status?: string | null
+          review_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_review_audit_logs_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_public_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_review_audit_logs_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_student_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_review_institutes: {
+        Row: {
+          canonical_name: string
+          created_at: string
+          description: string | null
+          id: string
+          normalized_name: string
+          parent_institute_id: string | null
+          slug: string
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          canonical_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          normalized_name: string
+          parent_institute_id?: string | null
+          slug: string
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          canonical_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          normalized_name?: string
+          parent_institute_id?: string | null
+          slug?: string
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_review_institutes_parent_institute_id_fkey"
+            columns: ["parent_institute_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_review_institutes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_student_reviews: {
+        Row: {
+          average_rating: number
+          class_mode: string | null
+          created_at: string
+          doubt_solving: number
+          exam_category: string | null
+          flag_reasons: string[] | null
+          id: string
+          institute_id: string
+          live_classes: number
+          mentorship: number
+          mock_tests: number
+          moderation_status: string
+          original_institute_input: string | null
+          overall_experience: number
+          preparation_year: string | null
+          recorded_lectures: number
+          review_comment: string
+          student_email: string
+          student_name: string
+          student_support: number
+          study_material: number
+          teaching_quality: number
+          updated_at: string
+          value_for_money: number
+        }
+        Insert: {
+          average_rating: number
+          class_mode?: string | null
+          created_at?: string
+          doubt_solving: number
+          exam_category?: string | null
+          flag_reasons?: string[] | null
+          id?: string
+          institute_id: string
+          live_classes: number
+          mentorship: number
+          mock_tests: number
+          moderation_status?: string
+          original_institute_input?: string | null
+          overall_experience: number
+          preparation_year?: string | null
+          recorded_lectures: number
+          review_comment: string
+          student_email: string
+          student_name: string
+          student_support: number
+          study_material: number
+          teaching_quality: number
+          updated_at?: string
+          value_for_money: number
+        }
+        Update: {
+          average_rating?: number
+          class_mode?: string | null
+          created_at?: string
+          doubt_solving?: number
+          exam_category?: string | null
+          flag_reasons?: string[] | null
+          id?: string
+          institute_id?: string
+          live_classes?: number
+          mentorship?: number
+          mock_tests?: number
+          moderation_status?: string
+          original_institute_input?: string | null
+          overall_experience?: number
+          preparation_year?: string | null
+          recorded_lectures?: number
+          review_comment?: string
+          student_email?: string
+          student_name?: string
+          student_support?: number
+          study_material?: number
+          teaching_quality?: number
+          updated_at?: string
+          value_for_money?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_student_reviews_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_review_institutes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       college_sections: {
         Row: {
           college_id: string
@@ -16156,6 +16369,80 @@ export type Database = {
       }
     }
     Views: {
+      coaching_public_reviews: {
+        Row: {
+          average_rating: number | null
+          class_mode: string | null
+          created_at: string | null
+          doubt_solving: number | null
+          exam_category: string | null
+          id: string | null
+          institute_id: string | null
+          live_classes: number | null
+          mentorship: number | null
+          mock_tests: number | null
+          overall_experience: number | null
+          preparation_year: string | null
+          recorded_lectures: number | null
+          review_comment: string | null
+          student_name: string | null
+          student_support: number | null
+          study_material: number | null
+          teaching_quality: number | null
+          value_for_money: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          class_mode?: string | null
+          created_at?: string | null
+          doubt_solving?: number | null
+          exam_category?: string | null
+          id?: string | null
+          institute_id?: string | null
+          live_classes?: number | null
+          mentorship?: number | null
+          mock_tests?: number | null
+          overall_experience?: number | null
+          preparation_year?: string | null
+          recorded_lectures?: number | null
+          review_comment?: string | null
+          student_name?: string | null
+          student_support?: number | null
+          study_material?: number | null
+          teaching_quality?: number | null
+          value_for_money?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          class_mode?: string | null
+          created_at?: string | null
+          doubt_solving?: number | null
+          exam_category?: string | null
+          id?: string | null
+          institute_id?: string | null
+          live_classes?: number | null
+          mentorship?: number | null
+          mock_tests?: number | null
+          overall_experience?: number | null
+          preparation_year?: string | null
+          recorded_lectures?: number | null
+          review_comment?: string | null
+          student_name?: string | null
+          student_support?: number | null
+          study_material?: number | null
+          teaching_quality?: number | null
+          value_for_money?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_student_reviews_institute_id_fkey"
+            columns: ["institute_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_review_institutes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       colleges_listing_cache: {
         Row: {
           accreditations: string[] | null
@@ -16585,6 +16872,10 @@ export type Database = {
         }
       }
       claim_shortlister_submissions: { Args: never; Returns: number }
+      coaching_institute_stats: {
+        Args: { p_institute_id: string }
+        Returns: Json
+      }
       colleges_hub_listing: {
         Args: { hub_kind: string; hub_slug: string }
         Returns: {
@@ -16920,6 +17211,16 @@ export type Database = {
           p_submission_id: string
         }
         Returns: string
+      }
+      search_coaching_institutes: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          canonical_name: string
+          id: string
+          matched_alias: string
+          score: number
+          slug: string
+        }[]
       }
       seo_intel_claim_job: {
         Args: { p_lease_seconds?: number }
