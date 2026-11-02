@@ -28,6 +28,7 @@ import { Route as PublicBundlesRouteImport } from './routes/_public.bundles'
 import { Route as PublicBusinessInquiriesRouteImport } from './routes/_public.business-inquiries'
 import { Route as PublicCatMock1RouteImport } from './routes/_public.cat-mock-1'
 import { Route as PublicCatScoreCalculatorRouteImport } from './routes/_public.cat-score-calculator'
+import { Route as PublicCoachingReviewDemoRouteImport } from './routes/_public.coaching-review-demo'
 import { Route as PublicCollegeFinderRouteImport } from './routes/_public.college-finder'
 import { Route as PublicCollegeShortlisterRouteImport } from './routes/_public.college-shortlister'
 import { Route as PublicCompareRouteImport } from './routes/_public.compare'
@@ -442,6 +443,12 @@ const PublicCatScoreCalculatorRoute =
   PublicCatScoreCalculatorRouteImport.update({
     id: '/cat-score-calculator',
     path: '/cat-score-calculator',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCoachingReviewDemoRoute =
+  PublicCoachingReviewDemoRouteImport.update({
+    id: '/coaching-review-demo',
+    path: '/coaching-review-demo',
     getParentRoute: () => PublicRoute,
   } as any)
 const PublicCollegeFinderRoute = PublicCollegeFinderRouteImport.update({
@@ -2129,6 +2136,7 @@ export interface FileRoutesByFullPath {
   '/business-inquiries': typeof PublicBusinessInquiriesRoute
   '/cat-mock-1': typeof PublicCatMock1Route
   '/cat-score-calculator': typeof PublicCatScoreCalculatorRoute
+  '/coaching-review-demo': typeof PublicCoachingReviewDemoRoute
   '/college-finder': typeof PublicCollegeFinderRoute
   '/college-shortlister': typeof PublicCollegeShortlisterRoute
   '/compare': typeof PublicCompareRoute
@@ -2464,6 +2472,7 @@ export interface FileRoutesByTo {
   '/business-inquiries': typeof PublicBusinessInquiriesRoute
   '/cat-mock-1': typeof PublicCatMock1Route
   '/cat-score-calculator': typeof PublicCatScoreCalculatorRoute
+  '/coaching-review-demo': typeof PublicCoachingReviewDemoRoute
   '/college-finder': typeof PublicCollegeFinderRoute
   '/college-shortlister': typeof PublicCollegeShortlisterRoute
   '/compare': typeof PublicCompareRoute
@@ -2791,6 +2800,7 @@ export interface FileRoutesById {
   '/_public/business-inquiries': typeof PublicBusinessInquiriesRoute
   '/_public/cat-mock-1': typeof PublicCatMock1Route
   '/_public/cat-score-calculator': typeof PublicCatScoreCalculatorRoute
+  '/_public/coaching-review-demo': typeof PublicCoachingReviewDemoRoute
   '/_public/college-finder': typeof PublicCollegeFinderRoute
   '/_public/college-shortlister': typeof PublicCollegeShortlisterRoute
   '/_public/compare': typeof PublicCompareRoute
@@ -3134,6 +3144,7 @@ export interface FileRouteTypes {
     | '/business-inquiries'
     | '/cat-mock-1'
     | '/cat-score-calculator'
+    | '/coaching-review-demo'
     | '/college-finder'
     | '/college-shortlister'
     | '/compare'
@@ -3469,6 +3480,7 @@ export interface FileRouteTypes {
     | '/business-inquiries'
     | '/cat-mock-1'
     | '/cat-score-calculator'
+    | '/coaching-review-demo'
     | '/college-finder'
     | '/college-shortlister'
     | '/compare'
@@ -3795,6 +3807,7 @@ export interface FileRouteTypes {
     | '/_public/business-inquiries'
     | '/_public/cat-mock-1'
     | '/_public/cat-score-calculator'
+    | '/_public/coaching-review-demo'
     | '/_public/college-finder'
     | '/_public/college-shortlister'
     | '/_public/compare'
@@ -4275,6 +4288,13 @@ declare module '@tanstack/react-router' {
       path: '/cat-score-calculator'
       fullPath: '/cat-score-calculator'
       preLoaderRoute: typeof PublicCatScoreCalculatorRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/coaching-review-demo': {
+      id: '/_public/coaching-review-demo'
+      path: '/coaching-review-demo'
+      fullPath: '/coaching-review-demo'
+      preLoaderRoute: typeof PublicCoachingReviewDemoRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/college-finder': {
@@ -6657,6 +6677,7 @@ interface PublicRouteChildren {
   PublicBusinessInquiriesRoute: typeof PublicBusinessInquiriesRoute
   PublicCatMock1Route: typeof PublicCatMock1Route
   PublicCatScoreCalculatorRoute: typeof PublicCatScoreCalculatorRoute
+  PublicCoachingReviewDemoRoute: typeof PublicCoachingReviewDemoRoute
   PublicCollegeFinderRoute: typeof PublicCollegeFinderRoute
   PublicCollegeShortlisterRoute: typeof PublicCollegeShortlisterRoute
   PublicCompareRoute: typeof PublicCompareRoute
@@ -6720,6 +6741,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicBusinessInquiriesRoute: PublicBusinessInquiriesRoute,
   PublicCatMock1Route: PublicCatMock1Route,
   PublicCatScoreCalculatorRoute: PublicCatScoreCalculatorRoute,
+  PublicCoachingReviewDemoRoute: PublicCoachingReviewDemoRoute,
   PublicCollegeFinderRoute: PublicCollegeFinderRoute,
   PublicCollegeShortlisterRoute: PublicCollegeShortlisterRoute,
   PublicCompareRoute: PublicCompareRoute,
