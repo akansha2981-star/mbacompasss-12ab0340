@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Link } from "@tanstack/react-router";
 import { CheckCircle2, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -188,7 +187,6 @@ export default function RateCoachingPage() {
           <p className="mt-3 text-base text-muted-foreground">
             Help fellow students make better decisions. Share your experience and rate your coaching institute.
           </p>
-          <Button asChild variant="outline" className="mt-4"><Link to="/coaching-review-demo">View demo reports</Link></Button>
         </div>
       </section>
 

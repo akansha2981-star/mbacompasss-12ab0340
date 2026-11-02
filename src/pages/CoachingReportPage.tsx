@@ -8,21 +8,20 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EXAM_CATEGORIES, RATING_PARAMETERS } from "@/lib/coachingReviews";
 import { getCoachingReportFn } from "@/lib/coachingReviews.functions";
-import { getDemoCoachingReport } from "@/lib/coachingReviewDemo";
 
 type ReportData = NonNullable<Awaited<ReturnType<typeof getCoachingReportFn>>>;
 
 const DISTRIBUTION_BUCKETS = ["1-2", "3-4", "5-6", "7-8", "9-10"] as const;
 
-export default function CoachingReportPage({ slug, initialData, demo = false }: { slug: string; initialData: ReportData; demo?: boolean }) {
+export default function CoachingReportPage({ slug, initialData }: { slug: string; initialData: ReportData }) {
   const reportFn = useServerFn(getCoachingReportFn);
   const [sort, setSort] = useState<"recent" | "highest" | "lowest">("recent");
   const [exam, setExam] = useState<string>("");
   const [page, setPage] = useState(1);
 
   const { data } = useQuery({
-    queryKey: [demo ? "coaching-report-demo" : "coaching-report", slug, sort, exam, page],
-    queryFn: () => demo ? Promise.resolve(getDemoCoachingReport(slug, sort, exam, page)) : reportFn({ data: { slug, sort, exam: exam || null, page } }),
+    queryKey: ["coaching-report", slug, sort, exam, page],
+    queryFn: () => reportFn({ data: { slug, sort, exam: exam || null, page } }),
     initialData: sort === "recent" && !exam && page === 1 ? initialData : undefined,
     placeholderData: (prev) => prev,
   });
@@ -36,7 +35,6 @@ export default function CoachingReportPage({ slug, initialData, demo = false }: 
     <main className="min-h-screen bg-background">
       <section className="border-b border-border bg-accent/40">
         <div className="container max-w-4xl py-10">
-          {demo && <p role="status" className="mb-4 border-l-4 border-primary bg-accent p-4 text-base font-semibold text-foreground">DEMO DATA — Fictional comments and ratings for layout testing only. Not real student feedback or institute reputation.</p>}
           <h1 className="text-3xl font-bold text-foreground">{institute.canonical_name}</h1>
           <p className="mt-1 text-base text-muted-foreground">Student ratings and reviews</p>
           <div className="mt-6 flex flex-wrap items-end gap-6">
@@ -46,7 +44,7 @@ export default function CoachingReportPage({ slug, initialData, demo = false }: 
                 {stats.overall_rating !== null ? `${stats.overall_rating} / 10` : "Not rated yet"}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-            Based on {stats.total_reviews} {demo ? "fictional demo" : "approved student"} review{stats.total_reviews === 1 ? "" : "s"}
+            Based on {stats.total_reviews} approved student review{stats.total_reviews === 1 ? "" : "s"}
               </p>
             </div>
             {stats.last_review_at && (
