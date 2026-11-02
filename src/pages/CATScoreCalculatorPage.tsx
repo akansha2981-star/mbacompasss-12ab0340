@@ -148,6 +148,56 @@ const SectionInView: React.FC<{ children: React.ReactNode; delay?: number; class
   );
 };
 
+
+/* ═══════ RESULT SECTION HEADER ═══════ */
+const ResultHead = ({ index, title, sub }: { index: string; title: string; sub: string }) => (
+  <div className="mb-3 flex items-end gap-3 border-b border-border pb-2">
+    <span className="font-mono text-sm font-semibold text-primary">{index}</span>
+    <div className="min-w-0">
+      <h2 className="text-xl font-bold text-foreground leading-tight">{title}</h2>
+      <p className="text-sm text-muted-foreground">{sub}</p>
+    </div>
+  </div>
+);
+
+/* ═══════ SCORE SCALE: you vs 2026 average ═══════ */
+const ScoreScale = ({ you, max, avg, count, top }: { you: number; max: number; avg: number; count: number; top: number }) => {
+  const min = -Math.round(max / 3);
+  const pos = (v: number) => `${Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100))}%`;
+  const hasAvg = count > 0;
+  const diff = Math.round((you - avg) * 10) / 10;
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 md:p-6 shadow-sm">
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div><p className="text-sm text-muted-foreground">Your score</p><p className="text-2xl font-bold text-primary tabular-nums">{you}</p></div>
+        <div><p className="text-sm text-muted-foreground">2026 average</p><p className="text-2xl font-bold text-foreground tabular-nums">{hasAvg ? avg : "—"}</p></div>
+        <div><p className="text-sm text-muted-foreground">Difference</p><p className="text-2xl font-bold text-foreground tabular-nums">{hasAvg ? `${diff > 0 ? "+" : ""}${diff}` : "—"}</p></div>
+      </div>
+      <div className="relative mt-10 mb-8 mx-2">
+        <div className="h-2.5 rounded-full bg-gradient-to-r from-muted via-primary/30 to-primary" />
+        {[0, 0.25, 0.5, 0.75, 1].map(f => (
+          <span key={f} className="absolute top-4 -translate-x-1/2 text-sm text-muted-foreground tabular-nums" style={{ left: `${f * 100}%` }}>{Math.round(min + f * (max - min))}</span>
+        ))}
+        {hasAvg && (
+          <div className="absolute -top-1 -translate-x-1/2 flex flex-col items-center" style={{ left: pos(avg) }}>
+            <span className="h-4.5 w-0.5 bg-muted-foreground" />
+            <span className="absolute top-9 whitespace-nowrap rounded bg-muted px-1.5 text-sm text-muted-foreground">Avg {avg}</span>
+          </div>
+        )}
+        <div className="absolute -top-7 -translate-x-1/2 flex flex-col items-center" style={{ left: pos(you) }}>
+          <span className="whitespace-nowrap rounded-md bg-primary px-2 py-0.5 text-sm font-semibold text-primary-foreground">You {you}</span>
+          <span className="h-3 w-3 -mb-1 mt-1 rounded-full border-2 border-card bg-primary shadow" />
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {hasAvg
+          ? `Based on ${count.toLocaleString()} CAT 2026 score calculations on MBA Compass${top ? `; highest so far is ${top}` : ""}. Updates automatically as more aspirants submit.`
+          : "The 2026 aspirant average will appear here automatically once calculations come in."}
+      </p>
+    </div>
+  );
+};
+
 /* ═══════ DB STATS HOOK ═══════ */
 const useLiveStats = () => {
   return useQuery({
@@ -325,7 +375,7 @@ const CATScoreCalculatorPage: React.FC = () => {
 
       {/* ═══════ HERO + INPUT (first thing students see) ═══════ */}
       {!result && !loading && (
-        <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-primary/10 via-primary/5 to-background">
+        <section className="relative overflow-hidden border-b border-border cat-score-pattern">
           <div className="relative max-w-3xl mx-auto px-4 pt-6 pb-8 md:pt-8 md:pb-10">
             <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-sm font-semibold text-destructive">
@@ -453,7 +503,7 @@ const CATScoreCalculatorPage: React.FC = () => {
       {/* ═══════ RESULTS DASHBOARD ═══════ */}
       <AnimatePresence>
         {result && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="cat-score-pattern pb-4">
             {submittedAt && <PercentileCountdown startedAt={submittedAt} />}
             {/* Candidate Info */}
             <section className="max-w-5xl mx-auto px-4 pt-8">
@@ -474,63 +524,107 @@ const CATScoreCalculatorPage: React.FC = () => {
               </div>
             </section>
 
-            {/* Score Summary Cards */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Headline score cards */}
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { label: "Total Score", value: result.overall.totalScore, sub: `out of ${result.overall.maxScore}`, bg: "bg-primary/5", border: "border-primary/15", textColor: getScoreColor(result.overall.totalScore, result.overall.maxScore), labelColor: "text-primary", icon: Target },
-                  { label: "Percentile", value: "24 hrs", sub: "arriving on your email", bg: "bg-primary/5", border: "border-primary/15", textColor: "text-primary", labelColor: "text-primary", icon: TrendingUp },
-                  { label: "Accuracy", value: `${result.overall.accuracy.toFixed(1)}%`, sub: `${result.overall.correct}/${result.overall.attempted} correct`, bg: "bg-emerald-50", border: "border-emerald-200", textColor: "text-emerald-600", labelColor: "text-emerald-600", icon: CheckCircle2 },
-                  { label: "Attempted", value: result.overall.attempted, sub: `of ${result.overall.totalQuestions} Qs`, bg: "bg-amber-50", border: "border-amber-200", textColor: "text-amber-600", labelColor: "text-amber-600", icon: BookOpen },
+                  { label: "Total Score", value: result.overall.totalScore, sub: `out of ${result.overall.maxScore}`, icon: Target, strong: true },
+                  { label: "Accuracy", value: `${result.overall.accuracy.toFixed(1)}%`, sub: `${result.overall.correct}/${result.overall.attempted} correct`, icon: CheckCircle2 },
+                  { label: "Attempted", value: result.overall.attempted, sub: `of ${result.overall.totalQuestions} questions`, icon: BookOpen },
+                  { label: "Percentile", value: "24 hrs", sub: "arriving on your email", icon: TrendingUp },
                 ].map((card, i) => (
-                  <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }}
-                    className={`${card.bg} border ${card.border} rounded-2xl p-4 md:p-5 text-center shadow-xs hover:shadow-md transition-shadow`}>
-                    <card.icon className={`w-5 h-5 ${card.labelColor} mx-auto mb-2`} />
-                    <p className={`text-xs ${card.labelColor} uppercase tracking-wider font-semibold mb-1`}>{card.label}</p>
-                    <p className={`text-2xl md:text-4xl font-bold ${card.textColor}`}>{card.value}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
+                  <motion.div key={card.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.07 }}
+                    className={`relative overflow-hidden rounded-xl border p-4 shadow-sm ${card.strong ? "border-primary/30 bg-primary text-primary-foreground" : "border-border bg-card"}`}>
+                    <div className="flex items-center justify-between">
+                      <p className={`text-sm font-medium uppercase tracking-wider ${card.strong ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{card.label}</p>
+                      <card.icon className={`h-4 w-4 ${card.strong ? "text-primary-foreground/80" : "text-primary"}`} />
+                    </div>
+                    <p className={`mt-2 text-2xl md:text-4xl font-bold tabular-nums ${card.strong ? "" : "text-foreground"}`}>{card.value}</p>
+                    <p className={`mt-1 text-sm ${card.strong ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{card.sub}</p>
                   </motion.div>
                 ))}
               </div>
             </SectionInView>
 
+            {/* Complete Score Summary (moved up) */}
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
+              <ResultHead index="01" title="Complete Score Summary" sub="Every section at a glance, scored on the official CAT marking scheme" />
+              <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/40">
+                        {["Section", "Total", "Attempted", "Correct", "Incorrect", "Score", "Accuracy"].map((h, i) => (
+                          <th key={h} className={`${i === 0 ? "text-left px-4" : "text-center px-3"} py-2.5 text-sm font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap`}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.sections.map((s) => (
+                        <tr key={s.section} className="border-b border-border/60">
+                          <td className="px-4 py-3 font-semibold text-foreground">{s.section}</td>
+                          <td className="text-center px-3 py-3 text-muted-foreground tabular-nums">{s.total}</td>
+                          <td className="text-center px-3 py-3 text-foreground tabular-nums">{s.attempted}</td>
+                          <td className="text-center px-3 py-3 text-foreground tabular-nums">{s.correct}</td>
+                          <td className="text-center px-3 py-3 text-muted-foreground tabular-nums">{s.incorrect}</td>
+                          <td className="text-center px-3 py-3 text-primary font-bold tabular-nums">{s.score}</td>
+                          <td className="px-3 py-3">
+                            <div className="flex items-center gap-2 min-w-24">
+                              <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden"><div className="h-full bg-primary/70 rounded-full" style={{ width: `${Math.min(100, s.accuracy)}%` }} /></div>
+                              <span className="text-foreground tabular-nums">{s.accuracy.toFixed(0)}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="bg-primary/5">
+                        <td className="px-4 py-3 font-bold text-foreground">Total</td>
+                        <td className="text-center px-3 py-3 text-foreground font-semibold tabular-nums">{result.overall.totalQuestions}</td>
+                        <td className="text-center px-3 py-3 text-foreground font-semibold tabular-nums">{result.overall.attempted}</td>
+                        <td className="text-center px-3 py-3 text-foreground font-semibold tabular-nums">{result.overall.correct}</td>
+                        <td className="text-center px-3 py-3 text-muted-foreground font-semibold tabular-nums">{result.overall.incorrect}</td>
+                        <td className="text-center px-3 py-3 text-primary font-bold text-xl tabular-nums">{result.overall.totalScore}</td>
+                        <td className="text-center px-3 py-3 text-foreground font-semibold tabular-nums">{result.overall.accuracy.toFixed(1)}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </SectionInView>
+
+            {/* Score scale vs 2026 aspirants */}
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
+              <ResultHead index="02" title="Where You Stand" sub="Your score against the average of CAT 2026 aspirants on this calculator" />
+              <ScoreScale you={result.overall.totalScore} max={result.overall.maxScore} avg={liveStats?.year.avg ?? 0} count={liveStats?.year.count ?? 0} top={liveStats?.year.highest ?? 0} />
+            </SectionInView>
+
             {/* Section-wise Breakdown */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" /> Section-wise Breakdown
-              </h2>
-              <div className="grid md:grid-cols-3 gap-4">
+              <ResultHead index="03" title="Section-wise Breakdown" sub="Attempts, accuracy and marks for VARC, DILR and QA" />
+              <div className="grid md:grid-cols-3 gap-3">
                 {result.sections.map((section, i) => {
-                  const colors = SECTION_COLORS[section.section] || SECTION_COLORS.VARC;
+                  const maxSec = section.total * 3;
                   return (
-                    <motion.div key={section.section} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.1 }}
-                      className={`${colors.bg} border ${colors.border} rounded-2xl p-5 shadow-xs hover:shadow-md transition-all`}>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className={`text-lg font-bold ${colors.text}`}>{section.section}</h3>
-                        <span className={`text-3xl font-black ${colors.text}`}>{section.score}</span>
+                    <motion.div key={section.section} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}
+                      className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                      <div className="flex items-baseline justify-between">
+                        <h3 className="text-base font-semibold uppercase tracking-wider text-muted-foreground">{section.section}</h3>
+                        <p className="text-foreground"><span className="text-2xl font-bold tabular-nums text-primary">{section.score}</span><span className="text-sm text-muted-foreground"> / {maxSec}</span></p>
                       </div>
-                      <div className="space-y-2.5">
-                        {[
-                          { icon: Target, label: "Attempted", value: `${section.attempted}/${section.total}`, color: "text-muted-foreground" },
-                          { icon: CheckCircle2, label: "Correct", value: section.correct, color: "text-emerald-600" },
-                          { icon: XCircle, label: "Incorrect", value: section.incorrect, color: "text-destructive" },
-                          { icon: MinusCircle, label: "Unattempted", value: section.unattempted, color: "text-muted-foreground" },
-                        ].map((row) => (
-                          <div key={row.label} className="flex justify-between text-sm">
-                            <span className={`flex items-center gap-1.5 ${row.color}`}><row.icon className="w-3.5 h-3.5" /> {row.label}</span>
-                            <span className={`${row.color} font-semibold`}>{row.value}</span>
+                      <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-muted">
+                        <div className="bg-primary" style={{ width: `${(section.correct / section.total) * 100}%` }} />
+                        <div className="bg-primary/30" style={{ width: `${(section.incorrect / section.total) * 100}%` }} />
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                        {[["Correct", section.correct], ["Wrong", section.incorrect], ["Skipped", section.unattempted]].map(([l, v]) => (
+                          <div key={l as string} className="rounded-lg bg-muted/50 py-2">
+                            <p className="text-base font-bold tabular-nums text-foreground">{v}</p>
+                            <p className="text-sm text-muted-foreground">{l}</p>
                           </div>
                         ))}
-                        <div className="pt-2 border-t border-border">
-                          <div className="flex justify-between text-sm mb-1.5">
-                            <span className="text-muted-foreground">Accuracy</span>
-                            <span className="text-foreground font-bold">{section.accuracy.toFixed(1)}%</span>
-                          </div>
-                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                            <motion.div initial={{ width: 0 }} animate={{ width: `${section.accuracy}%` }} transition={{ duration: 1.5, delay: 0.5 }}
-                              className={`h-full ${colors.accent} rounded-full`} />
-                          </div>
-                        </div>
+                      </div>
+                      <div className="mt-3 flex justify-between border-t border-border pt-3 text-sm">
+                        <span className="text-muted-foreground">Accuracy · {section.attempted}/{section.total} attempted</span>
+                        <span className="font-semibold text-foreground tabular-nums">{section.accuracy.toFixed(1)}%</span>
                       </div>
                     </motion.div>
                   );
@@ -540,69 +634,52 @@ const CATScoreCalculatorPage: React.FC = () => {
 
             {/* AI Insights Section */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <div className="bg-gradient-to-br from-primary/5 via-secondary/10 to-primary/5 border border-primary/15 rounded-2xl p-6 md:p-8 shadow-xs">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground">AI-Powered Performance Insights</h2>
-                    <p className="text-xs text-muted-foreground">Personalized analysis based on your response data</p>
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {(() => {
-                    const bestSection = [...result.sections].sort((a, b) => b.accuracy - a.accuracy)[0];
-                    const worstSection = [...result.sections].sort((a, b) => a.accuracy - b.accuracy)[0];
-                    const totalNeg = result.questions.filter(q => q.questionType === "MCQ" && !q.isCorrect && (q.status === "Answered" || q.status === "Answered & Marked for Review")).length;
-                    const attemptRate = ((result.overall.attempted / result.overall.totalQuestions) * 100).toFixed(0);
-                    const insights = [
-                      { icon: Trophy, title: "Strongest Section", text: `${bestSection.section} with ${bestSection.accuracy.toFixed(1)}% accuracy. Keep up the strong work here!`, color: "text-emerald-600" },
-                      { icon: TrendingDown, title: "Needs Improvement", text: `${worstSection.section} at ${worstSection.accuracy.toFixed(1)}% accuracy. Focus practice sessions here for maximum score gain.`, color: "text-amber-600" },
-                      { icon: Shield, title: "Negative Marks Impact", text: `You lost ${totalNeg} marks to negative marking. Reducing guesswork on MCQs could boost your score by ${Math.round(totalNeg * 0.7)}+ marks.`, color: "text-destructive" },
-                      { icon: Brain, title: "Attempt Strategy", text: `${attemptRate}% attempt rate. ${Number(attemptRate) > 80 ? "Excellent coverage! Focus on accuracy now." : Number(attemptRate) > 60 ? "Good attempt rate. Try to push to 75%+ in weaker sections." : "Low attempt rate. Practice time management to attempt more questions."}`, color: "text-primary" },
-                    ];
-                    return insights.map((insight, i) => (
-                      <motion.div key={insight.title} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.1 }}
-                        className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-4 shadow-xs">
-                        <div className="flex items-start gap-3">
-                          <insight.icon className={`w-5 h-5 ${insight.color} mt-0.5 shrink-0`} />
-                          <div>
-                            <p className="text-sm font-bold text-foreground mb-1">{insight.title}</p>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{insight.text}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ));
-                  })()}
-                </div>
-                <div className="mt-5 pt-4 border-t border-primary/10 text-center">
-                  <Link to="/tools/profile-analyzer">
-                    <Button variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/5">
-                      <BrainCircuit className="w-4 h-4 mr-1" /> Get Full AI Profile Analysis <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
+              <ResultHead index="04" title="AI-Powered Performance Insights" sub="Personalised analysis based on your response data" />
+              <div className="grid md:grid-cols-2 gap-3">
+                {(() => {
+                  const bestSection = [...result.sections].sort((a, b) => b.accuracy - a.accuracy)[0];
+                  const worstSection = [...result.sections].sort((a, b) => a.accuracy - b.accuracy)[0];
+                  const totalNeg = result.questions.filter(q => q.questionType === "MCQ" && !q.isCorrect && (q.status === "Answered" || q.status === "Answered & Marked for Review")).length;
+                  const attemptRate = ((result.overall.attempted / result.overall.totalQuestions) * 100).toFixed(0);
+                  const insights = [
+                    { icon: Trophy, title: "Strongest Section", text: `${bestSection.section} with ${bestSection.accuracy.toFixed(1)}% accuracy. Protect this edge in your mocks.` },
+                    { icon: TrendingDown, title: "Needs Improvement", text: `${worstSection.section} at ${worstSection.accuracy.toFixed(1)}% accuracy. Focused practice here gives the biggest score gain.` },
+                    { icon: Shield, title: "Negative Marks Impact", text: `You lost ${totalNeg} marks to negative marking. Cutting MCQ guesswork could add ${Math.round(totalNeg * 0.7)}+ marks.` },
+                    { icon: Brain, title: "Attempt Strategy", text: `${attemptRate}% attempt rate. ${Number(attemptRate) > 80 ? "Excellent coverage. Focus on accuracy now." : Number(attemptRate) > 60 ? "Good coverage. Push to 75%+ in weaker sections." : "Low coverage. Work on time management to attempt more."}` },
+                  ];
+                  return insights.map((insight) => (
+                    <div key={insight.title} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10"><insight.icon className="h-4 w-4 text-primary" /></span>
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{insight.title}</p>
+                        <p className="mt-1 text-sm text-foreground leading-relaxed">{insight.text}</p>
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+              <div className="mt-4 text-center">
+                <Link to="/tools/profile-analyzer">
+                  <Button variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/5">
+                    <BrainCircuit className="w-4 h-4 mr-1" /> Get Full AI Profile Analysis <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
               </div>
             </SectionInView>
 
-            {/* Peer Comparison + Topper Comparison */}
+            {/* Peer Comparison */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" /> Peer Comparison
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <SectionAvgComparison result={result} />
+              <ResultHead index="05" title="Peer Comparison" sub="Section scores against fellow aspirants and toppers" />
+              <div className="grid md:grid-cols-2 gap-3">
+                <SectionAvgComparison result={result} averages={liveStats?.year.count ? liveStats.year.sections : undefined} />
                 <TopperComparisonBar result={result} />
               </div>
             </SectionInView>
 
-            {/* Visual Charts Grid */}
+            {/* Visual Analysis */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" /> Visual Analysis
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
+              <ResultHead index="06" title="Visual Analysis" sub="Your attempt pattern, accuracy and marks visualised" />
+              <div className="grid md:grid-cols-2 gap-3">
                 <SectionRadarChart result={result} />
                 <AttemptBreakdownPie result={result} />
                 <SectionScoreBar result={result} />
@@ -612,68 +689,16 @@ const CATScoreCalculatorPage: React.FC = () => {
               </div>
             </SectionInView>
 
-            {/* Strength & Weakness + Mistake Analysis */}
+            {/* Deep Performance Insights */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-primary" /> Deep Performance Insights
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
+              <ResultHead index="07" title="Deep Performance Insights" sub="Strengths, mistakes and difficulty-level performance" />
+              <div className="grid md:grid-cols-2 gap-3">
                 <StrengthWeaknessChart result={result} />
                 <MistakeAnalysisChart result={result} />
                 <DifficultyPerformanceChart result={result} />
                 <SectionDifficultyHeatmap />
               </div>
             </SectionInView>
-
-            {/* Complete Score Summary Table */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
-                <div className="bg-primary/5 px-5 py-3 border-b border-border">
-                  <h3 className="text-foreground font-bold">Complete Score Summary</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="text-left px-5 py-3 text-muted-foreground font-medium">Section</th>
-                        <th className="text-center px-3 py-3 text-muted-foreground font-medium">Total</th>
-                        <th className="text-center px-3 py-3 text-muted-foreground font-medium">Attempted</th>
-                        <th className="text-center px-3 py-3 text-emerald-600 font-medium">Correct</th>
-                        <th className="text-center px-3 py-3 text-destructive font-medium">Incorrect</th>
-                        <th className="text-center px-3 py-3 text-muted-foreground font-medium">Score</th>
-                        <th className="text-center px-3 py-3 text-muted-foreground font-medium">Accuracy</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {result.sections.map((s) => {
-                        const c = SECTION_COLORS[s.section] || SECTION_COLORS.VARC;
-                        return (
-                          <tr key={s.section} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                            <td className={`px-5 py-3 font-semibold ${c.text}`}>{s.section}</td>
-                            <td className="text-center px-3 py-3 text-foreground">{s.total}</td>
-                            <td className="text-center px-3 py-3 text-foreground">{s.attempted}</td>
-                            <td className="text-center px-3 py-3 text-emerald-600 font-medium">{s.correct}</td>
-                            <td className="text-center px-3 py-3 text-destructive font-medium">{s.incorrect}</td>
-                            <td className="text-center px-3 py-3 text-foreground font-bold">{s.score}</td>
-                            <td className="text-center px-3 py-3 text-foreground">{s.accuracy.toFixed(1)}%</td>
-                          </tr>
-                        );
-                      })}
-                      <tr className="bg-primary/5">
-                        <td className="px-5 py-3 font-bold text-foreground">Total</td>
-                        <td className="text-center px-3 py-3 text-foreground font-semibold">{result.overall.totalQuestions}</td>
-                        <td className="text-center px-3 py-3 text-foreground font-semibold">{result.overall.attempted}</td>
-                        <td className="text-center px-3 py-3 text-emerald-600 font-bold">{result.overall.correct}</td>
-                        <td className="text-center px-3 py-3 text-destructive font-bold">{result.overall.incorrect}</td>
-                        <td className="text-center px-3 py-3 text-primary font-black text-xl">{result.overall.totalScore}</td>
-                        <td className="text-center px-3 py-3 text-foreground font-semibold">{result.overall.accuracy.toFixed(1)}%</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </SectionInView>
-
             {/* Question-wise Detail */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
@@ -733,11 +758,11 @@ const CATScoreCalculatorPage: React.FC = () => {
                   <p className="text-muted-foreground text-sm mb-4">Get AI-powered profile analysis with college predictions and strategy</p>
                   <Link to="/tools/profile-analyzer"><Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Analyse My Profile <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
                 </div>
-                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 shadow-xs hover:shadow-md transition-shadow">
-                  <TrendingUp className="w-8 h-8 text-emerald-600 mb-3" />
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-xs hover:shadow-md transition-shadow">
+                  <TrendingUp className="w-8 h-8 text-primary mb-3" />
                   <h3 className="text-foreground font-bold text-lg mb-2">Find Best Coaching</h3>
                   <p className="text-muted-foreground text-sm mb-4">Compare top CAT coaching centres with verified reviews and results</p>
-                  <Link to="/category/cat"><Button className="bg-emerald-600 hover:bg-emerald-500 text-white">Browse Coaching <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
+                  <Link to="/category/cat"><Button variant="outline">Browse Coaching <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
                 </div>
               </div>
             </SectionInView>
