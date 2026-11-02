@@ -1,4 +1,7 @@
-import PhoneOtpVerifyDialog from "@/components/PhoneOtpVerifyDialog";
+import CatDetailsDialog, { type CatContact } from "@/components/CatDetailsDialog";
+import PercentileCountdown from "@/components/PercentileCountdown";
+import { saveCatScoreSubmission } from "@/lib/catScore.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { deriveCatSlot } from "@/lib/catSlot";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
@@ -188,129 +191,78 @@ const CATScoreCalculatorPage: React.FC = () => {
   const { user } = useAuth();
   const { data: liveStats } = useLiveStats();
 
-  const [showOtpDialog, setShowOtpDialog] = useState(false);
-  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
-  const pendingRef = useRef<null | ((phone: string) => void)>(null);
-  const otpContinueRef = useRef<null | ((phone: string) => void)>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [pending, setPending] = useState<{ parsed: CATResult; url: string | null } | null>(null);
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
+  const saveFn = useServerFn(saveCatScoreSubmission);
 
-  // Remember a phone verified earlier by this account (a past verified submission).
-  useEffect(() => {
-    if (!user) { setVerifiedPhone(null); return; }
-    supabase.from("cat_score_submissions").select("phone").eq("user_id", user.id).eq("phone_verified", true)
-      .not("phone", "is", null).order("created_at", { ascending: false }).limit(1)
-      .then(({ data }) => { if (data?.[0]?.phone) setVerifiedPhone(data[0].phone); });
-  }, [user]);
-
-  // Resume the calculation once login completes.
-  useEffect(() => {
-    if (user && pendingRef.current && !showLoginDialog) {
-      const fn = pendingRef.current; pendingRef.current = null;
-      if (verifiedPhone) fn(verifiedPhone);
-      else { otpContinueRef.current = fn; setShowOtpDialog(true); }
-    }
-  }, [user, showLoginDialog, verifiedPhone]);
-
-  const saveSubmission = async (parsed: CATResult, sheetUrl: string | null, phone: string) => {
-    const getSectionData = (name: string) => parsed.sections.find((s) => s.section === name);
-    const varc = getSectionData("VARC");
-    const dilr = getSectionData("DILR");
-    const qa = getSectionData("QA");
-    const mcqWrong = parsed.questions.filter(
-      (q) => q.questionType === "MCQ" && !q.isCorrect &&
-        (q.status === "Answered" || q.status === "Answered & Marked for Review")
-    ).length;
-
-    await supabase.from("cat_score_submissions").insert({
-      candidate_name: parsed.candidateName || user?.user_metadata?.display_name || "Unknown",
-      application_no: parsed.applicationNo || null,
-      test_date: parsed.testDate || null,
-      test_time: parsed.testTime || null,
-      slot: deriveCatSlot(parsed.testTime),
-      response_sheet_url: sheetUrl,
-      phone_verified: true,
-      subject: parsed.subject || "CAT",
-      email: user?.email || null,
-      phone,
-      state: null,
-      user_id: user?.id || null,
-      total_score: parsed.overall.totalScore,
-      max_score: parsed.overall.maxScore,
-      estimated_percentile: parsed.estimatedPercentile,
-      total_questions: parsed.overall.totalQuestions,
-      attempted: parsed.overall.attempted,
-      correct: parsed.overall.correct,
-      incorrect: parsed.overall.incorrect,
-      unattempted: parsed.overall.unattempted,
-      accuracy: parseFloat(parsed.overall.accuracy.toFixed(2)),
+  const buildRow = (parsed: CATResult, sheetUrl: string | null) => {
+    const sec = (n: string) => parsed.sections.find((s) => s.section === n);
+    const varc = sec("VARC"), dilr = sec("DILR"), qa = sec("QA");
+    const mcqWrong = parsed.questions.filter((q) => q.questionType === "MCQ" && !q.isCorrect &&
+      (q.status === "Answered" || q.status === "Answered & Marked for Review")).length;
+    const fx = (n?: number) => parseFloat((n || 0).toFixed(2));
+    return {
+      application_no: parsed.applicationNo || null, test_date: parsed.testDate || null, test_time: parsed.testTime || null,
+      slot: deriveCatSlot(parsed.testTime), response_sheet_url: sheetUrl, subject: parsed.subject || "CAT",
+      total_score: parsed.overall.totalScore, max_score: parsed.overall.maxScore, estimated_percentile: parsed.estimatedPercentile,
+      total_questions: parsed.overall.totalQuestions, attempted: parsed.overall.attempted, correct: parsed.overall.correct,
+      incorrect: parsed.overall.incorrect, unattempted: parsed.overall.unattempted, accuracy: fx(parsed.overall.accuracy),
       negative_marks: mcqWrong,
-      varc_score: varc?.score || 0, varc_attempted: varc?.attempted || 0,
-      varc_correct: varc?.correct || 0, varc_incorrect: varc?.incorrect || 0,
-      varc_accuracy: parseFloat((varc?.accuracy || 0).toFixed(2)),
-      dilr_score: dilr?.score || 0, dilr_attempted: dilr?.attempted || 0,
-      dilr_correct: dilr?.correct || 0, dilr_incorrect: dilr?.incorrect || 0,
-      dilr_accuracy: parseFloat((dilr?.accuracy || 0).toFixed(2)),
-      qa_score: qa?.score || 0, qa_attempted: qa?.attempted || 0,
-      qa_correct: qa?.correct || 0, qa_incorrect: qa?.incorrect || 0,
-      qa_accuracy: parseFloat((qa?.accuracy || 0).toFixed(2)),
-      sections_data: parsed.sections,
-      questions_data: parsed.questions,
-    } as any);
+      varc_score: varc?.score || 0, varc_attempted: varc?.attempted || 0, varc_correct: varc?.correct || 0, varc_incorrect: varc?.incorrect || 0, varc_accuracy: fx(varc?.accuracy),
+      dilr_score: dilr?.score || 0, dilr_attempted: dilr?.attempted || 0, dilr_correct: dilr?.correct || 0, dilr_incorrect: dilr?.incorrect || 0, dilr_accuracy: fx(dilr?.accuracy),
+      qa_score: qa?.score || 0, qa_attempted: qa?.attempted || 0, qa_correct: qa?.correct || 0, qa_incorrect: qa?.incorrect || 0, qa_accuracy: fx(qa?.accuracy),
+      sections_data: parsed.sections, questions_data: parsed.questions,
+    };
   };
 
-  /** Login → verified mobile → run. */
-  const requireAccess = (run: (phone: string) => void) => {
-    if (!user) { pendingRef.current = run; setShowLoginDialog(true); return; }
-    if (!verifiedPhone) {
-      otpContinueRef.current = run;
-      setShowOtpDialog(true);
-      return;
-    }
-    run(verifiedPhone);
-  };
-
-  const analyse = async (html: string, sheetUrl: string | null, phone: string) => {
-    setError(""); setLoading(true); setLoadingStep(0); setLoadingProgress(0); setResult(null);
+  /** Read the sheet first, then ask for email + verified mobile (name pre-filled from the sheet). */
+  const analyse = async (html: string, sheetUrl: string | null) => {
+    setError(""); setLoading(true); setLoadingStep(0); setLoadingProgress(0); setResult(null); setSubmittedAt(null);
     for (let i = 0; i < FAKE_STEPS.length; i++) {
       setLoadingStep(i);
       setLoadingProgress(((i + 1) / FAKE_STEPS.length) * 100);
-      await new Promise((r) => setTimeout(r, 250 + Math.random() * 200));
+      await new Promise((r) => setTimeout(r, 200 + Math.random() * 150));
     }
     try {
       const { parseCATResponseSheet } = await import("@/lib/catParser");
       const parsed = parseCATResponseSheet(html);
       if (parsed.questions.length === 0) { setError("Could not read any questions from this response sheet. Please check the link or paste the page source."); return; }
-      setResult(parsed);
-      saveSubmission(parsed, sheetUrl, phone);
+      setPending({ parsed, url: sheetUrl });
+      setShowDetails(true);
     } catch { setError("Failed to read the response sheet. Please check it and try again."); }
     finally { setLoading(false); }
   };
 
-  const handleFetchUrl = useCallback(() => {
+  const submitDetails = async (c: CatContact) => {
+    if (!pending) return;
+    const saved = await saveFn({ data: { name: c.name, email: c.email, phone: c.phone, row: buildRow(pending.parsed, pending.url) } });
+    setResult({ ...pending.parsed, candidateName: c.name });
+    setSubmittedAt(saved.createdAt);
+    setPending(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleFetchUrl = useCallback(async () => {
     const link = urlInput.trim();
     if (!link) { setError("Please paste your CAT response sheet link."); return; }
     try { new URL(link); } catch { setError("Please paste a valid link starting with https://"); return; }
-    requireAccess(async (phone) => {
-      setError(""); setUrlFetching(true);
-      try {
-        const { data, error: fnError } = await supabase.functions.invoke("fetch-response-sheet", { body: { url: link } });
-        if (fnError || !data?.success) {
-          setError(data?.error || "We could not open this link. Try pasting the page source instead.");
-          return;
-        }
-        setUrlFetching(false);
-        await analyse(data.html, link, phone);
-      } catch {
-        setError("We could not open this link. Try pasting the page source instead.");
-      } finally { setUrlFetching(false); }
-    });
+    setError(""); setUrlFetching(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("fetch-response-sheet", { body: { url: link } });
+      if (fnError || !data?.success) { setError(data?.error || "We could not open this link. Try pasting the page source instead."); return; }
+      setUrlFetching(false);
+      await analyse(data.html, link);
+    } catch { setError("We could not open this link. Try pasting the page source instead."); }
+    finally { setUrlFetching(false); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlInput, user, verifiedPhone]);
+  }, [urlInput]);
 
   const handleCalculate = useCallback(() => {
     if (!htmlInput.trim()) { setError("Please paste the HTML source code of your CAT response sheet."); return; }
-    requireAccess((phone) => analyse(htmlInput, urlInput.trim() || null, phone));
+    analyse(htmlInput, urlInput.trim() || null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [htmlInput, urlInput, user, verifiedPhone]);
+  }, [htmlInput, urlInput]);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -322,7 +274,7 @@ const CATScoreCalculatorPage: React.FC = () => {
 
   const handleShare = () => {
     if (!result) return;
-    const text = `🎯 My CAT Score Report\n📊 Total: ${result.overall.totalScore}/${result.overall.maxScore}\n📈 Percentile: ~${result.estimatedPercentile}\n✅ Accuracy: ${result.overall.accuracy.toFixed(1)}%\n\nVARC: ${result.sections.find(s => s.section === "VARC")?.score || 0} | DILR: ${result.sections.find(s => s.section === "DILR")?.score || 0} | QA: ${result.sections.find(s => s.section === "QA")?.score || 0}\n\nCalculate yours: ${window.location.href}`;
+    const text = `🎯 My CAT Score Report\n📊 Total: ${result.overall.totalScore}/${result.overall.maxScore}\n✅ Accuracy: ${result.overall.accuracy.toFixed(1)}%\n\nVARC: ${result.sections.find(s => s.section === "VARC")?.score || 0} | DILR: ${result.sections.find(s => s.section === "DILR")?.score || 0} | QA: ${result.sections.find(s => s.section === "QA")?.score || 0}\n\nCalculate yours: ${window.location.href}`;
     if (navigator.share) navigator.share({ title: "My CAT Score", text });
     else { navigator.clipboard.writeText(text); toast.success("Copied to clipboard!"); }
   };
@@ -352,13 +304,11 @@ const CATScoreCalculatorPage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog}
         message="Sign in to calculate your CAT score. Your name, email, and phone number are required." />
-      <PhoneOtpVerifyDialog open={showOtpDialog} onOpenChange={setShowOtpDialog}
-        initialPhone={user?.user_metadata?.phone || ""}
-        onVerified={(phone) => {
-          setVerifiedPhone(phone);
-          const fn = otpContinueRef.current; otpContinueRef.current = null;
-          fn?.(phone);
-        }} />
+      <CatDetailsDialog open={showDetails} onOpenChange={setShowDetails}
+        name={pending?.parsed.candidateName || ""}
+        defaultEmail={user?.email || ""}
+        defaultPhone={user?.user_metadata?.phone || ""}
+        onSubmit={submitDetails} />
 
       {/* ═══════ HERO ═══════ */}
       <section className="relative overflow-hidden pt-8 pb-14" style={{ background: "var(--hero-gradient)" }}>
@@ -568,6 +518,7 @@ const CATScoreCalculatorPage: React.FC = () => {
       <AnimatePresence>
         {result && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+            {submittedAt && <PercentileCountdown startedAt={submittedAt} />}
             {/* Candidate Info */}
             <section className="max-w-5xl mx-auto px-4 pt-8">
               <div className="bg-card border border-border rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center justify-between shadow-xs">
@@ -582,7 +533,7 @@ const CATScoreCalculatorPage: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={handleShare}><Share2 className="w-4 h-4 mr-1" /> Share</Button>
-                  <Button variant="outline" size="sm" onClick={() => { setResult(null); setHtmlInput(""); }}>Calculate Again</Button>
+                  <Button variant="outline" size="sm" onClick={() => { setResult(null); setHtmlInput(""); setSubmittedAt(null); }}>Calculate Again</Button>
                 </div>
               </div>
             </section>
@@ -592,7 +543,7 @@ const CATScoreCalculatorPage: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: "Total Score", value: result.overall.totalScore, sub: `out of ${result.overall.maxScore}`, bg: "bg-primary/5", border: "border-primary/15", textColor: getScoreColor(result.overall.totalScore, result.overall.maxScore), labelColor: "text-primary", icon: Target },
-                  { label: "Est. Percentile", value: result.estimatedPercentile, sub: "approximate", bg: "bg-purple-50", border: "border-purple-200", textColor: getPercentileColor(result.estimatedPercentile), labelColor: "text-purple-600", icon: TrendingUp },
+                  { label: "Percentile", value: "24 hrs", sub: "arriving on your email", bg: "bg-primary/5", border: "border-primary/15", textColor: "text-primary", labelColor: "text-primary", icon: TrendingUp },
                   { label: "Accuracy", value: `${result.overall.accuracy.toFixed(1)}%`, sub: `${result.overall.correct}/${result.overall.attempted} correct`, bg: "bg-emerald-50", border: "border-emerald-200", textColor: "text-emerald-600", labelColor: "text-emerald-600", icon: CheckCircle2 },
                   { label: "Attempted", value: result.overall.attempted, sub: `of ${result.overall.totalQuestions} Qs`, bg: "bg-amber-50", border: "border-amber-200", textColor: "text-amber-600", labelColor: "text-amber-600", icon: BookOpen },
                 ].map((card, i) => (
@@ -735,17 +686,6 @@ const CATScoreCalculatorPage: React.FC = () => {
                 <MistakeAnalysisChart result={result} />
                 <DifficultyPerformanceChart result={result} />
                 <SectionDifficultyHeatmap />
-              </div>
-            </SectionInView>
-
-            {/* Score vs Percentile + Predictor */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
-              <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" /> Percentile Prediction
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <ScoreVsPercentileCurve currentScore={result.overall.totalScore} />
-                <PercentilePredictorPanel />
               </div>
             </SectionInView>
 
