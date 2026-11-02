@@ -186,7 +186,26 @@ const CATScoreCalculatorPage: React.FC = () => {
   const { user } = useAuth();
   const { data: liveStats } = useLiveStats();
 
-  const saveSubmission = async (parsed: CATResult) => {
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+  const pendingRef = useRef<null | (() => void)>(null);
+
+  // Remember a phone verified earlier by this account (a past verified submission).
+  useEffect(() => {
+    if (!user) { setVerifiedPhone(null); return; }
+    supabase.from("cat_score_submissions").select("phone").eq("user_id", user.id).eq("phone_verified", true)
+      .not("phone", "is", null).order("created_at", { ascending: false }).limit(1)
+      .then(({ data }) => { if (data?.[0]?.phone) setVerifiedPhone(data[0].phone); });
+  }, [user]);
+
+  // Resume the calculation once login completes.
+  useEffect(() => {
+    if (user && pendingRef.current && !showLoginDialog) {
+      const fn = pendingRef.current; pendingRef.current = null; fn();
+    }
+  }, [user, showLoginDialog]);
+
+  const saveSubmission = async (parsed: CATResult, sheetUrl: string | null, phone: string) => {
     const getSectionData = (name: string) => parsed.sections.find((s) => s.section === name);
     const varc = getSectionData("VARC");
     const dilr = getSectionData("DILR");
@@ -197,13 +216,16 @@ const CATScoreCalculatorPage: React.FC = () => {
     ).length;
 
     await supabase.from("cat_score_submissions").insert({
-      candidate_name: parsed.candidateName,
+      candidate_name: parsed.candidateName || user?.user_metadata?.display_name || "Unknown",
       application_no: parsed.applicationNo || null,
       test_date: parsed.testDate || null,
       test_time: parsed.testTime || null,
+      slot: deriveCatSlot(parsed.testTime),
+      response_sheet_url: sheetUrl,
+      phone_verified: true,
       subject: parsed.subject || "CAT",
       email: user?.email || null,
-      phone: user?.user_metadata?.phone || null,
+      phone,
       state: null,
       user_id: user?.id || null,
       total_score: parsed.overall.totalScore,
@@ -230,42 +252,62 @@ const CATScoreCalculatorPage: React.FC = () => {
     } as any);
   };
 
-  const handleFetchUrl = useCallback(async () => {
-    if (!user) { setShowLoginDialog(true); return; }
-    if (!urlInput.trim()) { setError("Please enter your CAT response sheet URL."); return; }
-    setError(""); setUrlFetching(true);
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("fetch-response-sheet", {
-        body: { url: urlInput.trim() },
-      });
-      if (fnError) { setError("Network error fetching the response sheet. Try pasting HTML instead."); setUrlFetching(false); return; }
-      if (!data?.success) { setError(data?.error || "Could not fetch. Try pasting HTML source code instead."); setUrlFetching(false); return; }
-      setHtmlInput(data.html);
-      setInputMode("paste");
-      toast.success("Response sheet fetched! Click 'Calculate My Score' to analyze.");
-    } catch {
-      setError("Failed to fetch. The server may be blocking. Please paste the HTML source code instead.");
-    } finally { setUrlFetching(false); }
-  }, [urlInput, user]);
+  /** Login → verified mobile → run. */
+  const requireAccess = (run: (phone: string) => void) => {
+    if (!user) { pendingRef.current = () => requireAccess(run); setShowLoginDialog(true); return; }
+    if (!verifiedPhone) {
+      pendingRef.current = null;
+      otpContinueRef.current = run;
+      setShowOtpDialog(true);
+      return;
+    }
+    run(verifiedPhone);
+  };
+  const otpContinueRef = useRef<null | ((phone: string) => void)>(null);
 
-  const handleCalculate = useCallback(async () => {
-    if (!user) { setShowLoginDialog(true); return; }
-    if (!htmlInput.trim()) { setError("Please paste the HTML source code of your CAT response sheet."); return; }
+  const analyse = async (html: string, sheetUrl: string | null, phone: string) => {
     setError(""); setLoading(true); setLoadingStep(0); setLoadingProgress(0); setResult(null);
     for (let i = 0; i < FAKE_STEPS.length; i++) {
       setLoadingStep(i);
       setLoadingProgress(((i + 1) / FAKE_STEPS.length) * 100);
-      await new Promise((r) => setTimeout(r, 350 + Math.random() * 300));
+      await new Promise((r) => setTimeout(r, 250 + Math.random() * 200));
     }
     try {
       const { parseCATResponseSheet } = await import("@/lib/catParser");
-      const parsed = parseCATResponseSheet(htmlInput);
-      if (parsed.questions.length === 0) { setError("Could not parse any questions. Please ensure you pasted the complete HTML source."); setLoading(false); return; }
+      const parsed = parseCATResponseSheet(html);
+      if (parsed.questions.length === 0) { setError("Could not read any questions from this response sheet. Please check the link or paste the page source."); return; }
       setResult(parsed);
-      saveSubmission(parsed);
-    } catch { setError("Failed to parse. Please check the HTML content and try again."); }
+      saveSubmission(parsed, sheetUrl, phone);
+    } catch { setError("Failed to read the response sheet. Please check it and try again."); }
     finally { setLoading(false); }
-  }, [htmlInput, user]);
+  };
+
+  const handleFetchUrl = useCallback(() => {
+    const link = urlInput.trim();
+    if (!link) { setError("Please paste your CAT response sheet link."); return; }
+    try { new URL(link); } catch { setError("Please paste a valid link starting with https://"); return; }
+    requireAccess(async (phone) => {
+      setError(""); setUrlFetching(true);
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke("fetch-response-sheet", { body: { url: link } });
+        if (fnError || !data?.success) {
+          setError(data?.error || "We could not open this link. Try pasting the page source instead.");
+          return;
+        }
+        setUrlFetching(false);
+        await analyse(data.html, link, phone);
+      } catch {
+        setError("We could not open this link. Try pasting the page source instead.");
+      } finally { setUrlFetching(false); }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlInput, user, verifiedPhone]);
+
+  const handleCalculate = useCallback(() => {
+    if (!htmlInput.trim()) { setError("Please paste the HTML source code of your CAT response sheet."); return; }
+    requireAccess((phone) => analyse(htmlInput, urlInput.trim() || null, phone));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [htmlInput, urlInput, user, verifiedPhone]);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
