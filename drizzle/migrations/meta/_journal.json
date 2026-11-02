@@ -260,6 +260,13 @@
       "when": 1793651453637,
       "tag": "0036_cat_score_guest_submissions",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793653037389,
+      "tag": "0037_cat_calculator_settings_and_alerts",
+      "breakpoints": true
     }
   ]
 }
