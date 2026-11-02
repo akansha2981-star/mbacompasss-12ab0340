@@ -188,7 +188,6 @@ export default function RateCoachingPage() {
           <p className="mt-3 text-base text-muted-foreground">
             Help fellow students make better decisions. Share your experience and rate your coaching institute.
           </p>
-          <Button asChild variant="outline" className="mt-4"><Link to="/coaching-review-demo">View demo reports</Link></Button>
         </div>
       </section>
 
