@@ -35,6 +35,7 @@ export const adminNavGroups: AdminNavGroup[] = [
     items: [
       { label: "CAT Score Calculator", path: "/admin/cat-scores", icon: Calculator },
       { label: "CAT Calculator Settings", path: "/admin/cat-calculator-settings", icon: Calculator },
+      { label: "CAT 2026 Alerts", path: "/admin/cat-alerts", icon: Calculator },
     ],
   },
   {
