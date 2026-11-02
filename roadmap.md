@@ -1,5 +1,14 @@
 # Roadmap
 
+## CAT Score Calculator brief — November 3
+- [x] Shared scoring engine with tests (marking, validation, interpolation, link host check)
+- [x] Manual entry tab, slot selector, estimated percentile band, share image, copy link, next steps, optional counselling link, anonymous score consent
+- [x] Admin-editable percentile model, sectional tables, slot factors, cutoffs, answer-key status, banner, last updated, video
+- [x] 11 guide pages incl. Hindi with hreflang; FAQ/WebPage schema; sitemap + prerender lists; hub links all guides
+- [x] Alert signups (email/WhatsApp with consent) + admin CSV; GA4 events
+- [ ] Supply: verified CAT 2025 overall + sectional tables, IIM cutoffs, screenshots, video, 1200x630 share image
+- [ ] Publish, then submit sitemap / request indexing in Search Console
+
 ## Coaching demo reports — November 2
 - [x] Create six isolated fictional report fixtures with 41–98 comments and requested sentiment ratios; assume IMS 83% positive
 - [x] Reuse report layout with prominent demo labelling, institute picker, sorting, exam filters and pagination; exclude demo from search indexing

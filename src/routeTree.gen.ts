@@ -26,8 +26,17 @@ import { Route as PublicAuthorsRouteImport } from './routes/_public.authors'
 import { Route as PublicBlogRouteImport } from './routes/_public.blog'
 import { Route as PublicBundlesRouteImport } from './routes/_public.bundles'
 import { Route as PublicBusinessInquiriesRouteImport } from './routes/_public.business-inquiries'
+import { Route as PublicCatAnswerKey2026Slot1RouteImport } from './routes/_public.cat-answer-key-2026-slot-1'
+import { Route as PublicCatAnswerKey2026Slot2RouteImport } from './routes/_public.cat-answer-key-2026-slot-2'
+import { Route as PublicCatAnswerKey2026Slot3RouteImport } from './routes/_public.cat-answer-key-2026-slot-3'
+import { Route as PublicCatCompositeScoreCalculatorRouteImport } from './routes/_public.cat-composite-score-calculator'
+import { Route as PublicCatCutoff2026RouteImport } from './routes/_public.cat-cutoff-2026'
 import { Route as PublicCatMock1RouteImport } from './routes/_public.cat-mock-1'
+import { Route as PublicCatNormalizationExplainedRouteImport } from './routes/_public.cat-normalization-explained'
+import { Route as PublicCatPercentilePredictorRouteImport } from './routes/_public.cat-percentile-predictor'
+import { Route as PublicCatResponseSheet2026RouteImport } from './routes/_public.cat-response-sheet-2026'
 import { Route as PublicCatScoreCalculatorRouteImport } from './routes/_public.cat-score-calculator'
+import { Route as PublicCatScoreVsPercentile2026RouteImport } from './routes/_public.cat-score-vs-percentile-2026'
 import { Route as PublicCollegeFinderRouteImport } from './routes/_public.college-finder'
 import { Route as PublicCollegeShortlisterRouteImport } from './routes/_public.college-shortlister'
 import { Route as PublicCompareRouteImport } from './routes/_public.compare'
@@ -40,6 +49,7 @@ import { Route as PublicFactCheckPolicyRouteImport } from './routes/_public.fact
 import { Route as PublicForgotPasswordRouteImport } from './routes/_public.forgot-password'
 import { Route as PublicFormulasRouteImport } from './routes/_public.formulas'
 import { Route as PublicFreebiesRouteImport } from './routes/_public.freebies'
+import { Route as PublicIimCallPredictorRouteImport } from './routes/_public.iim-call-predictor'
 import { Route as PublicIimWaitlistMovementRouteImport } from './routes/_public.iim-waitlist-movement'
 import { Route as PublicListYourBusinessRouteImport } from './routes/_public.list-your-business'
 import { Route as PublicMbaCompassRouteImport } from './routes/_public.mba-compass'
@@ -69,6 +79,7 @@ import { Route as AdminBulkSeoRouteImport } from './routes/admin.bulk-seo'
 import { Route as AdminBusinessInquiriesRouteImport } from './routes/admin.business-inquiries'
 import { Route as AdminCacheDiagnosticsRouteImport } from './routes/admin.cache-diagnostics'
 import { Route as AdminCallbacksRouteImport } from './routes/admin.callbacks'
+import { Route as AdminCatCalculatorSettingsRouteImport } from './routes/admin.cat-calculator-settings'
 import { Route as AdminCatScoresRouteImport } from './routes/admin.cat-scores'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminClearCacheRouteImport } from './routes/admin.clear-cache'
@@ -231,6 +242,7 @@ import { Route as PublicDashboardMocksRouteImport } from './routes/_public.dashb
 import { Route as PublicExamSlugRouteImport } from './routes/_public.exam_.$slug'
 import { Route as PublicFormulaSlugRouteImport } from './routes/_public.formula.$slug'
 import { Route as PublicGuidesIpmatPreparationRouteImport } from './routes/_public.guides.ipmat-preparation'
+import { Route as PublicHiCatScoreCalculatorRouteImport } from './routes/_public.hi.cat-score-calculator'
 import { Route as PublicInstituteSlugRouteImport } from './routes/_public.institute.$slug'
 import { Route as PublicListYourBusinessPocRouteImport } from './routes/_public.list-your-business.poc'
 import { Route as PublicMbaApplicationIndexRouteImport } from './routes/_public.mba-application.index'
@@ -433,15 +445,68 @@ const PublicBusinessInquiriesRoute = PublicBusinessInquiriesRouteImport.update({
   path: '/business-inquiries',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicCatAnswerKey2026Slot1Route =
+  PublicCatAnswerKey2026Slot1RouteImport.update({
+    id: '/cat-answer-key-2026-slot-1',
+    path: '/cat-answer-key-2026-slot-1',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCatAnswerKey2026Slot2Route =
+  PublicCatAnswerKey2026Slot2RouteImport.update({
+    id: '/cat-answer-key-2026-slot-2',
+    path: '/cat-answer-key-2026-slot-2',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCatAnswerKey2026Slot3Route =
+  PublicCatAnswerKey2026Slot3RouteImport.update({
+    id: '/cat-answer-key-2026-slot-3',
+    path: '/cat-answer-key-2026-slot-3',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCatCompositeScoreCalculatorRoute =
+  PublicCatCompositeScoreCalculatorRouteImport.update({
+    id: '/cat-composite-score-calculator',
+    path: '/cat-composite-score-calculator',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCatCutoff2026Route = PublicCatCutoff2026RouteImport.update({
+  id: '/cat-cutoff-2026',
+  path: '/cat-cutoff-2026',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PublicCatMock1Route = PublicCatMock1RouteImport.update({
   id: '/cat-mock-1',
   path: '/cat-mock-1',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicCatNormalizationExplainedRoute =
+  PublicCatNormalizationExplainedRouteImport.update({
+    id: '/cat-normalization-explained',
+    path: '/cat-normalization-explained',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCatPercentilePredictorRoute =
+  PublicCatPercentilePredictorRouteImport.update({
+    id: '/cat-percentile-predictor',
+    path: '/cat-percentile-predictor',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCatResponseSheet2026Route =
+  PublicCatResponseSheet2026RouteImport.update({
+    id: '/cat-response-sheet-2026',
+    path: '/cat-response-sheet-2026',
+    getParentRoute: () => PublicRoute,
+  } as any)
 const PublicCatScoreCalculatorRoute =
   PublicCatScoreCalculatorRouteImport.update({
     id: '/cat-score-calculator',
     path: '/cat-score-calculator',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicCatScoreVsPercentile2026Route =
+  PublicCatScoreVsPercentile2026RouteImport.update({
+    id: '/cat-score-vs-percentile-2026',
+    path: '/cat-score-vs-percentile-2026',
     getParentRoute: () => PublicRoute,
   } as any)
 const PublicCollegeFinderRoute = PublicCollegeFinderRouteImport.update({
@@ -503,6 +568,11 @@ const PublicFormulasRoute = PublicFormulasRouteImport.update({
 const PublicFreebiesRoute = PublicFreebiesRouteImport.update({
   id: '/freebies',
   path: '/freebies',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicIimCallPredictorRoute = PublicIimCallPredictorRouteImport.update({
+  id: '/iim-call-predictor',
+  path: '/iim-call-predictor',
   getParentRoute: () => PublicRoute,
 } as any)
 const PublicIimWaitlistMovementRoute =
@@ -651,6 +721,12 @@ const AdminCallbacksRoute = AdminCallbacksRouteImport.update({
   path: '/callbacks',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCatCalculatorSettingsRoute =
+  AdminCatCalculatorSettingsRouteImport.update({
+    id: '/cat-calculator-settings',
+    path: '/cat-calculator-settings',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminCatScoresRoute = AdminCatScoresRouteImport.update({
   id: '/cat-scores',
   path: '/cat-scores',
@@ -1468,6 +1544,12 @@ const PublicGuidesIpmatPreparationRoute =
     path: '/guides/ipmat-preparation',
     getParentRoute: () => PublicRoute,
   } as any)
+const PublicHiCatScoreCalculatorRoute =
+  PublicHiCatScoreCalculatorRouteImport.update({
+    id: '/hi/cat-score-calculator',
+    path: '/hi/cat-score-calculator',
+    getParentRoute: () => PublicRoute,
+  } as any)
 const PublicInstituteSlugRoute = PublicInstituteSlugRouteImport.update({
   id: '/institute/$slug',
   path: '/institute/$slug',
@@ -2127,8 +2209,17 @@ export interface FileRoutesByFullPath {
   '/blog': typeof PublicBlogRoute
   '/bundles': typeof PublicBundlesRouteWithChildren
   '/business-inquiries': typeof PublicBusinessInquiriesRoute
+  '/cat-answer-key-2026-slot-1': typeof PublicCatAnswerKey2026Slot1Route
+  '/cat-answer-key-2026-slot-2': typeof PublicCatAnswerKey2026Slot2Route
+  '/cat-answer-key-2026-slot-3': typeof PublicCatAnswerKey2026Slot3Route
+  '/cat-composite-score-calculator': typeof PublicCatCompositeScoreCalculatorRoute
+  '/cat-cutoff-2026': typeof PublicCatCutoff2026Route
   '/cat-mock-1': typeof PublicCatMock1Route
+  '/cat-normalization-explained': typeof PublicCatNormalizationExplainedRoute
+  '/cat-percentile-predictor': typeof PublicCatPercentilePredictorRoute
+  '/cat-response-sheet-2026': typeof PublicCatResponseSheet2026Route
   '/cat-score-calculator': typeof PublicCatScoreCalculatorRoute
+  '/cat-score-vs-percentile-2026': typeof PublicCatScoreVsPercentile2026Route
   '/college-finder': typeof PublicCollegeFinderRoute
   '/college-shortlister': typeof PublicCollegeShortlisterRoute
   '/compare': typeof PublicCompareRoute
@@ -2141,6 +2232,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof PublicForgotPasswordRoute
   '/formulas': typeof PublicFormulasRoute
   '/freebies': typeof PublicFreebiesRoute
+  '/iim-call-predictor': typeof PublicIimCallPredictorRoute
   '/iim-waitlist-movement': typeof PublicIimWaitlistMovementRoute
   '/list-your-business': typeof PublicListYourBusinessRouteWithChildren
   '/mba-compass': typeof PublicMbaCompassRouteWithChildren
@@ -2169,6 +2261,7 @@ export interface FileRoutesByFullPath {
   '/admin/business-inquiries': typeof AdminBusinessInquiriesRoute
   '/admin/cache-diagnostics': typeof AdminCacheDiagnosticsRoute
   '/admin/callbacks': typeof AdminCallbacksRoute
+  '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -2330,6 +2423,7 @@ export interface FileRoutesByFullPath {
   '/exam/$slug': typeof PublicExamSlugRoute
   '/formula/$slug': typeof PublicFormulaSlugRoute
   '/guides/ipmat-preparation': typeof PublicGuidesIpmatPreparationRoute
+  '/hi/cat-score-calculator': typeof PublicHiCatScoreCalculatorRoute
   '/institute/$slug': typeof PublicInstituteSlugRoute
   '/list-your-business/poc': typeof PublicListYourBusinessPocRoute
   '/mba-application/$category': typeof PublicMbaApplicationCategoryRoute
@@ -2462,8 +2556,17 @@ export interface FileRoutesByTo {
   '/blog': typeof PublicBlogRoute
   '/bundles': typeof PublicBundlesRouteWithChildren
   '/business-inquiries': typeof PublicBusinessInquiriesRoute
+  '/cat-answer-key-2026-slot-1': typeof PublicCatAnswerKey2026Slot1Route
+  '/cat-answer-key-2026-slot-2': typeof PublicCatAnswerKey2026Slot2Route
+  '/cat-answer-key-2026-slot-3': typeof PublicCatAnswerKey2026Slot3Route
+  '/cat-composite-score-calculator': typeof PublicCatCompositeScoreCalculatorRoute
+  '/cat-cutoff-2026': typeof PublicCatCutoff2026Route
   '/cat-mock-1': typeof PublicCatMock1Route
+  '/cat-normalization-explained': typeof PublicCatNormalizationExplainedRoute
+  '/cat-percentile-predictor': typeof PublicCatPercentilePredictorRoute
+  '/cat-response-sheet-2026': typeof PublicCatResponseSheet2026Route
   '/cat-score-calculator': typeof PublicCatScoreCalculatorRoute
+  '/cat-score-vs-percentile-2026': typeof PublicCatScoreVsPercentile2026Route
   '/college-finder': typeof PublicCollegeFinderRoute
   '/college-shortlister': typeof PublicCollegeShortlisterRoute
   '/compare': typeof PublicCompareRoute
@@ -2476,6 +2579,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof PublicForgotPasswordRoute
   '/formulas': typeof PublicFormulasRoute
   '/freebies': typeof PublicFreebiesRoute
+  '/iim-call-predictor': typeof PublicIimCallPredictorRoute
   '/iim-waitlist-movement': typeof PublicIimWaitlistMovementRoute
   '/list-your-business': typeof PublicListYourBusinessRouteWithChildren
   '/my-listings': typeof PublicMyListingsRoute
@@ -2501,6 +2605,7 @@ export interface FileRoutesByTo {
   '/admin/business-inquiries': typeof AdminBusinessInquiriesRoute
   '/admin/cache-diagnostics': typeof AdminCacheDiagnosticsRoute
   '/admin/callbacks': typeof AdminCallbacksRoute
+  '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -2651,6 +2756,7 @@ export interface FileRoutesByTo {
   '/exam/$slug': typeof PublicExamSlugRoute
   '/formula/$slug': typeof PublicFormulaSlugRoute
   '/guides/ipmat-preparation': typeof PublicGuidesIpmatPreparationRoute
+  '/hi/cat-score-calculator': typeof PublicHiCatScoreCalculatorRoute
   '/institute/$slug': typeof PublicInstituteSlugRoute
   '/list-your-business/poc': typeof PublicListYourBusinessPocRoute
   '/mba-application/$category': typeof PublicMbaApplicationCategoryRoute
@@ -2789,8 +2895,17 @@ export interface FileRoutesById {
   '/_public/blog': typeof PublicBlogRoute
   '/_public/bundles': typeof PublicBundlesRouteWithChildren
   '/_public/business-inquiries': typeof PublicBusinessInquiriesRoute
+  '/_public/cat-answer-key-2026-slot-1': typeof PublicCatAnswerKey2026Slot1Route
+  '/_public/cat-answer-key-2026-slot-2': typeof PublicCatAnswerKey2026Slot2Route
+  '/_public/cat-answer-key-2026-slot-3': typeof PublicCatAnswerKey2026Slot3Route
+  '/_public/cat-composite-score-calculator': typeof PublicCatCompositeScoreCalculatorRoute
+  '/_public/cat-cutoff-2026': typeof PublicCatCutoff2026Route
   '/_public/cat-mock-1': typeof PublicCatMock1Route
+  '/_public/cat-normalization-explained': typeof PublicCatNormalizationExplainedRoute
+  '/_public/cat-percentile-predictor': typeof PublicCatPercentilePredictorRoute
+  '/_public/cat-response-sheet-2026': typeof PublicCatResponseSheet2026Route
   '/_public/cat-score-calculator': typeof PublicCatScoreCalculatorRoute
+  '/_public/cat-score-vs-percentile-2026': typeof PublicCatScoreVsPercentile2026Route
   '/_public/college-finder': typeof PublicCollegeFinderRoute
   '/_public/college-shortlister': typeof PublicCollegeShortlisterRoute
   '/_public/compare': typeof PublicCompareRoute
@@ -2803,6 +2918,7 @@ export interface FileRoutesById {
   '/_public/forgot-password': typeof PublicForgotPasswordRoute
   '/_public/formulas': typeof PublicFormulasRoute
   '/_public/freebies': typeof PublicFreebiesRoute
+  '/_public/iim-call-predictor': typeof PublicIimCallPredictorRoute
   '/_public/iim-waitlist-movement': typeof PublicIimWaitlistMovementRoute
   '/_public/list-your-business': typeof PublicListYourBusinessRouteWithChildren
   '/_public/mba-compass': typeof PublicMbaCompassRouteWithChildren
@@ -2831,6 +2947,7 @@ export interface FileRoutesById {
   '/admin/business-inquiries': typeof AdminBusinessInquiriesRoute
   '/admin/cache-diagnostics': typeof AdminCacheDiagnosticsRoute
   '/admin/callbacks': typeof AdminCallbacksRoute
+  '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -2993,6 +3110,7 @@ export interface FileRoutesById {
   '/_public/exam_/$slug': typeof PublicExamSlugRoute
   '/_public/formula/$slug': typeof PublicFormulaSlugRoute
   '/_public/guides/ipmat-preparation': typeof PublicGuidesIpmatPreparationRoute
+  '/_public/hi/cat-score-calculator': typeof PublicHiCatScoreCalculatorRoute
   '/_public/institute/$slug': typeof PublicInstituteSlugRoute
   '/_public/list-your-business/poc': typeof PublicListYourBusinessPocRoute
   '/_public/mba-application/$category': typeof PublicMbaApplicationCategoryRoute
@@ -3132,8 +3250,17 @@ export interface FileRouteTypes {
     | '/blog'
     | '/bundles'
     | '/business-inquiries'
+    | '/cat-answer-key-2026-slot-1'
+    | '/cat-answer-key-2026-slot-2'
+    | '/cat-answer-key-2026-slot-3'
+    | '/cat-composite-score-calculator'
+    | '/cat-cutoff-2026'
     | '/cat-mock-1'
+    | '/cat-normalization-explained'
+    | '/cat-percentile-predictor'
+    | '/cat-response-sheet-2026'
     | '/cat-score-calculator'
+    | '/cat-score-vs-percentile-2026'
     | '/college-finder'
     | '/college-shortlister'
     | '/compare'
@@ -3146,6 +3273,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/formulas'
     | '/freebies'
+    | '/iim-call-predictor'
     | '/iim-waitlist-movement'
     | '/list-your-business'
     | '/mba-compass'
@@ -3174,6 +3302,7 @@ export interface FileRouteTypes {
     | '/admin/business-inquiries'
     | '/admin/cache-diagnostics'
     | '/admin/callbacks'
+    | '/admin/cat-calculator-settings'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -3335,6 +3464,7 @@ export interface FileRouteTypes {
     | '/exam/$slug'
     | '/formula/$slug'
     | '/guides/ipmat-preparation'
+    | '/hi/cat-score-calculator'
     | '/institute/$slug'
     | '/list-your-business/poc'
     | '/mba-application/$category'
@@ -3467,8 +3597,17 @@ export interface FileRouteTypes {
     | '/blog'
     | '/bundles'
     | '/business-inquiries'
+    | '/cat-answer-key-2026-slot-1'
+    | '/cat-answer-key-2026-slot-2'
+    | '/cat-answer-key-2026-slot-3'
+    | '/cat-composite-score-calculator'
+    | '/cat-cutoff-2026'
     | '/cat-mock-1'
+    | '/cat-normalization-explained'
+    | '/cat-percentile-predictor'
+    | '/cat-response-sheet-2026'
     | '/cat-score-calculator'
+    | '/cat-score-vs-percentile-2026'
     | '/college-finder'
     | '/college-shortlister'
     | '/compare'
@@ -3481,6 +3620,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/formulas'
     | '/freebies'
+    | '/iim-call-predictor'
     | '/iim-waitlist-movement'
     | '/list-your-business'
     | '/my-listings'
@@ -3506,6 +3646,7 @@ export interface FileRouteTypes {
     | '/admin/business-inquiries'
     | '/admin/cache-diagnostics'
     | '/admin/callbacks'
+    | '/admin/cat-calculator-settings'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -3656,6 +3797,7 @@ export interface FileRouteTypes {
     | '/exam/$slug'
     | '/formula/$slug'
     | '/guides/ipmat-preparation'
+    | '/hi/cat-score-calculator'
     | '/institute/$slug'
     | '/list-your-business/poc'
     | '/mba-application/$category'
@@ -3793,8 +3935,17 @@ export interface FileRouteTypes {
     | '/_public/blog'
     | '/_public/bundles'
     | '/_public/business-inquiries'
+    | '/_public/cat-answer-key-2026-slot-1'
+    | '/_public/cat-answer-key-2026-slot-2'
+    | '/_public/cat-answer-key-2026-slot-3'
+    | '/_public/cat-composite-score-calculator'
+    | '/_public/cat-cutoff-2026'
     | '/_public/cat-mock-1'
+    | '/_public/cat-normalization-explained'
+    | '/_public/cat-percentile-predictor'
+    | '/_public/cat-response-sheet-2026'
     | '/_public/cat-score-calculator'
+    | '/_public/cat-score-vs-percentile-2026'
     | '/_public/college-finder'
     | '/_public/college-shortlister'
     | '/_public/compare'
@@ -3807,6 +3958,7 @@ export interface FileRouteTypes {
     | '/_public/forgot-password'
     | '/_public/formulas'
     | '/_public/freebies'
+    | '/_public/iim-call-predictor'
     | '/_public/iim-waitlist-movement'
     | '/_public/list-your-business'
     | '/_public/mba-compass'
@@ -3835,6 +3987,7 @@ export interface FileRouteTypes {
     | '/admin/business-inquiries'
     | '/admin/cache-diagnostics'
     | '/admin/callbacks'
+    | '/admin/cat-calculator-settings'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -3997,6 +4150,7 @@ export interface FileRouteTypes {
     | '/_public/exam_/$slug'
     | '/_public/formula/$slug'
     | '/_public/guides/ipmat-preparation'
+    | '/_public/hi/cat-score-calculator'
     | '/_public/institute/$slug'
     | '/_public/list-your-business/poc'
     | '/_public/mba-application/$category'
@@ -4263,6 +4417,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicBusinessInquiriesRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/cat-answer-key-2026-slot-1': {
+      id: '/_public/cat-answer-key-2026-slot-1'
+      path: '/cat-answer-key-2026-slot-1'
+      fullPath: '/cat-answer-key-2026-slot-1'
+      preLoaderRoute: typeof PublicCatAnswerKey2026Slot1RouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/cat-answer-key-2026-slot-2': {
+      id: '/_public/cat-answer-key-2026-slot-2'
+      path: '/cat-answer-key-2026-slot-2'
+      fullPath: '/cat-answer-key-2026-slot-2'
+      preLoaderRoute: typeof PublicCatAnswerKey2026Slot2RouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/cat-answer-key-2026-slot-3': {
+      id: '/_public/cat-answer-key-2026-slot-3'
+      path: '/cat-answer-key-2026-slot-3'
+      fullPath: '/cat-answer-key-2026-slot-3'
+      preLoaderRoute: typeof PublicCatAnswerKey2026Slot3RouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/cat-composite-score-calculator': {
+      id: '/_public/cat-composite-score-calculator'
+      path: '/cat-composite-score-calculator'
+      fullPath: '/cat-composite-score-calculator'
+      preLoaderRoute: typeof PublicCatCompositeScoreCalculatorRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/cat-cutoff-2026': {
+      id: '/_public/cat-cutoff-2026'
+      path: '/cat-cutoff-2026'
+      fullPath: '/cat-cutoff-2026'
+      preLoaderRoute: typeof PublicCatCutoff2026RouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/cat-mock-1': {
       id: '/_public/cat-mock-1'
       path: '/cat-mock-1'
@@ -4270,11 +4459,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicCatMock1RouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/cat-normalization-explained': {
+      id: '/_public/cat-normalization-explained'
+      path: '/cat-normalization-explained'
+      fullPath: '/cat-normalization-explained'
+      preLoaderRoute: typeof PublicCatNormalizationExplainedRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/cat-percentile-predictor': {
+      id: '/_public/cat-percentile-predictor'
+      path: '/cat-percentile-predictor'
+      fullPath: '/cat-percentile-predictor'
+      preLoaderRoute: typeof PublicCatPercentilePredictorRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/cat-response-sheet-2026': {
+      id: '/_public/cat-response-sheet-2026'
+      path: '/cat-response-sheet-2026'
+      fullPath: '/cat-response-sheet-2026'
+      preLoaderRoute: typeof PublicCatResponseSheet2026RouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/cat-score-calculator': {
       id: '/_public/cat-score-calculator'
       path: '/cat-score-calculator'
       fullPath: '/cat-score-calculator'
       preLoaderRoute: typeof PublicCatScoreCalculatorRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/cat-score-vs-percentile-2026': {
+      id: '/_public/cat-score-vs-percentile-2026'
+      path: '/cat-score-vs-percentile-2026'
+      fullPath: '/cat-score-vs-percentile-2026'
+      preLoaderRoute: typeof PublicCatScoreVsPercentile2026RouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/college-finder': {
@@ -4359,6 +4576,13 @@ declare module '@tanstack/react-router' {
       path: '/freebies'
       fullPath: '/freebies'
       preLoaderRoute: typeof PublicFreebiesRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/iim-call-predictor': {
+      id: '/_public/iim-call-predictor'
+      path: '/iim-call-predictor'
+      fullPath: '/iim-call-predictor'
+      preLoaderRoute: typeof PublicIimCallPredictorRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/iim-waitlist-movement': {
@@ -4562,6 +4786,13 @@ declare module '@tanstack/react-router' {
       path: '/callbacks'
       fullPath: '/admin/callbacks'
       preLoaderRoute: typeof AdminCallbacksRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cat-calculator-settings': {
+      id: '/admin/cat-calculator-settings'
+      path: '/cat-calculator-settings'
+      fullPath: '/admin/cat-calculator-settings'
+      preLoaderRoute: typeof AdminCatCalculatorSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/cat-scores': {
@@ -5698,6 +5929,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicGuidesIpmatPreparationRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/hi/cat-score-calculator': {
+      id: '/_public/hi/cat-score-calculator'
+      path: '/hi/cat-score-calculator'
+      fullPath: '/hi/cat-score-calculator'
+      preLoaderRoute: typeof PublicHiCatScoreCalculatorRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/institute/$slug': {
       id: '/_public/institute/$slug'
       path: '/institute/$slug'
@@ -6655,8 +6893,17 @@ interface PublicRouteChildren {
   PublicBlogRoute: typeof PublicBlogRoute
   PublicBundlesRoute: typeof PublicBundlesRouteWithChildren
   PublicBusinessInquiriesRoute: typeof PublicBusinessInquiriesRoute
+  PublicCatAnswerKey2026Slot1Route: typeof PublicCatAnswerKey2026Slot1Route
+  PublicCatAnswerKey2026Slot2Route: typeof PublicCatAnswerKey2026Slot2Route
+  PublicCatAnswerKey2026Slot3Route: typeof PublicCatAnswerKey2026Slot3Route
+  PublicCatCompositeScoreCalculatorRoute: typeof PublicCatCompositeScoreCalculatorRoute
+  PublicCatCutoff2026Route: typeof PublicCatCutoff2026Route
   PublicCatMock1Route: typeof PublicCatMock1Route
+  PublicCatNormalizationExplainedRoute: typeof PublicCatNormalizationExplainedRoute
+  PublicCatPercentilePredictorRoute: typeof PublicCatPercentilePredictorRoute
+  PublicCatResponseSheet2026Route: typeof PublicCatResponseSheet2026Route
   PublicCatScoreCalculatorRoute: typeof PublicCatScoreCalculatorRoute
+  PublicCatScoreVsPercentile2026Route: typeof PublicCatScoreVsPercentile2026Route
   PublicCollegeFinderRoute: typeof PublicCollegeFinderRoute
   PublicCollegeShortlisterRoute: typeof PublicCollegeShortlisterRoute
   PublicCompareRoute: typeof PublicCompareRoute
@@ -6669,6 +6916,7 @@ interface PublicRouteChildren {
   PublicForgotPasswordRoute: typeof PublicForgotPasswordRoute
   PublicFormulasRoute: typeof PublicFormulasRoute
   PublicFreebiesRoute: typeof PublicFreebiesRoute
+  PublicIimCallPredictorRoute: typeof PublicIimCallPredictorRoute
   PublicIimWaitlistMovementRoute: typeof PublicIimWaitlistMovementRoute
   PublicListYourBusinessRoute: typeof PublicListYourBusinessRouteWithChildren
   PublicMbaCompassRoute: typeof PublicMbaCompassRouteWithChildren
@@ -6693,6 +6941,7 @@ interface PublicRouteChildren {
   PublicExamSlugRoute: typeof PublicExamSlugRoute
   PublicFormulaSlugRoute: typeof PublicFormulaSlugRoute
   PublicGuidesIpmatPreparationRoute: typeof PublicGuidesIpmatPreparationRoute
+  PublicHiCatScoreCalculatorRoute: typeof PublicHiCatScoreCalculatorRoute
   PublicInstituteSlugRoute: typeof PublicInstituteSlugRoute
   PublicMbaApplicationCategoryRoute: typeof PublicMbaApplicationCategoryRoute
   PublicMbaApplicationMyApplicationsRoute: typeof PublicMbaApplicationMyApplicationsRoute
@@ -6718,8 +6967,18 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicBlogRoute: PublicBlogRoute,
   PublicBundlesRoute: PublicBundlesRouteWithChildren,
   PublicBusinessInquiriesRoute: PublicBusinessInquiriesRoute,
+  PublicCatAnswerKey2026Slot1Route: PublicCatAnswerKey2026Slot1Route,
+  PublicCatAnswerKey2026Slot2Route: PublicCatAnswerKey2026Slot2Route,
+  PublicCatAnswerKey2026Slot3Route: PublicCatAnswerKey2026Slot3Route,
+  PublicCatCompositeScoreCalculatorRoute:
+    PublicCatCompositeScoreCalculatorRoute,
+  PublicCatCutoff2026Route: PublicCatCutoff2026Route,
   PublicCatMock1Route: PublicCatMock1Route,
+  PublicCatNormalizationExplainedRoute: PublicCatNormalizationExplainedRoute,
+  PublicCatPercentilePredictorRoute: PublicCatPercentilePredictorRoute,
+  PublicCatResponseSheet2026Route: PublicCatResponseSheet2026Route,
   PublicCatScoreCalculatorRoute: PublicCatScoreCalculatorRoute,
+  PublicCatScoreVsPercentile2026Route: PublicCatScoreVsPercentile2026Route,
   PublicCollegeFinderRoute: PublicCollegeFinderRoute,
   PublicCollegeShortlisterRoute: PublicCollegeShortlisterRoute,
   PublicCompareRoute: PublicCompareRoute,
@@ -6732,6 +6991,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicForgotPasswordRoute: PublicForgotPasswordRoute,
   PublicFormulasRoute: PublicFormulasRoute,
   PublicFreebiesRoute: PublicFreebiesRoute,
+  PublicIimCallPredictorRoute: PublicIimCallPredictorRoute,
   PublicIimWaitlistMovementRoute: PublicIimWaitlistMovementRoute,
   PublicListYourBusinessRoute: PublicListYourBusinessRouteWithChildren,
   PublicMbaCompassRoute: PublicMbaCompassRouteWithChildren,
@@ -6756,6 +7016,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicExamSlugRoute: PublicExamSlugRoute,
   PublicFormulaSlugRoute: PublicFormulaSlugRoute,
   PublicGuidesIpmatPreparationRoute: PublicGuidesIpmatPreparationRoute,
+  PublicHiCatScoreCalculatorRoute: PublicHiCatScoreCalculatorRoute,
   PublicInstituteSlugRoute: PublicInstituteSlugRoute,
   PublicMbaApplicationCategoryRoute: PublicMbaApplicationCategoryRoute,
   PublicMbaApplicationMyApplicationsRoute:
@@ -6793,6 +7054,7 @@ interface AdminRouteChildren {
   AdminBusinessInquiriesRoute: typeof AdminBusinessInquiriesRoute
   AdminCacheDiagnosticsRoute: typeof AdminCacheDiagnosticsRoute
   AdminCallbacksRoute: typeof AdminCallbacksRoute
+  AdminCatCalculatorSettingsRoute: typeof AdminCatCalculatorSettingsRoute
   AdminCatScoresRoute: typeof AdminCatScoresRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminClearCacheRoute: typeof AdminClearCacheRoute
@@ -6917,6 +7179,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBusinessInquiriesRoute: AdminBusinessInquiriesRoute,
   AdminCacheDiagnosticsRoute: AdminCacheDiagnosticsRoute,
   AdminCallbacksRoute: AdminCallbacksRoute,
+  AdminCatCalculatorSettingsRoute: AdminCatCalculatorSettingsRoute,
   AdminCatScoresRoute: AdminCatScoresRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminClearCacheRoute: AdminClearCacheRoute,

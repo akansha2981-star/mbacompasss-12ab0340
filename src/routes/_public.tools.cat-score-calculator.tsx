@@ -5,15 +5,21 @@ import PublicPageSkeleton from "@/components/PublicPageSkeleton";
 import { CAT_CALCULATOR_FAQS, CAT_SCORE_EXTRA_FAQS, CAT_SCORE_VS_PERCENTILE, CAT_SECTIONAL_VS_PERCENTILE, CAT_INDICATIVE_TARGETS } from "@/lib/catScorePercentile";
 
 const URL = "https://mbacompass.in/tools/cat-score-calculator";
-const TITLE = "CAT Score Calculator 2026 & CAT Score vs Percentile";
+const TITLE = "CAT Score Calculator 2026: Score, Percentile & IIM Calls";
 const DESC =
-  "Calculate CAT marks from your response sheet. Check VARC, DILR and QA scores and compare indicative CAT score vs percentile bands.";
+  "Paste your CAT 2026 response sheet link. Get VARC, DILR, QA scores out of 204, slot-wise percentile, rank & IIM call chances in 10 seconds. Free.";
 
 export const Route = createFileRoute("/_public/tools/cat-score-calculator")({
   component: () => <CATScoreCalculatorPage />,
   pendingComponent: PublicPageSkeleton,
   head: () => ({
     ...publicPageHead("/tools/cat-score-calculator", TITLE, DESC),
+    links: [
+      ...publicPageHead("/tools/cat-score-calculator", TITLE, DESC).links,
+      { rel: "alternate", hrefLang: "en-IN", href: URL },
+      { rel: "alternate", hrefLang: "hi-IN", href: "https://mbacompass.in/hi/cat-score-calculator" },
+      { rel: "alternate", hrefLang: "x-default", href: URL },
+    ],
     scripts: [
       {
         type: "application/ld+json",
@@ -29,7 +35,7 @@ export const Route = createFileRoute("/_public/tools/cat-score-calculator")({
               inLanguage: "en-IN",
               isPartOf: { "@id": "https://mbacompass.in/#website" },
               publisher: { "@id": "https://mbacompass.in/#organization" },
-              dateModified: "2026-10-17",
+              dateModified: "2026-11-03",
               about: [
                 { "@type": "Thing", name: "CAT score calculator" },
                 { "@type": "Thing", name: "CAT score vs percentile" },
@@ -44,7 +50,7 @@ export const Route = createFileRoute("/_public/tools/cat-score-calculator")({
               headline: "CAT Score Calculator 2026 and CAT Score vs Percentile Guide",
               description: DESC,
               inLanguage: "en-IN",
-              dateModified: "2026-10-17",
+              dateModified: "2026-11-03",
               author: { "@id": "https://mbacompass.in/#organization" },
               publisher: { "@id": "https://mbacompass.in/#organization" },
               mainEntityOfPage: { "@id": `${URL}#webpage` },

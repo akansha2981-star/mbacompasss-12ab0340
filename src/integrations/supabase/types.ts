@@ -1636,6 +1636,90 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_alert_signups: {
+        Row: {
+          alerts: string[]
+          consent: boolean
+          created_at: string
+          email: string | null
+          id: string
+          source_path: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          alerts?: string[]
+          consent: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          source_path?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          alerts?: string[]
+          consent?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          source_path?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      cat_calculator_settings: {
+        Row: {
+          data: Json
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          data?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          data?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      cat_score_aggregates: {
+        Row: {
+          created_at: string
+          dilr_score: number | null
+          id: string
+          qa_score: number | null
+          slot: number | null
+          source: string
+          total_score: number
+          varc_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          dilr_score?: number | null
+          id?: string
+          qa_score?: number | null
+          slot?: number | null
+          source?: string
+          total_score: number
+          varc_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          dilr_score?: number | null
+          id?: string
+          qa_score?: number | null
+          slot?: number | null
+          source?: string
+          total_score?: number
+          varc_score?: number | null
+        }
+        Relationships: []
+      }
       cat_score_submissions: {
         Row: {
           accuracy: number | null
