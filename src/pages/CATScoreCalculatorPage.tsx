@@ -49,7 +49,6 @@ const DailySubmissionTrend = lazyChart("DailySubmissionTrend");
 const SectionAvgComparison = lazyChart("SectionAvgComparison");
 const AccuracyDistributionPie = lazyChart("AccuracyDistributionPie");
 const DifficultyPerformanceChart = lazyChart("DifficultyPerformanceChart");
-const ScoreVsAttemptsScatter = lazyChart("ScoreVsAttemptsScatter");
 const SectionDifficultyHeatmap = lazyChart("SectionDifficultyHeatmap");
 const PercentilePredictorPanel = lazyChart("PercentilePredictorPanel");
 const MistakeAnalysisChart = lazyChart("MistakeAnalysisChart");
@@ -471,10 +470,10 @@ const CATScoreCalculatorPage: React.FC = () => {
                   { label: "Attempted", value: result.overall.attempted, sub: `of ${result.overall.totalQuestions} Qs`, bg: "bg-amber-50", border: "border-amber-200", textColor: "text-amber-600", labelColor: "text-amber-600", icon: BookOpen },
                 ].map((card, i) => (
                   <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }}
-                    className={`${card.bg} border ${card.border} rounded-2xl p-5 text-center shadow-xs hover:shadow-md transition-shadow`}>
+                    className={`${card.bg} border ${card.border} rounded-2xl p-4 md:p-5 text-center shadow-xs hover:shadow-md transition-shadow`}>
                     <card.icon className={`w-5 h-5 ${card.labelColor} mx-auto mb-2`} />
                     <p className={`text-xs ${card.labelColor} uppercase tracking-wider font-semibold mb-1`}>{card.label}</p>
-                    <p className={`text-3xl md:text-4xl font-black ${card.textColor}`}>{card.value}</p>
+                    <p className={`text-2xl md:text-4xl font-bold ${card.textColor}`}>{card.value}</p>
                     <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
                   </motion.div>
                 ))}
@@ -482,7 +481,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* Section-wise Breakdown */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" /> Section-wise Breakdown
               </h2>
@@ -526,7 +525,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* AI Insights Section */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <div className="bg-gradient-to-br from-primary/5 via-secondary/10 to-primary/5 border border-primary/15 rounded-2xl p-6 md:p-8 shadow-xs">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -574,7 +573,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* Peer Comparison + Topper Comparison */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" /> Peer Comparison
               </h2>
@@ -585,7 +584,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* Visual Charts Grid */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" /> Visual Analysis
               </h2>
@@ -600,7 +599,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* Strength & Weakness + Mistake Analysis */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-primary" /> Deep Performance Insights
               </h2>
@@ -613,7 +612,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* Complete Score Summary Table */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
                 <div className="bg-primary/5 px-5 py-3 border-b border-border">
                   <h3 className="text-foreground font-bold">Complete Score Summary</h3>
@@ -662,7 +661,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* Question-wise Detail */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
                 <button onClick={() => setShowQuestions(!showQuestions)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                   <div className="flex items-center gap-2">
@@ -712,7 +711,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             {/* CTA Section */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-10">
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-primary/5 border border-primary/15 rounded-2xl p-6 shadow-xs hover:shadow-md transition-shadow">
                   <Award className="w-8 h-8 text-primary mb-3" />
@@ -733,20 +732,19 @@ const CATScoreCalculatorPage: React.FC = () => {
       </AnimatePresence>
 
       {/* ═══════ AGGREGATED TREND CHARTS ═══════ */}
-      <section className="bg-muted/30 py-14">
+      <section className="bg-muted/30 py-8 md:py-14">
         <div className="max-w-5xl mx-auto px-4">
           <SectionInView>
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2">CAT Score Analysis & Trends</h2>
+            <div className="text-center mb-6 md:mb-10">
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-2">CAT Score Analysis & Trends</h2>
               <p className="text-muted-foreground">Aggregated insights from thousands of response sheets analyzed on our platform</p>
             </div>
           </SectionInView>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             <SectionInView delay={0.1}><ScoreDistributionHistogram /></SectionInView>
             <SectionInView delay={0.2}><DailySubmissionTrend /></SectionInView>
             <SectionInView delay={0.3}><AccuracyDistributionPie /></SectionInView>
-            <SectionInView delay={0.4}><ScoreVsAttemptsScatter /></SectionInView>
           </div>
 
           <SectionInView delay={0.5} className="mt-6">
@@ -756,10 +754,10 @@ const CATScoreCalculatorPage: React.FC = () => {
       </section>
 
       {/* ═══════ WHAT IS CAT — CONTENT SECTION ═══════ */}
-      <SectionInView className="max-w-5xl mx-auto px-4 py-14">
+      <SectionInView className="max-w-5xl mx-auto px-4 py-8 md:py-14">
         <div className="grid md:grid-cols-2 gap-10">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-foreground mb-4">What is CAT Exam?</h2>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-4">What is CAT Exam?</h2>
             <p className="text-muted-foreground text-sm leading-relaxed mb-4">
               The Common Admission Test (CAT) is India's premier MBA entrance exam conducted by the Indian Institutes of Management (IIMs). CAT is usually held in late November, testing candidates on Verbal Ability & Reading Comprehension (VARC), Data Interpretation & Logical Reasoning (DILR), and Quantitative Ability (QA).
             </p>
@@ -771,7 +769,7 @@ const CATScoreCalculatorPage: React.FC = () => {
             </p>
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-foreground mb-4">How Does This Calculator Work?</h2>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-4">How Does This Calculator Work?</h2>
             <div className="space-y-4">
               {[
                 { icon: FileText, title: "Parses Official HTML", desc: "Reads the exact response data from your CAT response sheet hosted on TCS iON CDN." },
@@ -796,11 +794,11 @@ const CATScoreCalculatorPage: React.FC = () => {
       </SectionInView>
 
       {/* ═══════ CAT MARKING SCHEME ═══════ */}
-      <section className="bg-muted/20 py-14">
+      <section className="bg-muted/20 py-8 md:py-14">
         <div className="max-w-5xl mx-auto px-4">
           <SectionInView>
             <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2">CAT 2026 Marking Scheme</h2>
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-2">CAT 2026 Marking Scheme</h2>
               <p className="text-muted-foreground">Understanding how your CAT score is calculated</p>
             </div>
           </SectionInView>
@@ -868,9 +866,9 @@ const CATScoreCalculatorPage: React.FC = () => {
       </section>
 
       {/* ═══════ HOW TO CALCULATE + SECTIONAL + TARGETS ═══════ */}
-      <section id="how-to-calculate-cat-score" className="max-w-5xl mx-auto px-4 py-14 space-y-10">
+      <section id="how-to-calculate-cat-score" className="max-w-5xl mx-auto px-4 py-8 md:py-14 space-y-10">
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">How to Calculate Your CAT Score</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">How to Calculate Your CAT Score</h2>
           <p className="text-muted-foreground mb-4">Your CAT raw score follows one simple formula, applied separately to VARC, DILR and QA and then added up:</p>
           <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 mb-4">
             <p className="font-bold text-foreground">CAT score = (Correct answers × 3) − (Wrong MCQs × 1)</p>
@@ -880,7 +878,7 @@ const CATScoreCalculatorPage: React.FC = () => {
           <div className="overflow-x-auto bg-card border border-border rounded-2xl">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border bg-primary/5">
-                <th className="text-left py-3 px-4">Section</th><th className="text-center py-3 px-2">Correct</th><th className="text-center py-3 px-2">Wrong MCQ</th><th className="text-center py-3 px-2">Wrong TITA</th><th className="text-center py-3 px-4">Score</th>
+                <th className="text-left py-2.5 px-3 md:py-3 md:px-4">Section</th><th className="text-center py-2.5 px-2">Correct</th><th className="text-center py-2.5 px-2">Wrong MCQ</th><th className="text-center py-2.5 px-2">Wrong TITA</th><th className="text-center py-2.5 px-3 md:py-3 md:px-4">Score</th>
               </tr></thead>
               <tbody>
                 {[["VARC",12,4,1,32],["DILR",7,3,1,18],["QA",9,4,2,23]].map(([s,c,w,t,sc]) => (
@@ -896,12 +894,12 @@ const CATScoreCalculatorPage: React.FC = () => {
         </div>
 
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">Sectional CAT Score vs Percentile</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">Sectional CAT Score vs Percentile</h2>
           <p className="text-muted-foreground mb-4">Most IIMs apply sectional cut-offs, so check each section separately. Approximate raw scores needed for each percentile in recent years:</p>
           <div className="overflow-x-auto bg-card border border-border rounded-2xl">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border bg-primary/5">
-                <th className="text-left py-3 px-4">Percentile</th><th className="text-center py-3 px-2">VARC (/72)</th><th className="text-center py-3 px-2">DILR (/66)</th><th className="text-center py-3 px-2">QA (/66)</th>
+                <th className="text-left py-2.5 px-3 md:py-3 md:px-4">Percentile</th><th className="text-center py-2.5 px-2">VARC (/72)</th><th className="text-center py-2.5 px-2">DILR (/66)</th><th className="text-center py-2.5 px-2">QA (/66)</th>
               </tr></thead>
               <tbody>
                 {CAT_SECTIONAL_VS_PERCENTILE.map((r) => (
@@ -916,11 +914,11 @@ const CATScoreCalculatorPage: React.FC = () => {
         </div>
 
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">Which Percentile Do You Need? Indicative B-School Targets</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">Which Percentile Do You Need? Indicative B-School Targets</h2>
           <p className="text-muted-foreground mb-4">Overall percentiles that have typically been competitive for an interview shortlist (General category). These are not official cut-offs; academics, work experience and diversity also count.</p>
           <div className="overflow-x-auto bg-card border border-border rounded-2xl">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border bg-primary/5"><th className="text-left py-3 px-4">B-schools</th><th className="text-left py-3 px-4">Indicative percentile</th></tr></thead>
+              <thead><tr className="border-b border-border bg-primary/5"><th className="text-left py-2.5 px-3 md:py-3 md:px-4">B-schools</th><th className="text-left py-2.5 px-3 md:py-3 md:px-4">Indicative percentile</th></tr></thead>
               <tbody>
                 {CAT_INDICATIVE_TARGETS.map((r) => (
                   <tr key={r.group} className="border-b border-border last:border-0"><td className="py-2.5 px-4">{r.group}</td><td className="py-2.5 px-4 font-semibold">{r.target}</td></tr>
@@ -934,7 +932,7 @@ const CATScoreCalculatorPage: React.FC = () => {
         </div>
 
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">What Decides Your Final CAT Percentile?</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">What Decides Your Final CAT Percentile?</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li><span className="font-semibold text-foreground">Slot normalisation:</span> CAT runs in multiple slots, so raw scores are converted into scaled scores before percentiles are computed.</li>
             <li><span className="font-semibold text-foreground">Paper difficulty:</span> a tougher paper lowers the score needed for the same percentile.</li>
@@ -944,13 +942,13 @@ const CATScoreCalculatorPage: React.FC = () => {
         </div>
 
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">CAT Score vs Percentile: Why the Two Differ</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">CAT Score vs Percentile: Why the Two Differ</h2>
           <p className="text-muted-foreground mb-3">Your CAT score is an absolute number: the marks you earned out of 204. Your percentile is relative: it tells you what share of test-takers scored below you. Two candidates with the same raw score in different slots can end up with slightly different percentiles because the IIMs first convert raw scores into scaled scores to even out slot difficulty.</p>
           <p className="text-muted-foreground">That is why this calculator gives an exact raw score but only an estimated percentile. Use the estimate to plan, and wait for the official scorecard before final decisions.</p>
         </div>
 
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">How to Use This CAT Score Calculator</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">How to Use This CAT Score Calculator</h2>
           <ol className="list-decimal pl-5 space-y-2 text-muted-foreground">
             <li>Log in to the official CAT portal once the response sheet is released.</li>
             <li>Open the candidate response page for your slot.</li>
@@ -962,7 +960,7 @@ const CATScoreCalculatorPage: React.FC = () => {
         </div>
 
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">What to Do After Calculating Your CAT Score</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">What to Do After Calculating Your CAT Score</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li><span className="font-semibold text-foreground">Shortlist realistically:</span> match your estimated percentile and sectional scores with the target table above.</li>
             <li><span className="font-semibold text-foreground">Check your profile fit:</span> IIM shortlists also weigh 10th, 12th and graduation marks, work experience and diversity. Try the <Link to="/tools/profile-analyzer" className="text-primary underline">Profile Analyzer</Link>.</li>
@@ -973,7 +971,7 @@ const CATScoreCalculatorPage: React.FC = () => {
         </div>
 
         <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">Tips to Raise Your CAT Score Next Attempt</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">Tips to Raise Your CAT Score Next Attempt</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li><span className="font-semibold text-foreground">Protect accuracy:</span> skip MCQs where you can't eliminate at least two options, since every wrong answer costs a mark.</li>
             <li><span className="font-semibold text-foreground">Attempt every TITA you can:</span> wrong TITA answers carry no penalty.</li>
@@ -987,7 +985,7 @@ const CATScoreCalculatorPage: React.FC = () => {
       {/* ═══════ CAT SCORE VS PERCENTILE ═══════ */}
       <section id="cat-score-vs-percentile" className="py-14">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">CAT Score vs Percentile</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">CAT Score vs Percentile</h2>
           <p className="text-muted-foreground mb-6">
             Once the calculator gives your score, use this table to see roughly which percentile it corresponds to. The bands are approximate, compiled from publicly reported CAT 2024 results (scaled scores out of 204), and shift every year with slot difficulty and normalisation.
           </p>
@@ -995,8 +993,8 @@ const CATScoreCalculatorPage: React.FC = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-primary/5">
-                  <th className="text-left py-3 px-4 text-foreground">CAT percentile</th>
-                  <th className="text-left py-3 px-4 text-foreground">Approx. scaled score (out of 204)</th>
+                  <th className="text-left py-2.5 px-3 md:py-3 md:px-4 text-foreground">CAT percentile</th>
+                  <th className="text-left py-2.5 px-3 md:py-3 md:px-4 text-foreground">Approx. scaled score (out of 204)</th>
                 </tr>
               </thead>
               <tbody>
@@ -1016,11 +1014,11 @@ const CATScoreCalculatorPage: React.FC = () => {
       </section>
 
       {/* ═══════ FAQ SECTION ═══════ */}
-      <section className="bg-muted/30 py-14">
+      <section className="bg-muted/30 py-8 md:py-14">
         <div className="max-w-3xl mx-auto px-4">
           <SectionInView>
             <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2">Frequently Asked Questions</h2>
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-2">Frequently Asked Questions</h2>
               <p className="text-muted-foreground">Common questions about the CAT score calculator and CAT score vs percentile</p>
             </div>
           </SectionInView>
@@ -1056,13 +1054,13 @@ const CATScoreCalculatorPage: React.FC = () => {
       <section className="py-14">
         <div className="max-w-5xl mx-auto px-4">
           <SectionInView>
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2">Related Topics & Popular Searches</h2>
+            <div className="text-center mb-6 md:mb-10">
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-2">Related Topics & Popular Searches</h2>
               <p className="text-muted-foreground">Explore more about CAT 2025 score calculation, percentile prediction, and MBA admissions</p>
             </div>
           </SectionInView>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             {/* Long Tail Keywords */}
             <SectionInView delay={0.1}>
               <div className="bg-card border border-border rounded-2xl p-6 shadow-xs h-full">
@@ -1145,10 +1143,10 @@ const CATScoreCalculatorPage: React.FC = () => {
       </section>
 
       {/* ═══════ FINAL CTA ═══════ */}
-      <SectionInView className="max-w-4xl mx-auto px-4 py-14 text-center">
+      <SectionInView className="max-w-4xl mx-auto px-4 py-8 md:py-14 text-center">
         <div className="bg-gradient-to-br from-primary/10 via-secondary/20 to-primary/5 border border-primary/15 rounded-3xl p-8 md:p-12 shadow-lg">
           <BrainCircuit className="w-12 h-12 text-primary mx-auto mb-4" />
-          <h2 className="text-2xl md:text-3xl font-black text-foreground mb-3">Ready to Calculate Your CAT Score?</h2>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-3">Ready to Calculate Your CAT Score?</h2>
           <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
             Join {liveStats?.total ? liveStats.total.toLocaleString() : "thousands of"} students who have already analyzed their performance. Get instant section-wise scores, accuracy analysis, and AI-powered insights.
           </p>

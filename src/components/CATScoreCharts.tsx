@@ -17,13 +17,16 @@ const COLORS = {
 };
 
 const TOOLTIP_STYLE = {
-  background: "#fff",
-  border: "1px solid hsl(210, 30%, 92%)",
-  borderRadius: 10,
+  background: "rgba(255,255,255,0.97)",
+  border: "1px solid hsl(210, 40%, 90%)",
+  borderRadius: 12,
   color: "#1e293b",
-  fontSize: 12,
-  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+  fontSize: 13,
+  padding: "8px 12px",
+  boxShadow: "0 10px 30px -10px rgba(37,99,235,0.25)",
 };
+const AXIS = { axisLine: false, tickLine: false } as const;
+const LEGEND = { wrapperStyle: { fontSize: 12, color: "#64748b", paddingTop: 8 }, iconType: "circle" as const, iconSize: 8 };
 
 export const SectionRadarChart: React.FC<{ result: CATResult }> = ({ result }) => {
   const data = result.sections.map((s) => ({
@@ -34,16 +37,16 @@ export const SectionRadarChart: React.FC<{ result: CATResult }> = ({ result }) =
   }));
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
       <h3 className="text-foreground font-bold mb-4 text-sm">Section Comparison (Radar)</h3>
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={260}>
         <RadarChart data={data}>
           <PolarGrid stroke="hsl(210, 30%, 92%)" />
           <PolarAngleAxis dataKey="section" tick={{ fill: "#64748b", fontSize: 12 }} />
           <PolarRadiusAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
           <Radar name="Score" dataKey="score" stroke="#2563eb" fill="#2563eb" fillOpacity={0.2} />
           <Radar name="Accuracy %" dataKey="accuracy" stroke="#059669" fill="#059669" fillOpacity={0.15} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
+          <Legend {...LEGEND} />
         </RadarChart>
       </ResponsiveContainer>
     </div>
@@ -58,16 +61,17 @@ export const AttemptBreakdownPie: React.FC<{ result: CATResult }> = ({ result })
   ];
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
       <h3 className="text-foreground font-bold mb-4 text-sm">Attempt Breakdown</h3>
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={260}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={95} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="value">
             {data.map((entry, i) => (
               <Cell key={i} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -89,17 +93,17 @@ export const SectionScoreBar: React.FC<{ result: CATResult }> = ({ result }) => 
   });
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
       <h3 className="text-foreground font-bold mb-4 text-sm">Section-wise Score Breakdown</h3>
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={dataWithNeg}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="section" tick={{ fill: "#64748b", fontSize: 12 }} />
-          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
-          <Bar dataKey="Positive Marks" fill="#059669" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="Negative Marks" fill="#dc2626" radius={[4, 4, 0, 0]} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="section" tick={{ fill: "#64748b", fontSize: 12 }} />
+          <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
+          <Bar dataKey="Positive Marks" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Negative Marks" fill="#dc2626" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -114,15 +118,15 @@ export const AccuracyBySection: React.FC<{ result: CATResult }> = ({ result }) =
   }));
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
       <h3 className="text-foreground font-bold mb-4 text-sm">Accuracy by Section (%)</h3>
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data} layout="vertical">
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis type="number" domain={[0, 100]} tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <YAxis dataKey="section" type="category" tick={{ fill: "#64748b", fontSize: 12 }} width={50} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
-          <Bar dataKey="accuracy" radius={[0, 4, 4, 0]}>
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} type="number" domain={[0, 100]} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <YAxis {...AXIS} dataKey="section" type="category" tick={{ fill: "#64748b", fontSize: 12 }} width={50} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Bar dataKey="accuracy" radius={[0, 8, 8, 0]} maxBarSize={22}>
             {data.map((entry, i) => (
               <Cell key={i} fill={entry.fill} />
             ))}
@@ -148,17 +152,17 @@ export const QuestionTypeAnalysis: React.FC<{ result: CATResult }> = ({ result }
   ];
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
       <h3 className="text-foreground font-bold mb-4 text-sm">MCQ vs TITA Performance</h3>
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="type" tick={{ fill: "#64748b", fontSize: 12 }} />
-          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
-          <Bar dataKey="Correct" fill="#059669" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="Incorrect" fill="#dc2626" radius={[4, 4, 0, 0]} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="type" tick={{ fill: "#64748b", fontSize: 12 }} />
+          <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
+          <Bar dataKey="Correct" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Incorrect" fill="#dc2626" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -203,7 +207,7 @@ export const StrengthWeaknessChart: React.FC<{ result: CATResult }> = ({ result 
   });
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
       <h3 className="text-foreground font-bold mb-4 text-sm">Strength vs Weakness</h3>
       <div className="space-y-4">
         {data.map((d) => (
@@ -248,9 +252,9 @@ export const ScoreVsPercentileCurve: React.FC<{ currentScore: number }> = ({ cur
   ];
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
       <h3 className="text-foreground font-bold mb-4 text-sm">Score vs Percentile Curve</h3>
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={260}>
         <AreaChart data={curveData}>
           <defs>
             <linearGradient id="percentileGrad" x1="0" y1="0" x2="0" y2="1">
@@ -258,10 +262,10 @@ export const ScoreVsPercentileCurve: React.FC<{ currentScore: number }> = ({ cur
               <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="score" tick={{ fill: "#94a3b8", fontSize: 10 }} label={{ value: "Score", fill: "#64748b", fontSize: 11, position: "bottom" }} />
-          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} label={{ value: "Percentile", fill: "#64748b", fontSize: 11, angle: -90, position: "insideLeft" }} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="score" tick={{ fill: "#94a3b8", fontSize: 10 }} label={{ value: "Score", fill: "#64748b", fontSize: 11, position: "bottom" }} />
+          <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} label={{ value: "Percentile", fill: "#64748b", fontSize: 11, angle: -90, position: "insideLeft" }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
           <Area type="monotone" dataKey="percentile" stroke="#2563eb" strokeWidth={2} fill="url(#percentileGrad)" />
         </AreaChart>
       </ResponsiveContainer>
@@ -280,16 +284,16 @@ export const ScoreDistributionHistogram: React.FC = () => {
     { range: "160+", students: 85 },
   ];
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">CAT 2025 Score Distribution</h3>
-      <p className="text-xs text-muted-foreground mb-4">Based on 17,555 responses analyzed</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">CAT 2025 Score Distribution</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Based on 17,555 responses analyzed</p>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="range" tick={{ fill: "#64748b", fontSize: 10 }} />
-          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
-          <Bar dataKey="students" fill="#2563eb" radius={[4, 4, 0, 0]} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="range" tick={{ fill: "#64748b", fontSize: 10 }} />
+          <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Bar dataKey="students" fill="#2563eb" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -305,10 +309,10 @@ export const DailySubmissionTrend: React.FC = () => {
     { day: "Dec 28", submissions: 620 }, { day: "Dec 29", submissions: 450 },
   ];
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Daily Score Check Trend</h3>
-      <p className="text-xs text-muted-foreground mb-4">Student submissions over time</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Daily Score Check Trend</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Student submissions over time</p>
+      <ResponsiveContainer width="100%" height={260}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="subGrad" x1="0" y1="0" x2="0" y2="1">
@@ -316,10 +320,10 @@ export const DailySubmissionTrend: React.FC = () => {
               <stop offset="95%" stopColor="#059669" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="day" tick={{ fill: "#64748b", fontSize: 10 }} />
-          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="day" tick={{ fill: "#64748b", fontSize: 10 }} />
+          <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
           <Area type="monotone" dataKey="submissions" stroke="#059669" strokeWidth={2} fill="url(#subGrad)" />
         </AreaChart>
       </ResponsiveContainer>
@@ -336,19 +340,19 @@ export const SectionAvgComparison: React.FC<{ result: CATResult }> = ({ result }
     "Top 1% Score": s.section === "VARC" ? 58 : s.section === "DILR" ? 50 : 55,
   }));
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Your Score vs Peers</h3>
-      <p className="text-xs text-muted-foreground mb-4">Compare with average and top 1%</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Your Score vs Peers</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Compare with average and top 1%</p>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="section" tick={{ fill: "#64748b", fontSize: 12 }} />
-          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
-          <Bar dataKey="Your Score" fill="#2563eb" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="Average Score" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="Top 1% Score" fill="#059669" radius={[4, 4, 0, 0]} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="section" tick={{ fill: "#64748b", fontSize: 12 }} />
+          <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
+          <Bar dataKey="Your Score" fill="#2563eb" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Average Score" fill="#94a3b8" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Top 1% Score" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -364,15 +368,16 @@ export const AccuracyDistributionPie: React.FC = () => {
     { name: "<30%", value: 10, color: "#dc2626" },
   ];
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Accuracy Distribution (All Students)</h3>
-      <p className="text-xs text-muted-foreground mb-4">Percentage of students by accuracy range</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Accuracy Distribution (All Students)</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Percentage of students by accuracy range</p>
+      <ResponsiveContainer width="100%" height={260}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" outerRadius={95} innerRadius={45} dataKey="value" label={({ name, value }) => `${name}: ${value}%`}>
+          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="value">
             {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
           </Pie>
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -391,18 +396,18 @@ export const DifficultyPerformanceChart: React.FC<{ result: CATResult }> = ({ re
     { difficulty: "Hard", total: hard, correct: Math.round(hard * 0.28), accuracy: 28 },
   ];
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Difficulty-wise Performance</h3>
-      <p className="text-xs text-muted-foreground mb-4">Estimated based on question analysis</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Difficulty-wise Performance</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Estimated based on question analysis</p>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="difficulty" tick={{ fill: "#64748b", fontSize: 12 }} />
-          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
-          <Bar dataKey="total" name="Total Questions" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="correct" name="Correct" fill="#059669" radius={[4, 4, 0, 0]} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="difficulty" tick={{ fill: "#64748b", fontSize: 12 }} />
+          <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
+          <Bar dataKey="total" name="Total Questions" fill="#94a3b8" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="correct" name="Correct" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -416,16 +421,16 @@ export const ScoreVsAttemptsScatter: React.FC = () => {
     accuracy: Math.round(20 + Math.random() * 70),
   }));
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Score vs Attempts (All Students)</h3>
-      <p className="text-xs text-muted-foreground mb-4">Correlation analysis from 17K+ submissions</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Score vs Attempts (All Students)</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Correlation analysis from 17K+ submissions</p>
+      <ResponsiveContainer width="100%" height={260}>
         <ScatterChart>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis dataKey="attempts" name="Attempts" tick={{ fill: "#64748b", fontSize: 10 }} label={{ value: "Attempts", fill: "#64748b", fontSize: 11, position: "bottom" }} />
-          <YAxis dataKey="score" name="Score" tick={{ fill: "#94a3b8", fontSize: 10 }} label={{ value: "Score", fill: "#64748b", fontSize: 11, angle: -90, position: "insideLeft" }} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} dataKey="attempts" name="Attempts" tick={{ fill: "#64748b", fontSize: 10 }} label={{ value: "Attempts", fill: "#64748b", fontSize: 11, position: "bottom" }} />
+          <YAxis {...AXIS} dataKey="score" name="Score" tick={{ fill: "#94a3b8", fontSize: 10 }} label={{ value: "Score", fill: "#64748b", fontSize: 11, angle: -90, position: "insideLeft" }} />
           <ZAxis dataKey="accuracy" range={[30, 200]} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
           <Scatter data={data} fill="#2563eb" fillOpacity={0.5} />
         </ScatterChart>
       </ResponsiveContainer>
@@ -447,9 +452,9 @@ export const SectionDifficultyHeatmap: React.FC = () => {
     return "bg-red-100 text-destructive";
   };
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Section Difficulty Heatmap</h3>
-      <p className="text-xs text-muted-foreground mb-4">Accuracy % by section and difficulty level</p>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Section Difficulty Heatmap</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Accuracy % by section and difficulty level</p>
       <div className="overflow-x-auto">
         <table className="min-w-[360px] w-full text-sm">
           <thead>
@@ -489,11 +494,11 @@ export const PercentilePredictorPanel: React.FC = () => {
     { score: "<40", percentile: "<70", calls: "Tier 2-3 colleges" },
   ];
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Score → Percentile → College Predictor</h3>
-      <p className="text-xs text-muted-foreground mb-4">Estimated based on CAT 2025 trends</p>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Score → Percentile → College Predictor</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Estimated based on CAT 2025 trends</p>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[420px] text-sm">
           <thead>
             <tr className="border-b border-border">
               <th className="text-left py-2 text-muted-foreground font-medium">Score Range</th>
@@ -530,15 +535,16 @@ export const MistakeAnalysisChart: React.FC<{ result: CATResult }> = ({ result }
     { type: "Time-based Guesses", count: timeWaste, color: "#6366f1" },
   ];
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">Mistake Analysis</h3>
-      <p className="text-xs text-muted-foreground mb-4">Categorized incorrect answers (estimated)</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">Mistake Analysis</h3>
+      <p className="mb-3 text-sm text-muted-foreground">Categorized incorrect answers (estimated)</p>
+      <ResponsiveContainer width="100%" height={260}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" outerRadius={95} innerRadius={45} dataKey="count" label={({ type, count }) => `${type}: ${count}`}>
+          <Pie data={data} cx="50%" cy="45%" innerRadius="52%" outerRadius="78%" paddingAngle={2} cornerRadius={6} stroke="none" dataKey="count">
             {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
           </Pie>
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -552,19 +558,19 @@ export const TopperComparisonBar: React.FC<{ result: CATResult }> = ({ result })
     { metric: "Attempts", you: result.overall.attempted, topper: 58, average: 48 },
   ];
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-xs">
-      <h3 className="text-foreground font-bold mb-1 text-sm">You vs Topper vs Average</h3>
-      <p className="text-xs text-muted-foreground mb-4">How you compare with the best</p>
-      <ResponsiveContainer width="100%" height={280}>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
+      <h3 className="mb-0.5 text-base font-semibold text-foreground">You vs Topper vs Average</h3>
+      <p className="mb-3 text-sm text-muted-foreground">How you compare with the best</p>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data} layout="vertical">
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 30%, 94%)" />
-          <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-          <YAxis dataKey="metric" type="category" tick={{ fill: "#64748b", fontSize: 11 }} width={80} />
-          <Tooltip contentStyle={TOOLTIP_STYLE} />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
-          <Bar dataKey="you" name="You" fill="#2563eb" radius={[0, 4, 4, 0]} />
-          <Bar dataKey="average" name="Average" fill="#94a3b8" radius={[0, 4, 4, 0]} />
-          <Bar dataKey="topper" name="Topper" fill="#059669" radius={[0, 4, 4, 0]} />
+          <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
+          <XAxis {...AXIS} type="number" tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <YAxis {...AXIS} dataKey="metric" type="category" tick={{ fill: "#64748b", fontSize: 11 }} width={80} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
+          <Legend {...LEGEND} />
+          <Bar dataKey="you" name="You" fill="#2563eb" radius={[0, 8, 8, 0]} maxBarSize={22} />
+          <Bar dataKey="average" name="Average" fill="#94a3b8" radius={[0, 8, 8, 0]} maxBarSize={22} />
+          <Bar dataKey="topper" name="Topper" fill="#059669" radius={[0, 8, 8, 0]} maxBarSize={22} />
         </BarChart>
       </ResponsiveContainer>
     </div>
