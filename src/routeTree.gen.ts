@@ -48,6 +48,7 @@ import { Route as PublicMyListingsRouteImport } from './routes/_public.my-listin
 import { Route as PublicMyMba2027RouteImport } from './routes/_public.my-mba-2027'
 import { Route as PublicPrivacyPolicyRouteImport } from './routes/_public.privacy-policy'
 import { Route as PublicProfileAnalyzerRouteImport } from './routes/_public.profile-analyzer'
+import { Route as PublicRateCoachingRouteImport } from './routes/_public.rate-coaching'
 import { Route as PublicResetPasswordRouteImport } from './routes/_public.reset-password'
 import { Route as PublicReviewPolicyRouteImport } from './routes/_public.review-policy'
 import { Route as PublicRoiCalculatorRouteImport } from './routes/_public.roi-calculator'
@@ -218,6 +219,7 @@ import { Route as PublicArticleSlugRouteImport } from './routes/_public.article.
 import { Route as PublicAuthorsSlugRouteImport } from './routes/_public.authors.$slug'
 import { Route as PublicBundlesSlugRouteImport } from './routes/_public.bundles.$slug'
 import { Route as PublicCategorySlugRouteImport } from './routes/_public.category.$slug'
+import { Route as PublicCoachingReviewSlugRouteImport } from './routes/_public.coaching-review.$slug'
 import { Route as PublicCoachingIndexRouteImport } from './routes/_public.coaching.index'
 import { Route as PublicCoachingRegionRouteImport } from './routes/_public.coaching.$region'
 import { Route as PublicCollegeSlugRouteImport } from './routes/_public.college.$slug'
@@ -541,6 +543,11 @@ const PublicPrivacyPolicyRoute = PublicPrivacyPolicyRouteImport.update({
 const PublicProfileAnalyzerRoute = PublicProfileAnalyzerRouteImport.update({
   id: '/profile-analyzer',
   path: '/profile-analyzer',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicRateCoachingRoute = PublicRateCoachingRouteImport.update({
+  id: '/rate-coaching',
+  path: '/rate-coaching',
   getParentRoute: () => PublicRoute,
 } as any)
 const PublicResetPasswordRoute = PublicResetPasswordRouteImport.update({
@@ -1398,6 +1405,12 @@ const PublicCategorySlugRoute = PublicCategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicCoachingReviewSlugRoute =
+  PublicCoachingReviewSlugRouteImport.update({
+    id: '/coaching-review/$slug',
+    path: '/coaching-review/$slug',
+    getParentRoute: () => PublicRoute,
+  } as any)
 const PublicCoachingIndexRoute = PublicCoachingIndexRouteImport.update({
   id: '/coaching/',
   path: '/coaching/',
@@ -2130,6 +2143,7 @@ export interface FileRoutesByFullPath {
   '/my-mba-2027': typeof PublicMyMba2027Route
   '/privacy-policy': typeof PublicPrivacyPolicyRoute
   '/profile-analyzer': typeof PublicProfileAnalyzerRoute
+  '/rate-coaching': typeof PublicRateCoachingRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/review-policy': typeof PublicReviewPolicyRoute
   '/roi-calculator': typeof PublicRoiCalculatorRoute
@@ -2300,6 +2314,7 @@ export interface FileRoutesByFullPath {
   '/authors/$slug': typeof PublicAuthorsSlugRoute
   '/bundles/$slug': typeof PublicBundlesSlugRoute
   '/category/$slug': typeof PublicCategorySlugRoute
+  '/coaching-review/$slug': typeof PublicCoachingReviewSlugRoute
   '/coaching/$region': typeof PublicCoachingRegionRoute
   '/college/$slug': typeof PublicCollegeSlugRoute
   '/colleges/$region': typeof PublicCollegesRegionRoute
@@ -2460,6 +2475,7 @@ export interface FileRoutesByTo {
   '/my-mba-2027': typeof PublicMyMba2027Route
   '/privacy-policy': typeof PublicPrivacyPolicyRoute
   '/profile-analyzer': typeof PublicProfileAnalyzerRoute
+  '/rate-coaching': typeof PublicRateCoachingRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/review-policy': typeof PublicReviewPolicyRoute
   '/roi-calculator': typeof PublicRoiCalculatorRoute
@@ -2618,6 +2634,7 @@ export interface FileRoutesByTo {
   '/authors/$slug': typeof PublicAuthorsSlugRoute
   '/bundles/$slug': typeof PublicBundlesSlugRoute
   '/category/$slug': typeof PublicCategorySlugRoute
+  '/coaching-review/$slug': typeof PublicCoachingReviewSlugRoute
   '/coaching/$region': typeof PublicCoachingRegionRoute
   '/college/$slug': typeof PublicCollegeSlugRoute
   '/colleges/$region': typeof PublicCollegesRegionRoute
@@ -2786,6 +2803,7 @@ export interface FileRoutesById {
   '/_public/my-mba-2027': typeof PublicMyMba2027Route
   '/_public/privacy-policy': typeof PublicPrivacyPolicyRoute
   '/_public/profile-analyzer': typeof PublicProfileAnalyzerRoute
+  '/_public/rate-coaching': typeof PublicRateCoachingRoute
   '/_public/reset-password': typeof PublicResetPasswordRoute
   '/_public/review-policy': typeof PublicReviewPolicyRoute
   '/_public/roi-calculator': typeof PublicRoiCalculatorRoute
@@ -2957,6 +2975,7 @@ export interface FileRoutesById {
   '/_public/authors/$slug': typeof PublicAuthorsSlugRoute
   '/_public/bundles/$slug': typeof PublicBundlesSlugRoute
   '/_public/category/$slug': typeof PublicCategorySlugRoute
+  '/_public/coaching-review/$slug': typeof PublicCoachingReviewSlugRoute
   '/_public/coaching/$region': typeof PublicCoachingRegionRoute
   '/_public/college/$slug': typeof PublicCollegeSlugRoute
   '/_public/colleges/$region': typeof PublicCollegesRegionRoute
@@ -3126,6 +3145,7 @@ export interface FileRouteTypes {
     | '/my-mba-2027'
     | '/privacy-policy'
     | '/profile-analyzer'
+    | '/rate-coaching'
     | '/reset-password'
     | '/review-policy'
     | '/roi-calculator'
@@ -3296,6 +3316,7 @@ export interface FileRouteTypes {
     | '/authors/$slug'
     | '/bundles/$slug'
     | '/category/$slug'
+    | '/coaching-review/$slug'
     | '/coaching/$region'
     | '/college/$slug'
     | '/colleges/$region'
@@ -3456,6 +3477,7 @@ export interface FileRouteTypes {
     | '/my-mba-2027'
     | '/privacy-policy'
     | '/profile-analyzer'
+    | '/rate-coaching'
     | '/reset-password'
     | '/review-policy'
     | '/roi-calculator'
@@ -3614,6 +3636,7 @@ export interface FileRouteTypes {
     | '/authors/$slug'
     | '/bundles/$slug'
     | '/category/$slug'
+    | '/coaching-review/$slug'
     | '/coaching/$region'
     | '/college/$slug'
     | '/colleges/$region'
@@ -3781,6 +3804,7 @@ export interface FileRouteTypes {
     | '/_public/my-mba-2027'
     | '/_public/privacy-policy'
     | '/_public/profile-analyzer'
+    | '/_public/rate-coaching'
     | '/_public/reset-password'
     | '/_public/review-policy'
     | '/_public/roi-calculator'
@@ -3952,6 +3976,7 @@ export interface FileRouteTypes {
     | '/_public/authors/$slug'
     | '/_public/bundles/$slug'
     | '/_public/category/$slug'
+    | '/_public/coaching-review/$slug'
     | '/_public/coaching/$region'
     | '/_public/college/$slug'
     | '/_public/colleges/$region'
@@ -4378,6 +4403,13 @@ declare module '@tanstack/react-router' {
       path: '/profile-analyzer'
       fullPath: '/profile-analyzer'
       preLoaderRoute: typeof PublicProfileAnalyzerRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/rate-coaching': {
+      id: '/_public/rate-coaching'
+      path: '/rate-coaching'
+      fullPath: '/rate-coaching'
+      preLoaderRoute: typeof PublicRateCoachingRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/reset-password': {
@@ -5570,6 +5602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicCategorySlugRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/coaching-review/$slug': {
+      id: '/_public/coaching-review/$slug'
+      path: '/coaching-review/$slug'
+      fullPath: '/coaching-review/$slug'
+      preLoaderRoute: typeof PublicCoachingReviewSlugRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/coaching/': {
       id: '/_public/coaching/'
       path: '/coaching'
@@ -6619,6 +6658,7 @@ interface PublicRouteChildren {
   PublicMyMba2027Route: typeof PublicMyMba2027Route
   PublicPrivacyPolicyRoute: typeof PublicPrivacyPolicyRoute
   PublicProfileAnalyzerRoute: typeof PublicProfileAnalyzerRoute
+  PublicRateCoachingRoute: typeof PublicRateCoachingRoute
   PublicResetPasswordRoute: typeof PublicResetPasswordRoute
   PublicReviewPolicyRoute: typeof PublicReviewPolicyRoute
   PublicRoiCalculatorRoute: typeof PublicRoiCalculatorRoute
@@ -6627,6 +6667,7 @@ interface PublicRouteChildren {
   PublicIndexRoute: typeof PublicIndexRoute
   PublicArticleSlugRoute: typeof PublicArticleSlugRoute
   PublicCategorySlugRoute: typeof PublicCategorySlugRoute
+  PublicCoachingReviewSlugRoute: typeof PublicCoachingReviewSlugRoute
   PublicCoachingRegionRoute: typeof PublicCoachingRegionRoute
   PublicCollegeSlugRoute: typeof PublicCollegeSlugRoute
   PublicCollegesRegionRoute: typeof PublicCollegesRegionRoute
@@ -6680,6 +6721,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicMyMba2027Route: PublicMyMba2027Route,
   PublicPrivacyPolicyRoute: PublicPrivacyPolicyRoute,
   PublicProfileAnalyzerRoute: PublicProfileAnalyzerRoute,
+  PublicRateCoachingRoute: PublicRateCoachingRoute,
   PublicResetPasswordRoute: PublicResetPasswordRoute,
   PublicReviewPolicyRoute: PublicReviewPolicyRoute,
   PublicRoiCalculatorRoute: PublicRoiCalculatorRoute,
@@ -6688,6 +6730,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicIndexRoute: PublicIndexRoute,
   PublicArticleSlugRoute: PublicArticleSlugRoute,
   PublicCategorySlugRoute: PublicCategorySlugRoute,
+  PublicCoachingReviewSlugRoute: PublicCoachingReviewSlugRoute,
   PublicCoachingRegionRoute: PublicCoachingRegionRoute,
   PublicCollegeSlugRoute: PublicCollegeSlugRoute,
   PublicCollegesRegionRoute: PublicCollegesRegionRoute,
