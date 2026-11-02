@@ -78,9 +78,14 @@ export function CatSectionMarksTable() {
 }
 
 export function CatRelatedLinks({ exclude }: { exclude?: string }) {
-  const links = [{ path: CAT_HUB_PATH, label: "CAT Score Calculator 2026" }, ...CAT_SPOKES.map((s) => ({ path: s.path, label: s.h1 }))].filter((l) => l.path !== exclude);
+  const links = [...CAT_SPOKES.map((s) => ({ path: s.path, label: s.h1 }))].filter((l) => l.path !== exclude);
   return (
     <nav aria-label="CAT 2026 tools and guides" className="grid gap-2 sm:grid-cols-2">
+      {exclude !== CAT_HUB_PATH && (
+        <a href={CAT_HUB_PATH} className="cat-cta flex items-center justify-between gap-2 rounded-xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground sm:col-span-2">
+          <span>Calculate Your CAT 2026 Score</span><span className="cat-cta-arrow" aria-hidden="true">→</span>
+        </a>
+      )}
       {links.map((l) => <a key={l.path} href={l.path} className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:border-primary/40 hover:text-primary">{l.label}</a>)}
       <Link to="/tools/profile-analyzer" className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:border-primary/40 hover:text-primary">AI Profile Analyzer</Link>
     </nav>
