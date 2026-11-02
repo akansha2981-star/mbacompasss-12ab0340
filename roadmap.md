@@ -1,5 +1,12 @@
 # Roadmap
 
+## Rate Your Coaching Institute — November 2
+- [x] Database: coaching_review_institutes, aliases, student_reviews, audit logs, public safe view, stats/search functions with RLS and grants
+- [x] Shared validation/matching/CSV library with tests; server functions for search, AI matching, submission with spam flagging, public report, admin moderation, institute management, CSV export
+- [x] Public pages /rate-coaching and /coaching-review/$slug; admin dashboard /admin/coaching-reviews with sidebar entry
+- [x] 16 tests pass, build OK; preview verified end-to-end: new-institute submission, pending moderation, admin approval, live report page, unknown-slug 404; test data removed
+- [ ] Publish so the feature is live
+
 ## Advertisement extension — October 30
 - [x] Correct linked end/goal editing and seven-day extension using current saved dates; budgets and paused status remain unchanged; local date fields no longer shift UTC times
 - [x] Twenty-seven ad regression tests pass, including expired GIM deadline extension surviving resave and public eligibility; homepage renders without browser errors; preview build OK
