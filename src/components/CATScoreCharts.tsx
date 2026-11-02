@@ -9,11 +9,11 @@ import {
 
 const COLORS = {
   VARC: "#2563eb",
-  DILR: "#059669",
-  QA: "#d97706",
-  correct: "#059669",
-  incorrect: "#dc2626",
-  unattempted: "#9ca3af",
+  DILR: "#5b8fd6",
+  QA: "#9dbfe8",
+  correct: "#5b8fd6",
+  incorrect: "#c2737d",
+  unattempted: "#d5dde8",
 };
 
 const TOOLTIP_STYLE = {
@@ -45,7 +45,7 @@ export const SectionRadarChart: React.FC<{ result: CATResult }> = ({ result }) =
           <PolarAngleAxis dataKey="section" tick={{ fill: "#64748b", fontSize: 12 }} />
           <PolarRadiusAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
           <Radar name="Score" dataKey="score" stroke="#2563eb" fill="#2563eb" fillOpacity={0.2} />
-          <Radar name="Accuracy %" dataKey="accuracy" stroke="#059669" fill="#059669" fillOpacity={0.15} />
+          <Radar name="Accuracy %" dataKey="accuracy" stroke="#5b8fd6" fill="#5b8fd6" fillOpacity={0.15} />
           <Legend {...LEGEND} />
         </RadarChart>
       </ResponsiveContainer>
@@ -102,8 +102,8 @@ export const SectionScoreBar: React.FC<{ result: CATResult }> = ({ result }) => 
           <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
           <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
           <Legend {...LEGEND} />
-          <Bar dataKey="Positive Marks" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
-          <Bar dataKey="Negative Marks" fill="#dc2626" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Positive Marks" fill="#5b8fd6" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Negative Marks" fill="#c2737d" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -161,8 +161,8 @@ export const QuestionTypeAnalysis: React.FC<{ result: CATResult }> = ({ result }
           <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
           <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
           <Legend {...LEGEND} />
-          <Bar dataKey="Correct" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
-          <Bar dataKey="Incorrect" fill="#dc2626" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Correct" fill="#5b8fd6" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Incorrect" fill="#c2737d" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -215,8 +215,8 @@ export const StrengthWeaknessChart: React.FC<{ result: CATResult }> = ({ result 
             <div className="flex justify-between items-center">
               <span className="text-sm text-foreground font-medium">{d.section}</span>
               <span className={`text-xs px-2 py-0.5 rounded-full ${
-                d.strength === "Strong" ? "bg-emerald-100 text-emerald-700" :
-                d.strength === "Average" ? "bg-amber-100 text-amber-700" :
+                d.strength === "Strong" ? "bg-sky-100 text-sky-700" :
+                d.strength === "Average" ? "bg-slate-100 text-slate-700" :
                 "bg-red-100 text-destructive"
               }`}>{d.strength}</span>
             </div>
@@ -230,7 +230,7 @@ export const StrengthWeaknessChart: React.FC<{ result: CATResult }> = ({ result 
             <div className="flex gap-2 items-center">
               <span className="text-xs text-muted-foreground w-16">Attempt</span>
               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: `${d.attemptRate}%` }} />
+                <div className="h-full bg-sky-500 rounded-full" style={{ width: `${d.attemptRate}%` }} />
               </div>
               <span className="text-xs text-muted-foreground w-10 text-right">{d.attemptRate}%</span>
             </div>
@@ -316,15 +316,15 @@ export const DailySubmissionTrend: React.FC = () => {
         <AreaChart data={data}>
           <defs>
             <linearGradient id="subGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#059669" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+              <stop offset="5%" stopColor="#5b8fd6" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="#5b8fd6" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="4 4" stroke="hsl(210, 30%, 93%)" vertical={false} />
           <XAxis {...AXIS} dataKey="day" tick={{ fill: "#64748b", fontSize: 10 }} />
           <YAxis {...AXIS} tick={{ fill: "#94a3b8", fontSize: 10 }} />
           <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
-          <Area type="monotone" dataKey="submissions" stroke="#059669" strokeWidth={2} fill="url(#subGrad)" />
+          <Area type="monotone" dataKey="submissions" stroke="#5b8fd6" strokeWidth={2} fill="url(#subGrad)" />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -352,7 +352,7 @@ export const SectionAvgComparison: React.FC<{ result: CATResult }> = ({ result }
           <Legend {...LEGEND} />
           <Bar dataKey="Your Score" fill="#2563eb" radius={[8, 8, 0, 0]} maxBarSize={36} />
           <Bar dataKey="Average Score" fill="#94a3b8" radius={[8, 8, 0, 0]} maxBarSize={36} />
-          <Bar dataKey="Top 1% Score" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="Top 1% Score" fill="#5b8fd6" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -361,11 +361,11 @@ export const SectionAvgComparison: React.FC<{ result: CATResult }> = ({ result }
 
 export const AccuracyDistributionPie: React.FC = () => {
   const data = [
-    { name: "90-100%", value: 8, color: "#059669" },
+    { name: "90-100%", value: 8, color: "#5b8fd6" },
     { name: "70-90%", value: 22, color: "#2563eb" },
-    { name: "50-70%", value: 35, color: "#d97706" },
-    { name: "30-50%", value: 25, color: "#ea580c" },
-    { name: "<30%", value: 10, color: "#dc2626" },
+    { name: "50-70%", value: 35, color: "#9dbfe8" },
+    { name: "30-50%", value: 25, color: "#c2737d" },
+    { name: "<30%", value: 10, color: "#c2737d" },
   ];
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
@@ -407,7 +407,7 @@ export const DifficultyPerformanceChart: React.FC<{ result: CATResult }> = ({ re
           <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "hsl(210, 60%, 96%)" }} />
           <Legend {...LEGEND} />
           <Bar dataKey="total" name="Total Questions" fill="#94a3b8" radius={[8, 8, 0, 0]} maxBarSize={36} />
-          <Bar dataKey="correct" name="Correct" fill="#059669" radius={[8, 8, 0, 0]} maxBarSize={36} />
+          <Bar dataKey="correct" name="Correct" fill="#5b8fd6" radius={[8, 8, 0, 0]} maxBarSize={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -447,8 +447,8 @@ export const SectionDifficultyHeatmap: React.FC = () => {
     [88, 60, 35],
   ];
   const getColor = (val: number) => {
-    if (val >= 75) return "bg-emerald-100 text-emerald-800";
-    if (val >= 50) return "bg-amber-100 text-amber-800";
+    if (val >= 75) return "bg-sky-100 text-sky-800";
+    if (val >= 50) return "bg-slate-100 text-slate-800";
     return "bg-red-100 text-destructive";
   };
   return (
@@ -530,9 +530,9 @@ export const MistakeAnalysisChart: React.FC<{ result: CATResult }> = ({ result }
   const conceptual = Math.round(incorrectQ.length * 0.45);
   const timeWaste = incorrectQ.length - silly - conceptual;
   const data = [
-    { type: "Silly Mistakes", count: silly, color: "#d97706" },
-    { type: "Conceptual Errors", count: conceptual, color: "#dc2626" },
-    { type: "Time-based Guesses", count: timeWaste, color: "#6366f1" },
+    { type: "Silly Mistakes", count: silly, color: "#9dbfe8" },
+    { type: "Conceptual Errors", count: conceptual, color: "#c2737d" },
+    { type: "Time-based Guesses", count: timeWaste, color: "#2563eb" },
   ];
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5">
@@ -570,7 +570,7 @@ export const TopperComparisonBar: React.FC<{ result: CATResult }> = ({ result })
           <Legend {...LEGEND} />
           <Bar dataKey="you" name="You" fill="#2563eb" radius={[0, 8, 8, 0]} maxBarSize={22} />
           <Bar dataKey="average" name="Average" fill="#94a3b8" radius={[0, 8, 8, 0]} maxBarSize={22} />
-          <Bar dataKey="topper" name="Topper" fill="#059669" radius={[0, 8, 8, 0]} maxBarSize={22} />
+          <Bar dataKey="topper" name="Topper" fill="#5b8fd6" radius={[0, 8, 8, 0]} maxBarSize={22} />
         </BarChart>
       </ResponsiveContainer>
     </div>
