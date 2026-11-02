@@ -57,8 +57,8 @@ const TopperComparisonBar = lazyChart("TopperComparisonBar");
 /* ═══════ CONSTANTS ═══════ */
 const SECTION_COLORS: Record<string, { bg: string; text: string; accent: string; border: string }> = {
   VARC: { bg: "bg-blue-50", text: "text-primary", accent: "bg-primary", border: "border-primary/20" },
-  DILR: { bg: "bg-emerald-50", text: "text-emerald-600", accent: "bg-emerald-500", border: "border-emerald-200" },
-  QA: { bg: "bg-amber-50", text: "text-amber-600", accent: "bg-amber-500", border: "border-amber-200" },
+  DILR: { bg: "bg-primary/5", text: "text-primary", accent: "bg-primary", border: "border-primary/20" },
+  QA: { bg: "bg-primary/5", text: "text-primary", accent: "bg-primary", border: "border-primary/20" },
 };
 
 const FAKE_STEPS = [
@@ -724,7 +724,7 @@ const CATScoreCalculatorPage: React.FC = () => {
                           </thead>
                           <tbody>
                             {result.questions.map((q, i) => (
-                              <tr key={i} className={`border-b border-border/30 ${q.isCorrect ? "bg-emerald-50/50" : q.status === "Answered" ? "bg-red-50/50" : ""}`}>
+                              <tr key={i} className={`border-b border-border/30 ${q.isCorrect ? "bg-primary/5" : q.status === "Answered" ? "bg-muted/40" : ""}`}>
                                 <td className="px-4 py-2 text-foreground font-medium">Q.{q.questionNumber}</td>
                                 <td className="px-3 py-2 text-center"><span className={`${SECTION_COLORS[q.section]?.text || "text-foreground"} font-medium`}>{q.section}</span></td>
                                 <td className="text-center px-3 py-2 text-muted-foreground">{q.questionType}</td>
@@ -735,7 +735,7 @@ const CATScoreCalculatorPage: React.FC = () => {
                                 <td className="text-center px-3 py-2 text-muted-foreground">{q.correctOption || "—"}</td>
                                 <td className="text-center px-3 py-2">
                                   {q.status !== "Answered" ? <MinusCircle className="w-4 h-4 text-muted-foreground mx-auto" /> :
-                                    q.isCorrect ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /> :
+                                    q.isCorrect ? <CheckCircle2 className="w-4 h-4 text-primary mx-auto" /> :
                                       <XCircle className="w-4 h-4 text-destructive mx-auto" />}
                                 </td>
                               </tr>
