@@ -1,5 +1,8 @@
 # Roadmap
 
+## Section-wise question analysis — November 3
+- [ ] Add compact question blocks, answer-review dialog and response-derived section statistics; verify colours, filters and small-screen layout
+
 ## CAT Score Calculator brief — November 3
 - [x] Shared scoring engine with tests (marking, validation, interpolation, link host check)
 - [x] Manual entry tab, slot selector, estimated percentile band, share image, copy link, next steps, optional counselling link, anonymous score consent
