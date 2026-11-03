@@ -61,7 +61,7 @@ const PublicLayoutShell = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const location = useLocation();
   const hasPageBreadcrumbs = /^\/(article|exam|blog|category|mba-application|courses|mocks|formulas)(\/|$)/.test(location.pathname);
-  const pageLabel = location.pathname.split("/").filter(Boolean).at(-1)?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "";
+  const pageLabel = location.pathname.split("/").filter(Boolean).at(-1)?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\b(Cat|Xat|Xlri|Iim|Mba|Roi|Gk)\b/g, (w) => w.toUpperCase()) || "";
   useEffect(() => {
     let disposed = false;
     let running = false;
