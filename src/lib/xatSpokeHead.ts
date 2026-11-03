@@ -24,12 +24,7 @@ export function xatSpokeHead(path: string) {
       { type: "application/ld+json", children: JSON.stringify({
         "@context": "https://schema.org",
         "@graph": [
-          { "@type": "WebPage", "@id": `${url}#webpage`, url, name: s.title, description: s.description, inLanguage: s.lang === "hi" ? "hi-IN" : "en-IN", dateModified: MODIFIED, isPartOf: { "@id": `${SITE}/#website` } },
-          { "@type": "BreadcrumbList", itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
-            { "@type": "ListItem", position: 2, name: "XAT Score Calculator", item: `${SITE}${XAT_HUB_PATH}` },
-            { "@type": "ListItem", position: 3, name: s.h1, item: url },
-          ] },
+          { "@type": "WebPage", "@id": `${url}#webpage`, url, name: s.title, description: s.description, inLanguage: s.lang === "hi" ? "hi-IN" : "en-IN", dateModified: MODIFIED, isPartOf: { "@id": `${SITE}/#website` }, breadcrumb: { "@id": `${url}#breadcrumb` } },
           { "@type": "FAQPage", "@id": `${url}#faq`, mainEntity: s.faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
         ],
       }) },
