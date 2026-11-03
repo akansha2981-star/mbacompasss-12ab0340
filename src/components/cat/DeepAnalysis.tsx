@@ -93,5 +93,80 @@ export function DeepAnalysis({ questions }: { questions: ParsedQuestion[] }) {
         </dl>
       </Card>
     </div>
+
+    <MoreStats questions={questions} sections={sections} />
+  </div>;
+}
+
+function longestRun(qs: ParsedQuestion[], o: string) {
+  let best = 0, cur = 0;
+  for (const q of qs) { cur = questionOutcome(q) === o ? cur + 1 : 0; best = Math.max(best, cur); }
+  return best;
+}
+
+/** Further stats read straight from the sheet: attempt status, pacing within each section, answer-option habits, streaks and best/weakest sets. */
+function MoreStats({ questions, sections }: { questions: ParsedQuestion[]; sections: string[] }) {
+  const answeredOnly = questions.filter(q => q.status === "Answered").length;
+  const answeredMarked = questions.filter(q => q.status === "Answered & Marked for Review").length;
+  const markedNo = questions.filter(q => q.status === "Marked For Review").length;
+  const notAns = questions.filter(q => q.status === "Not Answered").length;
+
+  const halves = sections.map(section => {
+    const qs = questions.filter(q => q.section === section);
+    const mid = Math.ceil(qs.length / 2);
+    return { section, a: analyseQuestions(qs.slice(0, mid)), b: analyseQuestions(qs.slice(mid)) };
+  });
+
+  const mcqs = questions.filter(q => q.questionType === "MCQ");
+  const opts = ["1", "2", "3", "4"].map(o => ({
+    o,
+    chosen: mcqs.filter(q => q.chosenOption === o).length,
+    key: mcqs.filter(q => q.correctOption === o).length,
+    right: mcqs.filter(q => q.chosenOption === o && questionOutcome(q) === "correct").length,
+  }));
+
+  const sets = sections.flatMap(section => {
+    const qs = questions.filter(q => q.section === section);
+    const keys = Array.from(new Set(qs.filter(q => q.setKey).map(q => q.setKey!)));
+    return keys.map((k, i) => ({ label: `${section} ${section === "VARC" ? "Passage" : "Set"} ${i + 1}`, n: net(qs.filter(q => q.setKey === k)) }));
+  }).sort((x, y) => y.n - x.n);
+
+  return <div className="grid gap-4 md:grid-cols-2">
+    <Card title="How you handled each question" sub="Exact status recorded in your response sheet">
+      <dl className="grid grid-cols-2 gap-3">
+        <Stat label="Answered" value={answeredOnly} />
+        <Stat label="Answered & flagged" value={answeredMarked} />
+        <Stat label="Flagged, left blank" value={markedNo} />
+        <Stat label="Seen, left blank" value={notAns} />
+      </dl>
+    </Card>
+
+    <Card title="First half vs second half" sub="Accuracy in the first and second half of each section, in question order">
+      <div className="space-y-3">
+        {halves.map(h => <div key={h.section} className="flex items-center justify-between gap-3 text-sm">
+          <span className="font-medium text-foreground">{h.section}</span>
+          <span className="tabular-nums text-muted-foreground">{h.a.attempted ? pct(h.a.accuracy) : "—"} ({h.a.attempted} att.) → {h.b.attempted ? pct(h.b.accuracy) : "—"} ({h.b.attempted} att.)</span>
+        </div>)}
+      </div>
+    </Card>
+
+    <Card title="Answer option habits" sub="How often you picked each MCQ option, against how often it was the right answer">
+      <div className="grid grid-cols-4 gap-2 text-center">
+        {opts.map(x => <div key={x.o} className="rounded-md border border-border p-2">
+          <p className="text-sm text-muted-foreground">Option {x.o}</p>
+          <p className="text-base font-semibold tabular-nums text-foreground">{x.chosen}</p>
+          <p className="text-sm text-muted-foreground">key {x.key} · {x.right} right</p>
+        </div>)}
+      </div>
+    </Card>
+
+    <Card title="Streaks and sets" sub="Runs across the whole paper and your highest and lowest scoring sets">
+      <dl className="grid grid-cols-2 gap-3">
+        <Stat label="Longest correct run" value={longestRun(questions, "correct")} />
+        <Stat label="Longest wrong run" value={longestRun(questions, "wrong")} />
+        <Stat label="Best set" value={sets[0] ? `${sets[0].label} (${sets[0].n > 0 ? "+" : ""}${sets[0].n})` : "—"} />
+        <Stat label="Weakest set" value={sets.length > 1 ? `${sets[sets.length - 1].label} (${sets[sets.length - 1].n})` : "—"} />
+      </dl>
+    </Card>
   </div>;
 }
