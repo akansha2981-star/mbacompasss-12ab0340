@@ -1,88 +1,91 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
+import { CheckCircle2, XCircle, MinusCircle, ArrowUpRight, HelpCircle } from "lucide-react";
+import type { ParsedQuestion } from "@/lib/catParser";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { analyseQuestions, questionOutcome, type QuestionOutcome } from "./questionAnalysis";
 
-type Q = {
-  questionNumber: number | string;
-  section: string;
-  questionType: string;
-  status: string;
-  chosenOption?: string | null;
-  correctOption?: string | null;
-  isCorrect?: boolean;
+const tones: Record<QuestionOutcome, string> = {
+  correct: "border-answer-correct/25 bg-answer-correct-soft text-answer-correct",
+  wrong: "border-answer-wrong/25 bg-answer-wrong-soft text-answer-wrong",
+  skipped: "border-answer-skipped/25 bg-answer-skipped-soft text-answer-skipped",
+  unknown: "border-border bg-muted text-muted-foreground",
 };
+const labels: Record<QuestionOutcome, string> = { correct: "Correct", wrong: "Incorrect", skipped: "Unattempted", unknown: "Key unavailable" };
+const icons = { correct: CheckCircle2, wrong: XCircle, skipped: MinusCircle, unknown: HelpCircle };
+type Filter = "all" | QuestionOutcome;
 
-const isAnswered = (s: string) => s === "Answered" || s === "Answered & Marked for Review";
+function Legend() {
+  return <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+    {(["correct", "wrong", "skipped"] as QuestionOutcome[]).map(outcome => {
+      const Icon = icons[outcome];
+      return <span key={outcome} className={`inline-flex items-center gap-1.5 ${tones[outcome].split(" ").at(-1)}`}><Icon className="h-4 w-4" />{labels[outcome]}</span>;
+    })}
+  </div>;
+}
 
-type Filter = "all" | "correct" | "wrong" | "skipped";
-
-export function QuestionwiseSections({ questions }: { questions: Q[] }) {
-  const sections = Array.from(new Set(questions.map((q) => q.section)));
+export function QuestionwiseSections({ questions }: { questions: ParsedQuestion[] }) {
+  const sections = Array.from(new Set(questions.map(q => q.section)));
   const [filter, setFilter] = useState<Filter>("all");
+  return <div className="space-y-6">
+    <div className="flex flex-wrap gap-2" aria-label="Question filters">
+      {(["all", "correct", "wrong", "skipped"] as Filter[]).map(f => <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} aria-pressed={filter === f} onClick={() => setFilter(f)}>{f === "all" ? "All questions" : labels[f]}</Button>)}
+    </div>
+    {sections.map(section => {
+      const all = questions.filter(q => q.section === section);
+      const stats = analyseQuestions(all);
+      const list = all.filter(q => filter === "all" || questionOutcome(q) === filter);
+      return <section key={section} className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-3">
+          <h3 className="text-xl font-semibold text-foreground">{section}</h3>
+          <p className="text-sm text-muted-foreground">{stats.correct} correct · {stats.wrong} incorrect · {stats.skipped} unattempted</p>
+        </div>
+        {list.length === 0 ? <p className="py-3 text-sm text-muted-foreground">No questions match this filter.</p> :
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((q, i) => {
+              const outcome = questionOutcome(q), Icon = icons[outcome];
+              return <article key={`${q.questionNumber}-${i}`} className={`min-w-0 rounded-lg border p-4 ${tones[outcome]}`}>
+                <div className="flex items-center justify-between gap-2"><h4 className="text-base font-semibold">Question {q.questionNumber}</h4><Icon className="h-4 w-4 shrink-0" /></div>
+                <p className="mt-1 text-sm">{q.questionType === "SA" ? "TITA" : "MCQ"} · {labels[outcome]}</p>
+                <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-current/15 pt-3 text-sm">
+                  <div className="min-w-0"><dt className="text-muted-foreground">You marked</dt><dd className="mt-1 break-words font-semibold">{outcome === "skipped" ? "Not attempted" : q.chosenOption || "Not available"}</dd></div>
+                  <div className="min-w-0"><dt className="text-muted-foreground">Correct answer</dt><dd className="mt-1 break-words font-semibold">{q.correctOption || "Key unavailable"}</dd></div>
+                </dl>
+              </article>;
+            })}
+          </div>}
+      </section>;
+    })}
+  </div>;
+}
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        {(["all", "correct", "wrong", "skipped"] as Filter[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`rounded-full border px-3 py-1 text-sm font-medium capitalize transition-colors ${filter === f ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:bg-muted"}`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-      {sections.map((sec) => {
-        const all = questions.filter((q) => q.section === sec);
-        const correct = all.filter((q) => isAnswered(q.status) && q.isCorrect).length;
-        const wrong = all.filter((q) => isAnswered(q.status) && !q.isCorrect).length;
-        const skipped = all.length - correct - wrong;
-        const list = all.filter((q) => {
-          const ans = isAnswered(q.status);
-          if (filter === "correct") return ans && q.isCorrect;
-          if (filter === "wrong") return ans && !q.isCorrect;
-          if (filter === "skipped") return !ans;
-          return true;
-        });
-        return (
-          <div key={sec} className="rounded-xl border border-border bg-card p-3 shadow-sm md:p-4">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
-              <div>
-                <p className="font-semibold text-foreground">{sec}</p>
-                <p className="text-sm text-muted-foreground">{all.length} questions</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-sm tabular-nums">
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary"><CheckCircle2 className="h-3.5 w-3.5" />{correct} correct</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-destructive"><XCircle className="h-3.5 w-3.5" />{wrong} wrong</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-muted-foreground"><MinusCircle className="h-3.5 w-3.5" />{skipped} skipped</span>
-              </div>
-            </div>
-            {list.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">No questions in this filter.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-                {list.map((q, i) => {
-                  const ans = isAnswered(q.status);
-                  const tone = !ans ? "border-border bg-muted/30" : q.isCorrect ? "border-primary/30 bg-primary/5" : "border-destructive/30 bg-destructive/5";
-                  return (
-                    <div key={i} className={`rounded-lg border p-2.5 ${tone}`}>
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-foreground">Q{q.questionNumber}</span>
-                        {!ans ? <MinusCircle className="h-4 w-4 text-muted-foreground" /> : q.isCorrect ? <CheckCircle2 className="h-4 w-4 text-primary" /> : <XCircle className="h-4 w-4 text-destructive" />}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{q.questionType}</p>
-                      <div className="mt-1 flex justify-between text-sm">
-                        <span className="text-muted-foreground">You: <span className="font-medium text-foreground">{q.chosenOption || "—"}</span></span>
-                        <span className="text-muted-foreground">Key: <span className="font-medium text-foreground">{q.correctOption || "—"}</span></span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
+export function SectionQuestionAnalysis({ questions }: { questions: ParsedQuestion[] }) {
+  const [open, setOpen] = useState(false);
+  const sections = Array.from(new Set(questions.map(q => q.section)));
+  return <div className="space-y-5">
+    <div className="flex flex-wrap items-center justify-between gap-3"><Legend /><Button onClick={() => setOpen(true)} variant="outline"><ArrowUpRight className="mr-2 h-4 w-4" />Check detailed view</Button></div>
+    <div className="grid gap-4 md:grid-cols-3">
+      {sections.map(section => {
+        const list = questions.filter(q => q.section === section);
+        const stats = analyseQuestions(list);
+        return <article key={section} className="min-w-0 rounded-lg border border-border bg-card p-4">
+          <div className="flex items-baseline justify-between gap-2 border-b border-border pb-3"><h3 className="text-xl font-semibold text-foreground">{section}</h3><span className="text-sm text-muted-foreground">{list.length} questions</span></div>
+          <div className="my-4 flex items-baseline gap-2"><span className="text-2xl font-bold tabular-nums text-primary">{stats.earnedMarks - stats.negativeMarks}</span><span className="text-sm text-muted-foreground">/ {list.length * 3} marks{stats.unknown ? " · provisional" : ""}</span></div>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+            {[["Correct", stats.correct], ["Incorrect", stats.wrong], ["Unattempted", stats.skipped], ["Accuracy", `${stats.accuracy.toFixed(1)}%`], ["Attempt rate", `${stats.attemptRate.toFixed(1)}%`], ["Negative marks", stats.negativeMarks ? `−${stats.negativeMarks}` : "0"], ["Marks earned", `+${stats.earnedMarks}`], ["MCQ / TITA", `${stats.mcq} / ${stats.tita}`]].map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 font-semibold tabular-nums text-foreground">{value}</dd></div>)}
+          </dl>
+          {stats.unknown > 0 && <p className="mt-3 text-sm text-muted-foreground">{stats.unknown} attempted answers awaiting an answer key.</p>}
+          <div className="mt-4 border-t border-border pt-4"><p className="mb-3 text-sm font-medium text-foreground">Question-wise analysis</p><div className="grid grid-cols-6 gap-1.5">
+            {list.map((q, i) => <Button key={`${q.questionNumber}-${i}`} variant="outline" className={`h-10 min-w-0 px-0 text-sm tabular-nums ${tones[questionOutcome(q)]}`} title={`Question ${q.questionNumber}: ${labels[questionOutcome(q)]}`} aria-label={`${section} question ${q.questionNumber}: ${labels[questionOutcome(q)]}`} onClick={() => setOpen(true)}>{q.questionNumber}</Button>)}
+          </div></div>
+        </article>;
       })}
     </div>
-  );
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="flex max-h-[85dvh] w-[calc(100%-2rem)] max-w-5xl flex-col overflow-hidden p-4 sm:p-6">
+        <DialogHeader className="shrink-0 pr-6"><DialogTitle className="text-xl">Detailed question analysis</DialogTitle><DialogDescription>VARC, DILR and QA · your marked answers against the response-sheet answer key</DialogDescription></DialogHeader>
+        <div className="min-h-0 overflow-y-auto pr-1"><QuestionwiseSections questions={questions} /></div>
+      </DialogContent>
+    </Dialog>
+  </div>;
 }
