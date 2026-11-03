@@ -47,6 +47,7 @@ export function QuestionwiseSections({ questions }: { questions: ParsedQuestion[
               return <article key={`${q.questionNumber}-${i}`} className={`min-w-0 rounded-lg border p-4 ${tones[outcome]}`}>
                 <div className="flex items-center justify-between gap-2"><h4 className="text-base font-semibold">Question {q.questionNumber}</h4><Icon className="h-4 w-4 shrink-0" /></div>
                 <p className="mt-1 text-sm">{q.questionType === "SA" ? "TITA" : "MCQ"} · {labels[outcome]}</p>
+                {q.questionText && <p className="mt-3 break-words text-base leading-relaxed text-foreground">{q.questionText}</p>}
                 <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-current/15 pt-3 text-sm">
                   <div className="min-w-0"><dt className="text-muted-foreground">You marked</dt><dd className="mt-1 break-words font-semibold">{outcome === "skipped" ? "Not attempted" : q.chosenOption || "Not available"}</dd></div>
                   <div className="min-w-0"><dt className="text-muted-foreground">Correct answer</dt><dd className="mt-1 break-words font-semibold">{q.correctOption || "Key unavailable"}</dd></div>
