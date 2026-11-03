@@ -68,3 +68,4 @@
 - [WhatsApp Automation](mem://features/whatsapp-automation) — /admin/whatsapp-automation bulk campaigns, daily limit, 3-attempt retry queue, hourly cron dispatch through SmartPing partner API
 - [Course Refund Policy](mem://features/course-refund-policy) — All course purchases are final and non-refundable; disclose clearly before payment
 - [Marketing research](mem://reference/marketing-research) — Research and plan saved in Project Files 2026-10-17
+- [XAT score calculator](mem://features/xat-score-calculator) — XAT 2027 hub + 9 guide pages mirroring CAT; +1/−0.25, −0.10 per skip after 8, GK excluded
