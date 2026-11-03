@@ -160,7 +160,7 @@ function findSetKey(panel: Element): string | undefined {
   const idx = text.search(/SubQuestion No\s*:/i);
   if (idx <= 0) return undefined;
   const passage = text.slice(0, idx).replace(/^Question Number\s*:\s*\d+\s*/i, "").trim();
-  return passage ? passage.slice(0, 160) : undefined;
+  return passage ? passage.slice(-160) : undefined;
 }
 
 function answersMatch(given: string, key: string): boolean {
