@@ -232,7 +232,7 @@ export const XAT_SPOKES: XatSpoke[] = [
         "Say you answered 60 Part 1 questions out of 76, with 48 correct and 12 wrong. Your raw score is 48 − (12 × 0.25) = 45. You left 16 questions, so 8 are free and 8 cost 0.10 each: a 0.8 penalty. Your final Part 1 score is 44.2.",
       ] },
       { heading: "Should you guess in XAT?", body: [
-        "A wrong answer costs 0.25 while a skip beyond 8 costs 0.10. With five options, a blind guess has a 20% chance of +1, which works out to about −0.0 expected marks compared with −0.10 for a skip. Eliminating even one option makes an educated guess better than skipping, but random guessing across many questions adds risk.",
+        "A wrong answer costs 0.25 while a skip beyond 8 costs 0.10. With five options, a blind guess has a 20% chance of +1, which works out to 0 expected marks, compared with −0.10 for a skip beyond the free 8. So once you have used your 8 free skips, an educated guess is usually better than leaving a question blank, and eliminating even one option improves the odds further. Random guessing still adds risk to your score.",
       ] },
       { heading: "How to reduce marks lost", body: [], list: [
         "Plan to attempt enough questions that you skip no more than 8 in Part 1.",
