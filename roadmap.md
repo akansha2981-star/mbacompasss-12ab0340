@@ -1,5 +1,9 @@
 # Roadmap
 
+## Section-wise question analysis — November 3
+- [x] Add compact question blocks, answer-review dialog and response-derived section statistics; 15 tests pass and temporary browser inputs verify colours, filters and phone layout without overflow
+- [ ] Verify full response-sheet/contact flow with a real student sheet; no real sheet available for this check
+
 ## CAT Score Calculator brief — November 3
 - [x] Shared scoring engine with tests (marking, validation, interpolation, link host check)
 - [x] Manual entry tab, slot selector, estimated percentile band, share image, copy link, next steps, optional counselling link, anonymous score consent

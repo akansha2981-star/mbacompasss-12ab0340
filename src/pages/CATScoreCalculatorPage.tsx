@@ -29,7 +29,7 @@ import {
 import { Link } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { QuestionwiseSections } from "@/components/cat/QuestionwiseSections";
+import { QuestionwiseSections, SectionQuestionAnalysis } from "@/components/cat/QuestionwiseSections";
 const loadCharts = () => import("@/components/CATScoreCharts");
 // Charts load after first paint so the page opens fast.
 function lazyChart(name: string): React.ComponentType<any> {
@@ -605,42 +605,13 @@ const CATScoreCalculatorPage: React.FC = () => {
             {/* Section-wise Breakdown */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <ResultHead index="03" title="Section-wise Breakdown" sub="Attempts, accuracy and marks for VARC, DILR and QA" />
-              <div className="grid md:grid-cols-3 gap-3">
-                {result.sections.map((section, i) => {
-                  const maxSec = section.total * 3;
-                  return (
-                    <motion.div key={section.section} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}
-                      className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                      <div className="flex items-baseline justify-between">
-                        <h3 className="text-base font-semibold uppercase tracking-wider text-muted-foreground">{section.section}</h3>
-                        <p className="text-foreground"><span className="text-2xl font-bold tabular-nums text-primary">{section.score}</span><span className="text-sm text-muted-foreground"> / {maxSec}</span></p>
-                      </div>
-                      <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-muted">
-                        <div className="bg-primary" style={{ width: `${(section.correct / section.total) * 100}%` }} />
-                        <div className="bg-primary/30" style={{ width: `${(section.incorrect / section.total) * 100}%` }} />
-                      </div>
-                      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                        {[["Correct", section.correct], ["Wrong", section.incorrect], ["Skipped", section.unattempted]].map(([l, v]) => (
-                          <div key={l as string} className="rounded-lg bg-muted/50 py-2">
-                            <p className="text-base font-bold tabular-nums text-foreground">{v}</p>
-                            <p className="text-sm text-muted-foreground">{l}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-3 flex justify-between border-t border-border pt-3 text-sm">
-                        <span className="text-muted-foreground">Accuracy · {section.attempted}/{section.total} attempted</span>
-                        <span className="font-semibold text-foreground tabular-nums">{section.accuracy.toFixed(1)}%</span>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+              <SectionQuestionAnalysis questions={result.questions} />
             </SectionInView>
 
             {/* Question-wise Details by section */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="04" title="Question-wise Details" sub="Open a section to review every answer against the key" />
-              <QuestionwiseSections questions={result.questions as any} />
+              <ResultHead index="04" title="Question-wise Details" sub="Your answers and the correct key, grouped by section" />
+              <QuestionwiseSections questions={result.questions} />
             </SectionInView>
 
             {/* AI Insights Section */}

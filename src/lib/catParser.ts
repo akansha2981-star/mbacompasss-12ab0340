@@ -9,6 +9,7 @@ export interface ParsedQuestion {
   chosenOption: string | null;
   correctOption: string | null;
   isCorrect: boolean;
+  questionText?: string;
 }
 
 export interface SectionScore {
@@ -225,6 +226,9 @@ function parseQuestions(doc: Document): ParsedQuestion[] {
         : null;
 
       const correctOption = findCorrectOption(panel, questionType);
+      // Keep question wording as plain text only; never render response-sheet HTML.
+      const questionRow = panel.querySelector(".questionRowTbl tr");
+      const questionText = questionRow?.textContent?.replace(/^\s*Q\.\s*\d+\s*/, "").replace(/\s+/g, " ").trim() || undefined;
 
       // Determine if correct
       let isCorrect = false;
@@ -246,6 +250,7 @@ function parseQuestions(doc: Document): ParsedQuestion[] {
         chosenOption,
         correctOption,
         isCorrect,
+        questionText,
       });
     });
   });

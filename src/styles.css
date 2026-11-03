@@ -64,6 +64,12 @@
   --color-application-warning-soft: var(--application-warning-soft);
   --color-application-danger: var(--application-danger);
   --color-application-danger-soft: var(--application-danger-soft);
+  --color-answer-correct: oklch(0.43 0.12 151);
+  --color-answer-correct-soft: oklch(0.96 0.025 151);
+  --color-answer-wrong: oklch(0.48 0.17 26);
+  --color-answer-wrong-soft: oklch(0.96 0.02 26);
+  --color-answer-skipped: oklch(0.45 0.09 85);
+  --color-answer-skipped-soft: oklch(0.97 0.07 95);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
