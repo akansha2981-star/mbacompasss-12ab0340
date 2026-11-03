@@ -10,6 +10,10 @@ export interface ParsedQuestion {
   correctOption: string | null;
   isCorrect: boolean;
   questionText?: string;
+  /** True when the sheet status says the question was marked for review. */
+  markedForReview?: boolean;
+  /** Shared passage/set identity for RC, DILR and QA sets (from "SubQuestion No" panels). */
+  setKey?: string;
 }
 
 export interface SectionScore {
@@ -150,6 +154,15 @@ function findCorrectOption(panel: Element, questionType: string): string | null 
   return null;
 }
 
+function findSetKey(panel: Element): string | undefined {
+  const tbl = panel.querySelector(".questionRowTbl");
+  const text = cellText(tbl);
+  const idx = text.search(/SubQuestion No\s*:/i);
+  if (idx <= 0) return undefined;
+  const passage = text.slice(0, idx).replace(/^Question Number\s*:\s*\d+\s*/i, "").trim();
+  return passage ? passage.slice(-160) : undefined;
+}
+
 function answersMatch(given: string, key: string): boolean {
   const g = given.trim().toLowerCase();
   return key.split(/[,;]|\bor\b/i).map((k) => k.trim().toLowerCase()).filter(Boolean).some((k) => {
@@ -219,6 +232,8 @@ function parseQuestions(doc: Document): ParsedQuestion[] {
         correctOption,
         isCorrect,
         questionText,
+        markedForReview: /marked/i.test(rawStatus),
+        setKey: findSetKey(panel),
       });
     });
   });

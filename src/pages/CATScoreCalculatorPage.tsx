@@ -30,7 +30,8 @@ import {
 import { Link } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { QuestionwiseSections, SectionQuestionAnalysis } from "@/components/cat/QuestionwiseSections";
+import { SectionQuestionAnalysis } from "@/components/cat/QuestionwiseSections";
+import { DeepAnalysis } from "@/components/cat/DeepAnalysis";
 const loadCharts = () => import("@/components/CATScoreCharts");
 // Charts load after first paint so the page opens fast.
 function lazyChart(name: string): React.ComponentType<any> {
@@ -621,10 +622,10 @@ const CATScoreCalculatorPage: React.FC = () => {
               <SectionQuestionAnalysis questions={result.questions} />
             </SectionInView>
 
-            {/* Question-wise Details by section */}
+            {/* Deeper analysis from the response sheet */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="04" title="Question-wise Details" sub="Your answers and the correct key, grouped by section" />
-              <QuestionwiseSections questions={result.questions} />
+              <ResultHead index="04" title="Deeper Analysis" sub="Set-wise scores, MCQ vs TITA, review flags and marks lost" />
+              <DeepAnalysis questions={result.questions} />
             </SectionInView>
 
             {/* AI Insights Section */}
