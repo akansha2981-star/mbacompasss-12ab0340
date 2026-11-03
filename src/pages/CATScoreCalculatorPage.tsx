@@ -162,17 +162,27 @@ const ResultHead = ({ index, title, sub }: { index: string; title: string; sub: 
 );
 
 /* ═══════ SCORE SCALE: you vs 2026 average ═══════ */
-const ScoreScale = ({ you, max, avg, count, top }: { you: number; max: number; avg: number; count: number; top: number }) => {
+const ScoreScale = ({ you, max, avg, count, top, tiers }: { you: number; max: number; avg: number; count: number; top: number; tiers?: { top10: number | null; top25: number | null; top50: number | null; overall: number | null } }) => {
   const min = -Math.round(max / 3);
   const pos = (v: number) => `${Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100))}%`;
   const hasAvg = count > 0;
-  const diff = Math.round((you - avg) * 10) / 10;
+  const show = (v: number | null | undefined) => (hasAvg && v != null ? v : "—");
+  const cells: [string, number | string, boolean][] = [
+    ["Your score", you, true],
+    ["Top 10% average", show(tiers?.top10), false],
+    ["Top 25% average", show(tiers?.top25), false],
+    ["Top 50% average", show(tiers?.top50), false],
+    ["Overall average", show(tiers?.overall ?? avg), false],
+  ];
   return (
     <div className="rounded-xl border border-border bg-card p-4 md:p-6 shadow-sm">
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div><p className="text-sm text-muted-foreground">Your score</p><p className="text-2xl font-bold text-primary tabular-nums">{you}</p></div>
-        <div><p className="text-sm text-muted-foreground">2026 average</p><p className="text-2xl font-bold text-foreground tabular-nums">{hasAvg ? avg : "—"}</p></div>
-        <div><p className="text-sm text-muted-foreground">Difference</p><p className="text-2xl font-bold text-foreground tabular-nums">{hasAvg ? `${diff > 0 ? "+" : ""}${diff}` : "—"}</p></div>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+        {cells.map(([label, value, mine]) => (
+          <div key={label} className={`rounded-lg p-2 ${mine ? "bg-primary/10 col-span-2 sm:col-span-1" : "bg-muted/50"}`}>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className={`text-2xl font-bold tabular-nums ${mine ? "text-primary" : "text-foreground"}`}>{value}</p>
+          </div>
+        ))}
       </div>
       <div className="relative mt-10 mb-8 mx-2">
         <div className="h-2.5 rounded-full bg-gradient-to-r from-muted via-primary/30 to-primary" />
@@ -221,10 +231,12 @@ const useLiveStats = () => {
       // Real averages for this exam cycle (submissions made in 2026)
       const yr = data.filter(d => new Date(d.created_at).getFullYear() === 2026);
       const mean = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : 0);
+      const yrScores = yr.map(d => Number(d.total_score) || 0);
       const year = {
         count: yr.length,
-        avg: mean(yr.map(d => Number(d.total_score) || 0)),
-        highest: yr.length ? Math.max(...yr.map(d => Number(d.total_score) || 0)) : 0,
+        avg: mean(yrScores),
+        tiers: cohortAverages(yrScores),
+        highest: yr.length ? Math.max(...yrScores) : 0,
         sections: yr.length ? {
           VARC: mean(yr.map(d => Number(d.varc_score) || 0)),
           DILR: mean(yr.map(d => Number(d.dilr_score) || 0)),
