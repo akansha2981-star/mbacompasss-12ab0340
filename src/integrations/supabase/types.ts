@@ -16460,6 +16460,147 @@ export type Database = {
         }
         Relationships: []
       }
+      xat_calculator_settings: {
+        Row: {
+          data: Json
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          data?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          data?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      xat_score_aggregates: {
+        Row: {
+          created_at: string
+          dm_score: number | null
+          gk_score: number | null
+          id: string
+          qadi_score: number | null
+          source: string
+          total_score: number
+          valr_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          dm_score?: number | null
+          gk_score?: number | null
+          id?: string
+          qadi_score?: number | null
+          source?: string
+          total_score: number
+          valr_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          dm_score?: number | null
+          gk_score?: number | null
+          id?: string
+          qadi_score?: number | null
+          source?: string
+          total_score?: number
+          valr_score?: number | null
+        }
+        Relationships: []
+      }
+      xat_score_submissions: {
+        Row: {
+          accuracy: number
+          application_no: string | null
+          attempted: number
+          candidate_name: string
+          correct: number
+          created_at: string
+          dm_score: number | null
+          email: string
+          gk_score: number | null
+          id: string
+          incorrect: number
+          max_score: number
+          phone: string
+          phone_verified: boolean
+          qadi_score: number | null
+          questions_data: Json | null
+          response_sheet_url: string | null
+          sections_data: Json | null
+          test_date: string | null
+          test_time: string | null
+          total_questions: number
+          total_score: number
+          unattempted: number
+          unattempted_penalty: number
+          user_id: string | null
+          valr_score: number | null
+        }
+        Insert: {
+          accuracy?: number
+          application_no?: string | null
+          attempted?: number
+          candidate_name: string
+          correct?: number
+          created_at?: string
+          dm_score?: number | null
+          email: string
+          gk_score?: number | null
+          id?: string
+          incorrect?: number
+          max_score?: number
+          phone: string
+          phone_verified?: boolean
+          qadi_score?: number | null
+          questions_data?: Json | null
+          response_sheet_url?: string | null
+          sections_data?: Json | null
+          test_date?: string | null
+          test_time?: string | null
+          total_questions?: number
+          total_score?: number
+          unattempted?: number
+          unattempted_penalty?: number
+          user_id?: string | null
+          valr_score?: number | null
+        }
+        Update: {
+          accuracy?: number
+          application_no?: string | null
+          attempted?: number
+          candidate_name?: string
+          correct?: number
+          created_at?: string
+          dm_score?: number | null
+          email?: string
+          gk_score?: number | null
+          id?: string
+          incorrect?: number
+          max_score?: number
+          phone?: string
+          phone_verified?: boolean
+          qadi_score?: number | null
+          questions_data?: Json | null
+          response_sheet_url?: string | null
+          sections_data?: Json | null
+          test_date?: string | null
+          test_time?: string | null
+          total_questions?: number
+          total_score?: number
+          unattempted?: number
+          unattempted_penalty?: number
+          user_id?: string | null
+          valr_score?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       coaching_public_reviews: {
@@ -17447,6 +17588,7 @@ export type Database = {
           total: number
         }[]
       }
+      xat_live_stats: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
