@@ -1014,7 +1014,7 @@ const CATScoreCalculatorPage: React.FC = () => {
               { q: "Can I calculate scores for multiple slots?", a: "Yes! You can calculate scores for any slot by pasting the respective response sheet HTML. Each slot's difficulty may vary, which is factored into the percentile estimation." },
               { q: "What if my response sheet URL is not working?", a: "The CAT response sheet CDN blocks direct fetching. You need to open it in your browser, view the page source (Ctrl+U), copy all the HTML code, and paste it in our calculator." },
               { q: "What is the difference between MCQ and TITA in CAT?", a: "MCQs (Multiple Choice Questions) have 4 options with +3 for correct and -1 for wrong answers. TITA (Type In The Answer) questions require typing numeric/text answers with +3 for correct and 0 for wrong — no negative marking." },
-              { q: "Can I use this calculator for XAT, SNAP, or other MBA exams?", a: "Currently, this tool is specifically designed for CAT response sheets. We plan to add support for XAT, SNAP, NMAT, and other MBA entrance exams soon." },
+              { q: "Can I use this calculator for XAT, SNAP, or other MBA exams?", a: "This tool is built for CAT response sheets. For XAT, use the MBA Compass XAT Score Calculator at /tools/xat-score-calculator." },
             ].map((faq, i) => (
               <SectionInView key={i} delay={i * 0.03}>
                 <details className="bg-card border border-border rounded-xl shadow-xs group">

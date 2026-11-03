@@ -3,8 +3,9 @@ import { coachingExams, coachingModes, matchesCoachingHub, type CoachingHub } fr
 export const MAX_PRERENDER_PAGES = 8000;
 export const PUBLIC_STATIC_PATHS = [
   "/", "/colleges", "/coaching", "/exam", "/blog", "/compare", "/mocks", "/freebies",
-  "/tools/roi-calculator", "/tools/cat-score-calculator", "/tools/college-shortlister", "/tools/profile-analyzer", "/contact",
+  "/tools/roi-calculator", "/tools/cat-score-calculator", "/tools/xat-score-calculator", "/tools/college-shortlister", "/tools/profile-analyzer", "/contact",
   "/tools", "/tools/college-finder", "/tools/iim-waitlist-movement", "/start-here",
+  "/xat-percentile-predictor", "/xat-score-vs-percentile-2027", "/xat-response-sheet-2027", "/xat-answer-key-2027", "/xat-cutoff-2027", "/xat-negative-marking-calculator", "/xlri-call-predictor", "/xat-marking-scheme", "/hi/xat-score-calculator",
   "/cat-percentile-predictor", "/cat-score-vs-percentile-2026", "/cat-response-sheet-2026", "/cat-answer-key-2026-slot-1", "/cat-answer-key-2026-slot-2", "/cat-answer-key-2026-slot-3", "/cat-normalization-explained", "/iim-call-predictor", "/cat-composite-score-calculator", "/cat-cutoff-2026", "/hi/cat-score-calculator",
 ];
 export const PUBLIC_SITEMAP_STATIC_PATHS = [

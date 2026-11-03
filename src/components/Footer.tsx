@@ -61,6 +61,7 @@ const Footer = () => {
               <li><Link to="/tools/profile-analyzer" className="hover:text-primary-foreground transition-colors">AI Profile Analyser</Link></li>
               <li><Link to="/tools/cat-score-calculator" className="hover:text-primary-foreground transition-colors">CAT Score Calculator</Link></li>
               <li><Link to="/cat-percentile-predictor" className="hover:text-primary-foreground transition-colors">CAT Percentile Predictor</Link></li>
+              <li><Link to="/tools/xat-score-calculator" className="hover:text-primary-foreground transition-colors">XAT Score Calculator</Link></li>
               <li><Link to="/tools/roi-calculator" className="hover:text-primary-foreground transition-colors">MBA ROI Calculator</Link></li>
               <li><Link to="/business-inquiries" className="hover:text-primary-foreground transition-colors">Business Inquiries</Link></li>
               <li><Link to="/list-your-business" className="hover:text-primary-foreground transition-colors">List Your Brand</Link></li>

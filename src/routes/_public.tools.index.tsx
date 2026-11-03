@@ -3,6 +3,7 @@ import { publicPageHead } from "@/lib/publicPageHead";
 import { ArrowUpRight } from "lucide-react";
 const tools = [
   { path: "/tools/cat-score-calculator", name: "CAT Score Calculator" },
+  { path: "/tools/xat-score-calculator", name: "XAT Score Calculator" },
   { path: "/tools/roi-calculator", name: "MBA ROI Calculator" },
   { path: "/tools/profile-analyzer", name: "Profile Analyser" },
   { path: "/tools/college-finder", name: "Coaching Finder" },
