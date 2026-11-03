@@ -2077,3 +2077,12 @@ html, body, #root {
 @keyframes cat-cta-shine { 0% { transform: translateX(-100%); } 60%,100% { transform: translateX(100%); } }
 @keyframes cat-cta-nudge { 0%,100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
 @media (prefers-reduced-motion: reduce) { .cat-cta, .cat-cta::after, .cat-cta-arrow { animation: none; } }
+
+/* XAT calculator pages reuse the CAT grid with XAT section marks */
+.cat-score-pattern.xat-pattern {
+  background-image:
+    radial-gradient(circle at 15% 10%, hsl(var(--primary) / 0.10), transparent 45%),
+    url("/patterns/xat-score.svg"),
+    linear-gradient(hsl(var(--primary) / 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.13) 1px, transparent 1px);
+}

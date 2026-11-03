@@ -8,7 +8,7 @@ import { XatPercentileTable, XatCutoffTable, XatAnswerKeyStatus, XatRelatedLinks
 export default function XatSpokePage({ spoke }: { spoke: XatSpoke }) {
   const hi = spoke.lang === "hi";
   return (
-    <div className="cat-score-pattern min-h-screen" lang={hi ? "hi" : "en"}>
+    <div className="cat-score-pattern xat-pattern min-h-screen" lang={hi ? "hi" : "en"}>
       <article className="mx-auto max-w-3xl space-y-6 px-4 py-6 md:py-10">
         <XatStatusBanner />
         <header>
