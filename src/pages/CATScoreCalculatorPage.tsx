@@ -29,6 +29,7 @@ import {
 import { Link } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { QuestionwiseSections } from "@/components/cat/QuestionwiseSections";
 const loadCharts = () => import("@/components/CATScoreCharts");
 // Charts load after first paint so the page opens fast.
 function lazyChart(name: string): React.ComponentType<any> {
@@ -636,9 +637,15 @@ const CATScoreCalculatorPage: React.FC = () => {
               </div>
             </SectionInView>
 
+            {/* Question-wise Details by section */}
+            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
+              <ResultHead index="04" title="Question-wise Details" sub="Open a section to review every answer against the key" />
+              <QuestionwiseSections questions={result.questions as any} />
+            </SectionInView>
+
             {/* AI Insights Section */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="04" title="AI-Powered Performance Insights" sub="Personalised analysis based on your response data" />
+              <ResultHead index="05" title="AI-Powered Performance Insights" sub="Personalised analysis based on your response data" />
               <div className="grid md:grid-cols-2 gap-3">
                 {(() => {
                   const bestSection = [...result.sections].sort((a, b) => b.accuracy - a.accuracy)[0];
@@ -673,7 +680,7 @@ const CATScoreCalculatorPage: React.FC = () => {
 
             {/* Peer Comparison */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="05" title="Peer Comparison" sub="Section scores against fellow aspirants and toppers" />
+              <ResultHead index="06" title="Peer Comparison" sub="Section scores against fellow aspirants and toppers" />
               <div className="grid md:grid-cols-2 gap-3">
                 <SectionAvgComparison result={result} averages={liveStats?.year.count ? liveStats.year.sections : undefined} />
                 <TopperComparisonBar result={result} />
@@ -682,7 +689,7 @@ const CATScoreCalculatorPage: React.FC = () => {
 
             {/* Visual Analysis */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="06" title="Visual Analysis" sub="Your attempt pattern, accuracy and marks visualised" />
+              <ResultHead index="07" title="Visual Analysis" sub="Your attempt pattern, accuracy and marks visualised" />
               <div className="grid md:grid-cols-2 gap-3">
                 <SectionRadarChart result={result} />
                 <AttemptBreakdownPie result={result} />
@@ -695,61 +702,12 @@ const CATScoreCalculatorPage: React.FC = () => {
 
             {/* Deep Performance Insights */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="07" title="Deep Performance Insights" sub="Strengths, mistakes and difficulty-level performance" />
+              <ResultHead index="08" title="Deep Performance Insights" sub="Strengths, mistakes and difficulty-level performance" />
               <div className="grid md:grid-cols-2 gap-3">
                 <StrengthWeaknessChart result={result} />
                 <MistakeAnalysisChart result={result} />
                 <DifficultyPerformanceChart result={result} />
                 <SectionDifficultyHeatmap />
-              </div>
-            </SectionInView>
-            {/* Question-wise Detail */}
-            <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
-                <button onClick={() => setShowQuestions(!showQuestions)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    <span className="text-foreground font-bold">Question-wise Details</span>
-                    <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{result.questions.length} questions</span>
-                  </div>
-                  {showQuestions ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
-                </button>
-                <AnimatePresence>
-                  {showQuestions && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                        <table className="w-full text-xs">
-                          <thead className="sticky top-0 bg-card z-10">
-                            <tr className="border-b border-border">
-                              {["Q#", "Section", "Type", "Status", "Your Ans", "Correct", "Result"].map(h => (
-                                <th key={h} className={`${h === "Q#" ? "text-left px-4" : "text-center px-3"} py-2.5 text-muted-foreground font-medium`}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {result.questions.map((q, i) => (
-                              <tr key={i} className={`border-b border-border/30 ${q.isCorrect ? "bg-primary/5" : q.status === "Answered" ? "bg-muted/40" : ""}`}>
-                                <td className="px-4 py-2 text-foreground font-medium">Q.{q.questionNumber}</td>
-                                <td className="px-3 py-2 text-center"><span className={`${SECTION_COLORS[q.section]?.text || "text-foreground"} font-medium`}>{q.section}</span></td>
-                                <td className="text-center px-3 py-2 text-muted-foreground">{q.questionType}</td>
-                                <td className="text-center px-3 py-2">
-                                  <span className={`text-xs px-2 py-0.5 rounded-full ${q.status === "Answered" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{q.status}</span>
-                                </td>
-                                <td className="text-center px-3 py-2 text-foreground font-medium">{q.chosenOption || "—"}</td>
-                                <td className="text-center px-3 py-2 text-muted-foreground">{q.correctOption || "—"}</td>
-                                <td className="text-center px-3 py-2">
-                                  {q.status !== "Answered" ? <MinusCircle className="w-4 h-4 text-muted-foreground mx-auto" /> :
-                                    q.isCorrect ? <CheckCircle2 className="w-4 h-4 text-primary mx-auto" /> :
-                                      <XCircle className="w-4 h-4 text-destructive mx-auto" />}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             </SectionInView>
 
