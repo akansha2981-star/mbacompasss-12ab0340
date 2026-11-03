@@ -267,6 +267,13 @@
       "when": 1793653037389,
       "tag": "0037_cat_calculator_settings_and_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793707785960,
+      "tag": "0038_migration",
+      "breakpoints": true
     }
   ]
 }

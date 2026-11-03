@@ -49,7 +49,7 @@ export interface CATResult {
   estimatedPercentile: number;
 }
 
-function extractCandidateInfo(doc: Document) {
+export function extractCandidateInfo(doc: Document) {
   const info: Record<string, string> = {};
   const infoPanel = doc.querySelector(".main-info-pnl");
   if (infoPanel) {
@@ -175,7 +175,7 @@ function answersMatch(given: string, key: string): boolean {
   });
 }
 
-function parseQuestions(doc: Document): ParsedQuestion[] {
+export function parseQuestions(doc: Document): ParsedQuestion[] {
   const questions: ParsedQuestion[] = [];
   const sectionContainers = doc.querySelectorAll(".section-cntnr");
 
