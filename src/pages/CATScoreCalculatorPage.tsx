@@ -621,10 +621,10 @@ const CATScoreCalculatorPage: React.FC = () => {
               <SectionQuestionAnalysis questions={result.questions} />
             </SectionInView>
 
-            {/* Question-wise Details by section */}
+            {/* Deeper analysis from the response sheet */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="04" title="Question-wise Details" sub="Your answers and the correct key, grouped by section" />
-              <QuestionwiseSections questions={result.questions} />
+              <ResultHead index="04" title="Deeper Analysis" sub="Set-wise scores, MCQ vs TITA, review flags and marks lost" />
+              <DeepAnalysis questions={result.questions} />
             </SectionInView>
 
             {/* AI Insights Section */}
