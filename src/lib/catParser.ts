@@ -106,97 +106,60 @@ function extractMetadata(panel: Element): Record<string, string> {
   return metadata;
 }
 
+function cellText(el: Element | null | undefined): string {
+  return (el?.textContent || "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/** TITA "Given Answer" lives inside the question table, not the metadata table. */
+function findGivenAnswer(panel: Element): string | null {
+  const cells = Array.from(panel.querySelectorAll("td"));
+  for (let i = 0; i < cells.length - 1; i++) {
+    if (/^Given Answer\s*:?$/i.test(cellText(cells[i]))) {
+      const v = cellText(cells[i + 1]);
+      return v && v !== "--" ? v : null;
+    }
+  }
+  return null;
+}
+
 function findCorrectOption(panel: Element, questionType: string): string | null {
   if (questionType === "SA") {
-    // For SA/TITA, look for "Possible Answer" in metadata
-    const metadata = extractMetadata(panel);
-    return metadata["Possible Answer"] || null;
+    for (const td of Array.from(panel.querySelectorAll("td"))) {
+      const m = cellText(td).match(/^Possible Answer\s*:?\s*(.+)$/i);
+      if (m) return m[1].trim() || null;
+    }
+    return extractMetadata(panel)["Possible Answer"] || null;
   }
 
-  // For MCQ: find the answer option with green styling (correct answer indicator)
-  // The answer section starts with "Ans" and lists options
-  // Correct answer: green text/image indicator
-  // Wrong answer: red text/image indicator
-
-  // Strategy 1: Look for elements with green color styling
-  const allElements = panel.querySelectorAll("td, span, div, font");
-  for (const el of allElements) {
-    const style = (el as HTMLElement).style?.color || el.getAttribute("style") || "";
-    const parentText = el.parentElement?.textContent || "";
-
-    // Check for green color indicators
-    if (
-      style.includes("green") ||
-      style.includes("#00") ||
-      style.includes("#0f") ||
-      style.includes("#0F") ||
-      style.includes("rgb(0,") ||
-      style.includes("rgb(0, ")
-    ) {
-      // Extract option number from text like "1. Option 1" or just "1"
-      const text = el.textContent?.trim() || "";
-      const match = text.match(/^(\d+)\./);
-      if (match) return match[1];
-    }
+  // TCS iON marks the correct displayed option with class "rightAns" (e.g. "2. Option 4").
+  // The displayed number (before the dot) is what "Chosen Option" refers to.
+  const right = panel.querySelector("td.rightAns");
+  if (right) {
+    const m = cellText(right).match(/^(\d+)\s*\./);
+    if (m) return m[1];
   }
 
-  // Strategy 2: Look for the option that has a "right" or "correct" image next to it
-  const imgs = panel.querySelectorAll("img");
-  for (const img of imgs) {
-    const src = img.getAttribute("src") || "";
-    const alt = img.getAttribute("alt") || "";
-    if (
-      src.includes("right") ||
-      src.includes("correct") ||
-      src.includes("tick") ||
-      src.includes("green") ||
-      alt.includes("right") ||
-      alt.includes("correct")
-    ) {
-      // Find nearest text with option number
-      const parent = img.closest("td") || img.parentElement;
-      const text = parent?.textContent?.trim() || "";
-      const match = text.match(/(\d+)\./);
-      if (match) return match[1];
+  // Fallback: an option cell carrying a tick image.
+  for (const img of Array.from(panel.querySelectorAll("img"))) {
+    const src = (img.getAttribute("src") || "").toLowerCase();
+    if (/tick|right|correct/.test(src) && !/cross|wrong/.test(src)) {
+      const m = cellText(img.closest("td")).match(/^(\d+)\s*\./);
+      if (m) return m[1];
     }
   }
-
-  // Strategy 3: Look for the "Ans" row and check which option has the checkmark
-  // Sometimes the indicator is just positioning/className
-  const tdElements = panel.querySelectorAll("td");
-  let foundAns = false;
-  for (const td of tdElements) {
-    const text = td.textContent?.trim() || "";
-    if (text === "Ans") {
-      foundAns = true;
-      continue;
-    }
-    if (foundAns) {
-      // The next td with an image that isn't "wrong/cross" is the correct answer
-      const img = td.querySelector("img");
-      if (img) {
-        const src = img.getAttribute("src") || "";
-        if (!src.includes("wrong") && !src.includes("cross") && !src.includes("red")) {
-          const optText = td.textContent?.trim() || "";
-          const match = optText.match(/(\d+)\./);
-          if (match) return match[1];
-        }
-      }
-    }
-  }
-
-  // Strategy 4: Check for colored font tags
-  const fonts = panel.querySelectorAll("font[color]");
-  for (const font of fonts) {
-    const color = font.getAttribute("color") || "";
-    if (color.toLowerCase().includes("green") || color === "#00ff00" || color === "#008000") {
-      const text = font.textContent?.trim() || "";
-      const match = text.match(/(\d+)\./);
-      if (match) return match[1];
-    }
-  }
-
   return null;
+}
+
+function answersMatch(given: string, key: string): boolean {
+  const g = given.trim().toLowerCase();
+  return key.split(/[,;]|\bor\b/i).map((k) => k.trim().toLowerCase()).filter(Boolean).some((k) => {
+    if (k === g) return true;
+    const range = k.match(/^(-?\d+(?:\.\d+)?)\s*(?:to|-)\s*(-?\d+(?:\.\d+)?)$/);
+    const gn = Number(g);
+    if (range && Number.isFinite(gn)) return gn >= Number(range[1]) && gn <= Number(range[2]);
+    const kn = Number(k);
+    return Number.isFinite(gn) && Number.isFinite(kn) && g !== "" && Math.abs(gn - kn) < 1e-9;
+  });
 }
 
 function parseQuestions(doc: Document): ParsedQuestion[] {
@@ -220,10 +183,15 @@ function parseQuestions(doc: Document): ParsedQuestion[] {
       }
 
       const questionType = (metadata["Question Type"] === "SA" ? "SA" : "MCQ") as "MCQ" | "SA";
-      const status = metadata["Status"] || "Not Answered";
-      const chosenOption = metadata["Chosen Option"] && metadata["Chosen Option"] !== "--"
-        ? metadata["Chosen Option"]
-        : null;
+      const rawStatus = metadata["Status"] || "Not Answered";
+      const rawChosen = questionType === "SA"
+        ? findGivenAnswer(panel) ?? metadata["Given Answer"] ?? metadata["Chosen Option"]
+        : metadata["Chosen Option"];
+      const chosenOption = rawChosen && rawChosen.trim() !== "--" && rawChosen.trim() !== "" ? rawChosen.trim() : null;
+      // A question with a recorded answer is evaluated even if it was also marked for review.
+      const status = chosenOption
+        ? (/marked/i.test(rawStatus) ? "Answered & Marked for Review" : "Answered")
+        : (/marked/i.test(rawStatus) ? "Marked For Review" : "Not Answered");
 
       const correctOption = findCorrectOption(panel, questionType);
       // Keep question wording as plain text only; never render response-sheet HTML.
@@ -237,7 +205,7 @@ function parseQuestions(doc: Document): ParsedQuestion[] {
           if (questionType === "MCQ") {
             isCorrect = chosenOption === correctOption;
           } else {
-            isCorrect = chosenOption.toLowerCase().trim() === correctOption.toLowerCase().trim();
+            isCorrect = answersMatch(chosenOption, correctOption);
           }
         }
       }
