@@ -30,7 +30,8 @@ import {
 import { Link } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { QuestionwiseSections, SectionQuestionAnalysis } from "@/components/cat/QuestionwiseSections";
+import { SectionQuestionAnalysis } from "@/components/cat/QuestionwiseSections";
+import { DeepAnalysis } from "@/components/cat/DeepAnalysis";
 const loadCharts = () => import("@/components/CATScoreCharts");
 // Charts load after first paint so the page opens fast.
 function lazyChart(name: string): React.ComponentType<any> {
