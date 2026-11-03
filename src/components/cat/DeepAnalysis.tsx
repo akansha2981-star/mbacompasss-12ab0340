@@ -155,7 +155,7 @@ function MoreStats({ questions, sections }: { questions: ParsedQuestion[]; secti
         {opts.map(x => <div key={x.o} className="rounded-md border border-border p-2">
           <p className="text-sm text-muted-foreground">Option {x.o}</p>
           <p className="text-base font-semibold tabular-nums text-foreground">{x.chosen}</p>
-          <p className="text-sm text-muted-foreground">key {x.key} · ✓{x.right}</p>
+          <p className="text-sm text-muted-foreground">key {x.key} · {x.right} right</p>
         </div>)}
       </div>
     </Card>
