@@ -3,7 +3,7 @@ import { CheckCircle2, XCircle, MinusCircle, ArrowUpRight, HelpCircle } from "lu
 import type { ParsedQuestion } from "@/lib/catParser";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { analyseQuestions, questionOutcome, type QuestionOutcome } from "./questionAnalysis";
+import { analyseQuestions, questionOutcome, CAT_SCHEME, type QuestionOutcome, type MarkingScheme } from "./questionAnalysis";
 
 const tones: Record<QuestionOutcome, string> = {
   correct: "border-answer-correct/25 bg-answer-correct-soft text-answer-correct",
@@ -60,20 +60,20 @@ export function QuestionwiseSections({ questions }: { questions: ParsedQuestion[
   </div>;
 }
 
-export function SectionQuestionAnalysis({ questions }: { questions: ParsedQuestion[] }) {
+export function SectionQuestionAnalysis({ questions, scheme = CAT_SCHEME, description = "VARC, DILR and QA · your marked answers against the response-sheet answer key" }: { questions: ParsedQuestion[]; scheme?: MarkingScheme; description?: string }) {
   const [open, setOpen] = useState(false);
   const sections = Array.from(new Set(questions.map(q => q.section)));
   return <div className="space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3"><Legend /><Button onClick={() => setOpen(true)} variant="outline"><ArrowUpRight className="mr-2 h-4 w-4" />Check detailed view</Button></div>
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className={`grid gap-4 ${sections.length > 3 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
       {sections.map(section => {
         const list = questions.filter(q => q.section === section);
-        const stats = analyseQuestions(list);
+        const stats = analyseQuestions(list, scheme);
         return <article key={section} className="min-w-0 rounded-lg border border-border bg-card p-4">
           <div className="flex items-baseline justify-between gap-2 border-b border-border pb-3"><h3 className="text-xl font-semibold text-foreground">{section}</h3><span className="text-sm text-muted-foreground">{list.length} questions</span></div>
-          <div className="my-4 flex items-baseline gap-2"><span className="text-2xl font-bold tabular-nums text-primary">{stats.earnedMarks - stats.negativeMarks}</span><span className="text-sm text-muted-foreground">/ {list.length * 3} marks{stats.unknown ? " · provisional" : ""}</span></div>
+          <div className="my-4 flex items-baseline gap-2"><span className="text-2xl font-bold tabular-nums text-primary">{Math.round((stats.earnedMarks - stats.negativeMarks) * 100) / 100}</span><span className="text-sm text-muted-foreground">/ {list.length * scheme.correct} marks{stats.unknown ? " · provisional" : ""}</span></div>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-            {[["Correct", stats.correct], ["Incorrect", stats.wrong], ["Unattempted", stats.skipped], ["Accuracy", `${stats.accuracy.toFixed(1)}%`], ["Attempt rate", `${stats.attemptRate.toFixed(1)}%`], ["Negative marks", stats.negativeMarks ? `−${stats.negativeMarks}` : "0"], ["Marks earned", `+${stats.earnedMarks}`], ["MCQ / TITA", `${stats.mcq} / ${stats.tita}`]].map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 font-semibold tabular-nums text-foreground">{value}</dd></div>)}
+            {[["Correct", stats.correct], ["Incorrect", stats.wrong], ["Unattempted", stats.skipped], ["Accuracy", `${stats.accuracy.toFixed(1)}%`], ["Attempt rate", `${stats.attemptRate.toFixed(1)}%`], ["Negative marks", stats.negativeMarks ? `−${stats.negativeMarks}` : "0"], ["Marks earned", `+${stats.earnedMarks}`], stats.tita ? ["MCQ / TITA", `${stats.mcq} / ${stats.tita}`] : ["Wrong answers", stats.wrongMcqCount]].map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 font-semibold tabular-nums text-foreground">{value}</dd></div>)}
           </dl>
           {stats.unknown > 0 && <p className="mt-3 text-sm text-muted-foreground">{stats.unknown} attempted answers awaiting an answer key.</p>}
           <div className="mt-4 border-t border-border pt-4"><p className="mb-3 text-sm font-medium text-foreground">Question-wise analysis</p><div className="grid grid-cols-6 gap-1.5">
@@ -84,7 +84,7 @@ export function SectionQuestionAnalysis({ questions }: { questions: ParsedQuesti
     </div>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="flex max-h-[85dvh] w-[calc(100%-2rem)] max-w-5xl flex-col overflow-hidden p-4 sm:p-6">
-        <DialogHeader className="shrink-0 pr-6"><DialogTitle className="text-xl">Detailed question analysis</DialogTitle><DialogDescription>VARC, DILR and QA · your marked answers against the response-sheet answer key</DialogDescription></DialogHeader>
+        <DialogHeader className="shrink-0 pr-6"><DialogTitle className="text-xl">Detailed question analysis</DialogTitle><DialogDescription>{description}</DialogDescription></DialogHeader>
         <div className="min-h-0 overflow-y-auto pr-1"><QuestionwiseSections questions={questions} /></div>
       </DialogContent>
     </Dialog>

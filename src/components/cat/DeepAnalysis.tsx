@@ -1,5 +1,5 @@
 import type { ParsedQuestion } from "@/lib/catParser";
-import { analyseQuestions, questionOutcome } from "./questionAnalysis";
+import { analyseQuestions, questionOutcome, CAT_SCHEME, type MarkingScheme } from "./questionAnalysis";
 
 const dot: Record<string, string> = {
   correct: "bg-answer-correct",
@@ -8,7 +8,9 @@ const dot: Record<string, string> = {
   unknown: "bg-muted-foreground",
 };
 
-const net = (qs: ParsedQuestion[]) => { const s = analyseQuestions(qs); return s.earnedMarks - s.negativeMarks; };
+let SCHEME: MarkingScheme = CAT_SCHEME;
+const net = (qs: ParsedQuestion[]) => { const s = analyseQuestions(qs, SCHEME); return Math.round((s.earnedMarks - s.negativeMarks) * 100) / 100; };
+const isPassageSection = (s: string) => s === "VARC" || s === "VALR";
 const pct = (v: number) => `${v.toFixed(1)}%`;
 
 function Card({ title, sub, children }: { title: string; sub: string; children: React.ReactNode }) {
@@ -24,15 +26,17 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 /** Set-wise, question-type, review-flag and lost-marks analysis derived only from the response sheet. */
-export function DeepAnalysis({ questions }: { questions: ParsedQuestion[] }) {
+export function DeepAnalysis({ questions, scheme = CAT_SCHEME }: { questions: ParsedQuestion[]; scheme?: MarkingScheme }) {
+  SCHEME = scheme;
   const sections = Array.from(new Set(questions.map(q => q.section)));
 
   const byType = (["MCQ", "SA"] as const).map(t => ({ t, qs: questions.filter(q => q.questionType === t) })).filter(x => x.qs.length);
   const marked = questions.filter(q => q.markedForReview);
   const markedAnswered = marked.filter(q => q.status.startsWith("Answered"));
-  const ms = analyseQuestions(markedAnswered);
-  const all = analyseQuestions(questions);
-  const wrongMcq = all.negativeMarks;
+  const ms = analyseQuestions(markedAnswered, scheme);
+  const all = analyseQuestions(questions, scheme);
+  const wrongMcq = all.wrongMcqCount;
+  const hasTita = byType.some(x => x.t === "SA");
   const wrongTita = questions.filter(q => q.questionType === "SA" && questionOutcome(q) === "wrong").length;
 
   return <div className="space-y-4">
@@ -41,14 +45,14 @@ export function DeepAnalysis({ questions }: { questions: ParsedQuestion[] }) {
         {sections.map(section => {
           const qs = questions.filter(q => q.section === section);
           const keys = Array.from(new Set(qs.filter(q => q.setKey).map(q => q.setKey!)));
-          const groups = keys.map((k, i) => ({ label: `${section === "VARC" ? "Passage" : "Set"} ${i + 1}`, qs: qs.filter(q => q.setKey === k) }));
+          const groups = keys.map((k, i) => ({ label: `${isPassageSection(section) ? "Passage" : "Set"} ${i + 1}`, qs: qs.filter(q => q.setKey === k) }));
           const solo = qs.filter(q => !q.setKey);
-          if (solo.length) groups.push({ label: section === "VARC" ? "Verbal ability" : "Standalone", qs: solo });
+          if (solo.length) groups.push({ label: isPassageSection(section) ? "Verbal ability" : "Standalone", qs: solo });
           return <div key={section}>
             <p className="mb-2 text-base font-semibold text-foreground">{section}</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {groups.map(g => {
-                const s = analyseQuestions(g.qs);
+                const s = analyseQuestions(g.qs, scheme);
                 const first = g.qs[0]?.questionNumber, last = g.qs[g.qs.length - 1]?.questionNumber;
                 return <div key={g.label} className="flex items-center justify-between gap-3 rounded-md border border-border p-3">
                   <div className="min-w-0">
@@ -66,9 +70,9 @@ export function DeepAnalysis({ questions }: { questions: ParsedQuestion[] }) {
     </Card>
 
     <div className="grid gap-4 md:grid-cols-3">
-      <Card title="MCQ vs TITA" sub="TITA has no negative marking">
+      <Card title={hasTita ? "MCQ vs TITA" : "Question type"} sub={hasTita ? "TITA has no negative marking" : `Every question is an MCQ: +${scheme.correct} right, −${scheme.wrongMcq} wrong`}>
         <div className="space-y-4">
-          {byType.map(({ t, qs }) => { const s = analyseQuestions(qs); return <div key={t}>
+          {byType.map(({ t, qs }) => { const s = analyseQuestions(qs, scheme); return <div key={t}>
             <p className="mb-2 text-sm font-medium text-foreground">{t === "SA" ? "TITA" : "MCQ"} · {qs.length} questions</p>
             <dl className="grid grid-cols-3 gap-2"><Stat label="Attempted" value={s.attempted} /><Stat label="Accuracy" value={pct(s.accuracy)} /><Stat label="Net marks" value={net(qs)} /></dl>
           </div>; })}
@@ -86,10 +90,10 @@ export function DeepAnalysis({ questions }: { questions: ParsedQuestion[] }) {
 
       <Card title="Marks left on the table" sub="Where your score leaked">
         <dl className="grid grid-cols-2 gap-3">
-          <Stat label="Negative marks" value={wrongMcq ? `−${wrongMcq}` : "0"} />
-          <Stat label="Wrong MCQ / TITA" value={`${wrongMcq} / ${wrongTita}`} />
-          <Stat label="Lost on wrong attempts" value={(all.wrong * 3) + wrongMcq} />
-          <Stat label="Unattempted marks" value={all.skipped * 3} />
+          <Stat label="Negative marks" value={all.negativeMarks ? `−${all.negativeMarks}` : "0"} />
+          <Stat label={hasTita ? "Wrong MCQ / TITA" : "Wrong answers"} value={hasTita ? `${wrongMcq} / ${wrongTita}` : wrongMcq} />
+          <Stat label="Lost on wrong attempts" value={Math.round((all.wrong * scheme.correct + all.negativeMarks) * 100) / 100} />
+          <Stat label="Unattempted marks" value={all.skipped * scheme.correct} />
         </dl>
       </Card>
     </div>
@@ -114,11 +118,12 @@ function MoreStats({ questions, sections }: { questions: ParsedQuestion[]; secti
   const halves = sections.map(section => {
     const qs = questions.filter(q => q.section === section);
     const mid = Math.ceil(qs.length / 2);
-    return { section, a: analyseQuestions(qs.slice(0, mid)), b: analyseQuestions(qs.slice(mid)) };
+    return { section, a: analyseQuestions(qs.slice(0, mid), SCHEME), b: analyseQuestions(qs.slice(mid), SCHEME) };
   });
 
   const mcqs = questions.filter(q => q.questionType === "MCQ");
-  const opts = ["1", "2", "3", "4"].map(o => ({
+  const optKeys = Array.from(new Set(["1", "2", "3", "4", ...mcqs.flatMap(q => [q.chosenOption, q.correctOption]).filter((o): o is string => !!o && /^[1-9]$/.test(o))])).sort();
+  const opts = optKeys.map(o => ({
     o,
     chosen: mcqs.filter(q => q.chosenOption === o).length,
     key: mcqs.filter(q => q.correctOption === o).length,
@@ -128,7 +133,7 @@ function MoreStats({ questions, sections }: { questions: ParsedQuestion[]; secti
   const sets = sections.flatMap(section => {
     const qs = questions.filter(q => q.section === section);
     const keys = Array.from(new Set(qs.filter(q => q.setKey).map(q => q.setKey!)));
-    return keys.map((k, i) => ({ label: `${section} ${section === "VARC" ? "Passage" : "Set"} ${i + 1}`, n: net(qs.filter(q => q.setKey === k)) }));
+    return keys.map((k, i) => ({ label: `${section} ${isPassageSection(section) ? "Passage" : "Set"} ${i + 1}`, n: net(qs.filter(q => q.setKey === k)) }));
   }).sort((x, y) => y.n - x.n);
 
   return <div className="grid gap-4 md:grid-cols-2">
@@ -151,7 +156,7 @@ function MoreStats({ questions, sections }: { questions: ParsedQuestion[]; secti
     </Card>
 
     <Card title="Answer option habits" sub="How often you picked each MCQ option, against how often it was the right answer">
-      <div className="grid grid-cols-4 gap-2 text-center">
+      <div className={`grid gap-2 text-center ${opts.length > 4 ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-4"}`}>
         {opts.map(x => <div key={x.o} className="rounded-md border border-border p-2">
           <p className="text-sm text-muted-foreground">Option {x.o}</p>
           <p className="text-base font-semibold tabular-nums text-foreground">{x.chosen}</p>
