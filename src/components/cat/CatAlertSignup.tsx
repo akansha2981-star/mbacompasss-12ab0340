@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackCatEvent } from "@/lib/catSettings";
 
 /** Email/WhatsApp alerts for response sheet, answer key and result. */
-export default function CatAlertSignup({ compact = false }: { compact?: boolean }) {
+export default function CatAlertSignup({ compact = false, exam = "CAT 2026" }: { compact?: boolean; exam?: string }) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [consent, setConsent] = useState(false);
@@ -37,8 +37,8 @@ export default function CatAlertSignup({ compact = false }: { compact?: boolean 
 
   return (
     <form onSubmit={submit} className={`rounded-xl border border-border bg-card p-4 shadow-sm ${compact ? "" : "md:p-5"}`}>
-      <p className="flex items-center gap-2 text-base font-semibold text-foreground"><BellRing className="h-4 w-4 text-primary" /> Get CAT 2026 alerts</p>
-      <p className="mt-1 text-sm text-muted-foreground">Response sheet release, slot-wise answer keys and result day. No spam.</p>
+      <p className="flex items-center gap-2 text-base font-semibold text-foreground"><BellRing className="h-4 w-4 text-primary" /> Get {exam} alerts</p>
+      <p className="mt-1 text-sm text-muted-foreground">{exam.startsWith("CAT") ? "Response sheet release, slot-wise answer keys and result day. No spam." : "Response sheet release, answer key and result day. No spam."}</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <label className="sr-only" htmlFor="cat-alert-email">Email</label>
         <input id="cat-alert-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" maxLength={255}
@@ -49,7 +49,7 @@ export default function CatAlertSignup({ compact = false }: { compact?: boolean 
       </div>
       <label className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1" />
-        <span>I agree to receive CAT 2026 updates from MBA Compass by email/WhatsApp. I can opt out anytime. See our <Link to="/privacy-policy" className="text-primary underline">privacy policy</Link>.</span>
+        <span>I agree to receive {exam} updates from MBA Compass by email/WhatsApp. I can opt out anytime. See our <Link to="/privacy-policy" className="text-primary underline">privacy policy</Link>.</span>
       </label>
       <Button type="submit" disabled={busy} className="mt-3 w-full sm:w-auto">{busy ? "Saving..." : "Notify me"}</Button>
     </form>
