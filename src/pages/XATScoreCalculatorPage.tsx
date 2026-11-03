@@ -201,7 +201,7 @@ export default function XATScoreCalculatorPage() {
         defaultEmail={user?.email || ""} defaultPhone={user?.user_metadata?.phone || ""} onSubmit={submitDetails} />
 
       {!result && !loading && (
-        <section className="cat-score-pattern relative overflow-hidden border-b border-border">
+        <section className="cat-score-pattern xat-pattern relative overflow-hidden border-b border-border">
           <div className="relative mx-auto max-w-3xl px-4 pb-8 pt-6 md:pb-10 md:pt-8">
             <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-sm font-semibold text-destructive">
@@ -286,7 +286,7 @@ export default function XATScoreCalculatorPage() {
       </AnimatePresence>
 
       {result && p1 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="cat-score-pattern pb-4">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="cat-score-pattern xat-pattern pb-4">
           <section className="mx-auto max-w-5xl px-4 pt-8">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-xs">
               <div className="flex items-center gap-3">
