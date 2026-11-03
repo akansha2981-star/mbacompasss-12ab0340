@@ -64,6 +64,15 @@ import { Route as PublicReviewPolicyRouteImport } from './routes/_public.review-
 import { Route as PublicRoiCalculatorRouteImport } from './routes/_public.roi-calculator'
 import { Route as PublicTermsRouteImport } from './routes/_public.terms'
 import { Route as PublicToolsRouteImport } from './routes/_public.tools'
+import { Route as PublicXatAnswerKey2027RouteImport } from './routes/_public.xat-answer-key-2027'
+import { Route as PublicXatCutoff2027RouteImport } from './routes/_public.xat-cutoff-2027'
+import { Route as PublicXatMarkingSchemeRouteImport } from './routes/_public.xat-marking-scheme'
+import { Route as PublicXatNegativeMarkingCalculatorRouteImport } from './routes/_public.xat-negative-marking-calculator'
+import { Route as PublicXatPercentilePredictorRouteImport } from './routes/_public.xat-percentile-predictor'
+import { Route as PublicXatResponseSheet2027RouteImport } from './routes/_public.xat-response-sheet-2027'
+import { Route as PublicXatScoreCalculatorRouteImport } from './routes/_public.xat-score-calculator'
+import { Route as PublicXatScoreVsPercentile2027RouteImport } from './routes/_public.xat-score-vs-percentile-2027'
+import { Route as PublicXlriCallPredictorRouteImport } from './routes/_public.xlri-call-predictor'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAdvertisementsRouteImport } from './routes/admin.advertisements'
 import { Route as AdminAiUsageRouteImport } from './routes/admin.ai-usage'
@@ -171,6 +180,8 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVocabularyRouteImport } from './routes/admin.vocabulary'
 import { Route as AdminWebsiteOptimizerRouteImport } from './routes/admin.website-optimizer'
 import { Route as AdminWhatsappAutomationRouteImport } from './routes/admin.whatsapp-automation'
+import { Route as AdminXatCalculatorSettingsRouteImport } from './routes/admin.xat-calculator-settings'
+import { Route as AdminXatScoresRouteImport } from './routes/admin.xat-scores'
 import { Route as AdmissionsSplatRouteImport } from './routes/admissions.$'
 import { Route as CourseSlugRouteImport } from './routes/course.$slug'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
@@ -244,6 +255,7 @@ import { Route as PublicExamSlugRouteImport } from './routes/_public.exam_.$slug
 import { Route as PublicFormulaSlugRouteImport } from './routes/_public.formula.$slug'
 import { Route as PublicGuidesIpmatPreparationRouteImport } from './routes/_public.guides.ipmat-preparation'
 import { Route as PublicHiCatScoreCalculatorRouteImport } from './routes/_public.hi.cat-score-calculator'
+import { Route as PublicHiXatScoreCalculatorRouteImport } from './routes/_public.hi.xat-score-calculator'
 import { Route as PublicInstituteSlugRouteImport } from './routes/_public.institute.$slug'
 import { Route as PublicListYourBusinessPocRouteImport } from './routes/_public.list-your-business.poc'
 import { Route as PublicMbaApplicationIndexRouteImport } from './routes/_public.mba-application.index'
@@ -264,6 +276,7 @@ import { Route as PublicToolsIimWaitlistMovementRouteImport } from './routes/_pu
 import { Route as PublicToolsPredictorRouteImport } from './routes/_public.tools.predictor'
 import { Route as PublicToolsProfileAnalyzerRouteImport } from './routes/_public.tools.profile-analyzer'
 import { Route as PublicToolsRoiCalculatorRouteImport } from './routes/_public.tools.roi-calculator'
+import { Route as PublicToolsXatScoreCalculatorRouteImport } from './routes/_public.tools.xat-score-calculator'
 import { Route as AdminCoachingInstitutesIdRouteImport } from './routes/admin.coaching-institutes_.$id'
 import { Route as AdminCoachingInstitutesBulkCreateRouteImport } from './routes/admin.coaching-institutes_.bulk-create'
 import { Route as AdminCollegeSectionsBulkGenerateRouteImport } from './routes/admin.college-sections_.bulk-generate'
@@ -645,6 +658,56 @@ const PublicTermsRoute = PublicTermsRouteImport.update({
 const PublicToolsRoute = PublicToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicXatAnswerKey2027Route = PublicXatAnswerKey2027RouteImport.update({
+  id: '/xat-answer-key-2027',
+  path: '/xat-answer-key-2027',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicXatCutoff2027Route = PublicXatCutoff2027RouteImport.update({
+  id: '/xat-cutoff-2027',
+  path: '/xat-cutoff-2027',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicXatMarkingSchemeRoute = PublicXatMarkingSchemeRouteImport.update({
+  id: '/xat-marking-scheme',
+  path: '/xat-marking-scheme',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicXatNegativeMarkingCalculatorRoute =
+  PublicXatNegativeMarkingCalculatorRouteImport.update({
+    id: '/xat-negative-marking-calculator',
+    path: '/xat-negative-marking-calculator',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicXatPercentilePredictorRoute =
+  PublicXatPercentilePredictorRouteImport.update({
+    id: '/xat-percentile-predictor',
+    path: '/xat-percentile-predictor',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicXatResponseSheet2027Route =
+  PublicXatResponseSheet2027RouteImport.update({
+    id: '/xat-response-sheet-2027',
+    path: '/xat-response-sheet-2027',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicXatScoreCalculatorRoute =
+  PublicXatScoreCalculatorRouteImport.update({
+    id: '/xat-score-calculator',
+    path: '/xat-score-calculator',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicXatScoreVsPercentile2027Route =
+  PublicXatScoreVsPercentile2027RouteImport.update({
+    id: '/xat-score-vs-percentile-2027',
+    path: '/xat-score-vs-percentile-2027',
+    getParentRoute: () => PublicRoute,
+  } as any)
+const PublicXlriCallPredictorRoute = PublicXlriCallPredictorRouteImport.update({
+  id: '/xlri-call-predictor',
+  path: '/xlri-call-predictor',
   getParentRoute: () => PublicRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -1188,6 +1251,17 @@ const AdminWhatsappAutomationRoute = AdminWhatsappAutomationRouteImport.update({
   path: '/whatsapp-automation',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminXatCalculatorSettingsRoute =
+  AdminXatCalculatorSettingsRouteImport.update({
+    id: '/xat-calculator-settings',
+    path: '/xat-calculator-settings',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminXatScoresRoute = AdminXatScoresRouteImport.update({
+  id: '/xat-scores',
+  path: '/xat-scores',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdmissionsSplatRoute = AdmissionsSplatRouteImport.update({
   id: '/admissions/$',
   path: '/admissions/$',
@@ -1556,6 +1630,12 @@ const PublicHiCatScoreCalculatorRoute =
     path: '/hi/cat-score-calculator',
     getParentRoute: () => PublicRoute,
   } as any)
+const PublicHiXatScoreCalculatorRoute =
+  PublicHiXatScoreCalculatorRouteImport.update({
+    id: '/hi/xat-score-calculator',
+    path: '/hi/xat-score-calculator',
+    getParentRoute: () => PublicRoute,
+  } as any)
 const PublicInstituteSlugRoute = PublicInstituteSlugRouteImport.update({
   id: '/institute/$slug',
   path: '/institute/$slug',
@@ -1664,6 +1744,12 @@ const PublicToolsRoiCalculatorRoute =
   PublicToolsRoiCalculatorRouteImport.update({
     id: '/roi-calculator',
     path: '/roi-calculator',
+    getParentRoute: () => PublicToolsRoute,
+  } as any)
+const PublicToolsXatScoreCalculatorRoute =
+  PublicToolsXatScoreCalculatorRouteImport.update({
+    id: '/xat-score-calculator',
+    path: '/xat-score-calculator',
     getParentRoute: () => PublicToolsRoute,
   } as any)
 const AdminCoachingInstitutesIdRoute =
@@ -2253,6 +2339,15 @@ export interface FileRoutesByFullPath {
   '/roi-calculator': typeof PublicRoiCalculatorRoute
   '/terms': typeof PublicTermsRoute
   '/tools': typeof PublicToolsRouteWithChildren
+  '/xat-answer-key-2027': typeof PublicXatAnswerKey2027Route
+  '/xat-cutoff-2027': typeof PublicXatCutoff2027Route
+  '/xat-marking-scheme': typeof PublicXatMarkingSchemeRoute
+  '/xat-negative-marking-calculator': typeof PublicXatNegativeMarkingCalculatorRoute
+  '/xat-percentile-predictor': typeof PublicXatPercentilePredictorRoute
+  '/xat-response-sheet-2027': typeof PublicXatResponseSheet2027Route
+  '/xat-score-calculator': typeof PublicXatScoreCalculatorRoute
+  '/xat-score-vs-percentile-2027': typeof PublicXatScoreVsPercentile2027Route
+  '/xlri-call-predictor': typeof PublicXlriCallPredictorRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/ai-usage': typeof AdminAiUsageRoute
   '/admin/all-leads-unified': typeof AdminAllLeadsUnifiedRoute
@@ -2359,6 +2454,8 @@ export interface FileRoutesByFullPath {
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
+  '/admin/xat-calculator-settings': typeof AdminXatCalculatorSettingsRoute
+  '/admin/xat-scores': typeof AdminXatScoresRoute
   '/admissions/$': typeof AdmissionsSplatRoute
   '/course/$slug': typeof CourseSlugRoute
   '/demo/all-india-rank': typeof DemoAllIndiaRankRoute
@@ -2431,6 +2528,7 @@ export interface FileRoutesByFullPath {
   '/formula/$slug': typeof PublicFormulaSlugRoute
   '/guides/ipmat-preparation': typeof PublicGuidesIpmatPreparationRoute
   '/hi/cat-score-calculator': typeof PublicHiCatScoreCalculatorRoute
+  '/hi/xat-score-calculator': typeof PublicHiXatScoreCalculatorRoute
   '/institute/$slug': typeof PublicInstituteSlugRoute
   '/list-your-business/poc': typeof PublicListYourBusinessPocRoute
   '/mba-application/$category': typeof PublicMbaApplicationCategoryRoute
@@ -2447,6 +2545,7 @@ export interface FileRoutesByFullPath {
   '/tools/predictor': typeof PublicToolsPredictorRoute
   '/tools/profile-analyzer': typeof PublicToolsProfileAnalyzerRoute
   '/tools/roi-calculator': typeof PublicToolsRoiCalculatorRoute
+  '/tools/xat-score-calculator': typeof PublicToolsXatScoreCalculatorRoute
   '/admin/coaching-institutes/$id': typeof AdminCoachingInstitutesIdRoute
   '/admin/coaching-institutes/bulk-create': typeof AdminCoachingInstitutesBulkCreateRoute
   '/admin/college-sections/bulk-generate': typeof AdminCollegeSectionsBulkGenerateRoute
@@ -2598,6 +2697,15 @@ export interface FileRoutesByTo {
   '/review-policy': typeof PublicReviewPolicyRoute
   '/roi-calculator': typeof PublicRoiCalculatorRoute
   '/terms': typeof PublicTermsRoute
+  '/xat-answer-key-2027': typeof PublicXatAnswerKey2027Route
+  '/xat-cutoff-2027': typeof PublicXatCutoff2027Route
+  '/xat-marking-scheme': typeof PublicXatMarkingSchemeRoute
+  '/xat-negative-marking-calculator': typeof PublicXatNegativeMarkingCalculatorRoute
+  '/xat-percentile-predictor': typeof PublicXatPercentilePredictorRoute
+  '/xat-response-sheet-2027': typeof PublicXatResponseSheet2027Route
+  '/xat-score-calculator': typeof PublicXatScoreCalculatorRoute
+  '/xat-score-vs-percentile-2027': typeof PublicXatScoreVsPercentile2027Route
+  '/xlri-call-predictor': typeof PublicXlriCallPredictorRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/ai-usage': typeof AdminAiUsageRoute
   '/admin/all-leads-unified': typeof AdminAllLeadsUnifiedRoute
@@ -2704,6 +2812,8 @@ export interface FileRoutesByTo {
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
+  '/admin/xat-calculator-settings': typeof AdminXatCalculatorSettingsRoute
+  '/admin/xat-scores': typeof AdminXatScoresRoute
   '/admissions/$': typeof AdmissionsSplatRoute
   '/course/$slug': typeof CourseSlugRoute
   '/demo/all-india-rank': typeof DemoAllIndiaRankRoute
@@ -2765,6 +2875,7 @@ export interface FileRoutesByTo {
   '/formula/$slug': typeof PublicFormulaSlugRoute
   '/guides/ipmat-preparation': typeof PublicGuidesIpmatPreparationRoute
   '/hi/cat-score-calculator': typeof PublicHiCatScoreCalculatorRoute
+  '/hi/xat-score-calculator': typeof PublicHiXatScoreCalculatorRoute
   '/institute/$slug': typeof PublicInstituteSlugRoute
   '/list-your-business/poc': typeof PublicListYourBusinessPocRoute
   '/mba-application/$category': typeof PublicMbaApplicationCategoryRoute
@@ -2781,6 +2892,7 @@ export interface FileRoutesByTo {
   '/tools/predictor': typeof PublicToolsPredictorRoute
   '/tools/profile-analyzer': typeof PublicToolsProfileAnalyzerRoute
   '/tools/roi-calculator': typeof PublicToolsRoiCalculatorRoute
+  '/tools/xat-score-calculator': typeof PublicToolsXatScoreCalculatorRoute
   '/admin/coaching-institutes/$id': typeof AdminCoachingInstitutesIdRoute
   '/admin/coaching-institutes/bulk-create': typeof AdminCoachingInstitutesBulkCreateRoute
   '/admin/college-sections/bulk-generate': typeof AdminCollegeSectionsBulkGenerateRoute
@@ -2941,6 +3053,15 @@ export interface FileRoutesById {
   '/_public/roi-calculator': typeof PublicRoiCalculatorRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/tools': typeof PublicToolsRouteWithChildren
+  '/_public/xat-answer-key-2027': typeof PublicXatAnswerKey2027Route
+  '/_public/xat-cutoff-2027': typeof PublicXatCutoff2027Route
+  '/_public/xat-marking-scheme': typeof PublicXatMarkingSchemeRoute
+  '/_public/xat-negative-marking-calculator': typeof PublicXatNegativeMarkingCalculatorRoute
+  '/_public/xat-percentile-predictor': typeof PublicXatPercentilePredictorRoute
+  '/_public/xat-response-sheet-2027': typeof PublicXatResponseSheet2027Route
+  '/_public/xat-score-calculator': typeof PublicXatScoreCalculatorRoute
+  '/_public/xat-score-vs-percentile-2027': typeof PublicXatScoreVsPercentile2027Route
+  '/_public/xlri-call-predictor': typeof PublicXlriCallPredictorRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/ai-usage': typeof AdminAiUsageRoute
   '/admin/all-leads-unified': typeof AdminAllLeadsUnifiedRoute
@@ -3047,6 +3168,8 @@ export interface FileRoutesById {
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
+  '/admin/xat-calculator-settings': typeof AdminXatCalculatorSettingsRoute
+  '/admin/xat-scores': typeof AdminXatScoresRoute
   '/admissions/$': typeof AdmissionsSplatRoute
   '/course/$slug': typeof CourseSlugRoute
   '/demo/all-india-rank': typeof DemoAllIndiaRankRoute
@@ -3120,6 +3243,7 @@ export interface FileRoutesById {
   '/_public/formula/$slug': typeof PublicFormulaSlugRoute
   '/_public/guides/ipmat-preparation': typeof PublicGuidesIpmatPreparationRoute
   '/_public/hi/cat-score-calculator': typeof PublicHiCatScoreCalculatorRoute
+  '/_public/hi/xat-score-calculator': typeof PublicHiXatScoreCalculatorRoute
   '/_public/institute/$slug': typeof PublicInstituteSlugRoute
   '/_public/list-your-business/poc': typeof PublicListYourBusinessPocRoute
   '/_public/mba-application/$category': typeof PublicMbaApplicationCategoryRoute
@@ -3136,6 +3260,7 @@ export interface FileRoutesById {
   '/_public/tools/predictor': typeof PublicToolsPredictorRoute
   '/_public/tools/profile-analyzer': typeof PublicToolsProfileAnalyzerRoute
   '/_public/tools/roi-calculator': typeof PublicToolsRoiCalculatorRoute
+  '/_public/tools/xat-score-calculator': typeof PublicToolsXatScoreCalculatorRoute
   '/admin/coaching-institutes_/$id': typeof AdminCoachingInstitutesIdRoute
   '/admin/coaching-institutes_/bulk-create': typeof AdminCoachingInstitutesBulkCreateRoute
   '/admin/college-sections_/bulk-generate': typeof AdminCollegeSectionsBulkGenerateRoute
@@ -3297,6 +3422,15 @@ export interface FileRouteTypes {
     | '/roi-calculator'
     | '/terms'
     | '/tools'
+    | '/xat-answer-key-2027'
+    | '/xat-cutoff-2027'
+    | '/xat-marking-scheme'
+    | '/xat-negative-marking-calculator'
+    | '/xat-percentile-predictor'
+    | '/xat-response-sheet-2027'
+    | '/xat-score-calculator'
+    | '/xat-score-vs-percentile-2027'
+    | '/xlri-call-predictor'
     | '/admin/advertisements'
     | '/admin/ai-usage'
     | '/admin/all-leads-unified'
@@ -3403,6 +3537,8 @@ export interface FileRouteTypes {
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
+    | '/admin/xat-calculator-settings'
+    | '/admin/xat-scores'
     | '/admissions/$'
     | '/course/$slug'
     | '/demo/all-india-rank'
@@ -3475,6 +3611,7 @@ export interface FileRouteTypes {
     | '/formula/$slug'
     | '/guides/ipmat-preparation'
     | '/hi/cat-score-calculator'
+    | '/hi/xat-score-calculator'
     | '/institute/$slug'
     | '/list-your-business/poc'
     | '/mba-application/$category'
@@ -3491,6 +3628,7 @@ export interface FileRouteTypes {
     | '/tools/predictor'
     | '/tools/profile-analyzer'
     | '/tools/roi-calculator'
+    | '/tools/xat-score-calculator'
     | '/admin/coaching-institutes/$id'
     | '/admin/coaching-institutes/bulk-create'
     | '/admin/college-sections/bulk-generate'
@@ -3642,6 +3780,15 @@ export interface FileRouteTypes {
     | '/review-policy'
     | '/roi-calculator'
     | '/terms'
+    | '/xat-answer-key-2027'
+    | '/xat-cutoff-2027'
+    | '/xat-marking-scheme'
+    | '/xat-negative-marking-calculator'
+    | '/xat-percentile-predictor'
+    | '/xat-response-sheet-2027'
+    | '/xat-score-calculator'
+    | '/xat-score-vs-percentile-2027'
+    | '/xlri-call-predictor'
     | '/admin/advertisements'
     | '/admin/ai-usage'
     | '/admin/all-leads-unified'
@@ -3748,6 +3895,8 @@ export interface FileRouteTypes {
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
+    | '/admin/xat-calculator-settings'
+    | '/admin/xat-scores'
     | '/admissions/$'
     | '/course/$slug'
     | '/demo/all-india-rank'
@@ -3809,6 +3958,7 @@ export interface FileRouteTypes {
     | '/formula/$slug'
     | '/guides/ipmat-preparation'
     | '/hi/cat-score-calculator'
+    | '/hi/xat-score-calculator'
     | '/institute/$slug'
     | '/list-your-business/poc'
     | '/mba-application/$category'
@@ -3825,6 +3975,7 @@ export interface FileRouteTypes {
     | '/tools/predictor'
     | '/tools/profile-analyzer'
     | '/tools/roi-calculator'
+    | '/tools/xat-score-calculator'
     | '/admin/coaching-institutes/$id'
     | '/admin/coaching-institutes/bulk-create'
     | '/admin/college-sections/bulk-generate'
@@ -3984,6 +4135,15 @@ export interface FileRouteTypes {
     | '/_public/roi-calculator'
     | '/_public/terms'
     | '/_public/tools'
+    | '/_public/xat-answer-key-2027'
+    | '/_public/xat-cutoff-2027'
+    | '/_public/xat-marking-scheme'
+    | '/_public/xat-negative-marking-calculator'
+    | '/_public/xat-percentile-predictor'
+    | '/_public/xat-response-sheet-2027'
+    | '/_public/xat-score-calculator'
+    | '/_public/xat-score-vs-percentile-2027'
+    | '/_public/xlri-call-predictor'
     | '/admin/advertisements'
     | '/admin/ai-usage'
     | '/admin/all-leads-unified'
@@ -4090,6 +4250,8 @@ export interface FileRouteTypes {
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
+    | '/admin/xat-calculator-settings'
+    | '/admin/xat-scores'
     | '/admissions/$'
     | '/course/$slug'
     | '/demo/all-india-rank'
@@ -4163,6 +4325,7 @@ export interface FileRouteTypes {
     | '/_public/formula/$slug'
     | '/_public/guides/ipmat-preparation'
     | '/_public/hi/cat-score-calculator'
+    | '/_public/hi/xat-score-calculator'
     | '/_public/institute/$slug'
     | '/_public/list-your-business/poc'
     | '/_public/mba-application/$category'
@@ -4179,6 +4342,7 @@ export interface FileRouteTypes {
     | '/_public/tools/predictor'
     | '/_public/tools/profile-analyzer'
     | '/_public/tools/roi-calculator'
+    | '/_public/tools/xat-score-calculator'
     | '/admin/coaching-institutes_/$id'
     | '/admin/coaching-institutes_/bulk-create'
     | '/admin/college-sections_/bulk-generate'
@@ -4693,6 +4857,69 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/tools'
       preLoaderRoute: typeof PublicToolsRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-answer-key-2027': {
+      id: '/_public/xat-answer-key-2027'
+      path: '/xat-answer-key-2027'
+      fullPath: '/xat-answer-key-2027'
+      preLoaderRoute: typeof PublicXatAnswerKey2027RouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-cutoff-2027': {
+      id: '/_public/xat-cutoff-2027'
+      path: '/xat-cutoff-2027'
+      fullPath: '/xat-cutoff-2027'
+      preLoaderRoute: typeof PublicXatCutoff2027RouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-marking-scheme': {
+      id: '/_public/xat-marking-scheme'
+      path: '/xat-marking-scheme'
+      fullPath: '/xat-marking-scheme'
+      preLoaderRoute: typeof PublicXatMarkingSchemeRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-negative-marking-calculator': {
+      id: '/_public/xat-negative-marking-calculator'
+      path: '/xat-negative-marking-calculator'
+      fullPath: '/xat-negative-marking-calculator'
+      preLoaderRoute: typeof PublicXatNegativeMarkingCalculatorRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-percentile-predictor': {
+      id: '/_public/xat-percentile-predictor'
+      path: '/xat-percentile-predictor'
+      fullPath: '/xat-percentile-predictor'
+      preLoaderRoute: typeof PublicXatPercentilePredictorRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-response-sheet-2027': {
+      id: '/_public/xat-response-sheet-2027'
+      path: '/xat-response-sheet-2027'
+      fullPath: '/xat-response-sheet-2027'
+      preLoaderRoute: typeof PublicXatResponseSheet2027RouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-score-calculator': {
+      id: '/_public/xat-score-calculator'
+      path: '/xat-score-calculator'
+      fullPath: '/xat-score-calculator'
+      preLoaderRoute: typeof PublicXatScoreCalculatorRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xat-score-vs-percentile-2027': {
+      id: '/_public/xat-score-vs-percentile-2027'
+      path: '/xat-score-vs-percentile-2027'
+      fullPath: '/xat-score-vs-percentile-2027'
+      preLoaderRoute: typeof PublicXatScoreVsPercentile2027RouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/xlri-call-predictor': {
+      id: '/_public/xlri-call-predictor'
+      path: '/xlri-call-predictor'
+      fullPath: '/xlri-call-predictor'
+      preLoaderRoute: typeof PublicXlriCallPredictorRouteImport
       parentRoute: typeof PublicRoute
     }
     '/admin/': {
@@ -5444,6 +5671,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWhatsappAutomationRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/xat-calculator-settings': {
+      id: '/admin/xat-calculator-settings'
+      path: '/xat-calculator-settings'
+      fullPath: '/admin/xat-calculator-settings'
+      preLoaderRoute: typeof AdminXatCalculatorSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/xat-scores': {
+      id: '/admin/xat-scores'
+      path: '/xat-scores'
+      fullPath: '/admin/xat-scores'
+      preLoaderRoute: typeof AdminXatScoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admissions/$': {
       id: '/admissions/$'
       path: '/admissions/$'
@@ -5955,6 +6196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicHiCatScoreCalculatorRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/hi/xat-score-calculator': {
+      id: '/_public/hi/xat-score-calculator'
+      path: '/hi/xat-score-calculator'
+      fullPath: '/hi/xat-score-calculator'
+      preLoaderRoute: typeof PublicHiXatScoreCalculatorRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/institute/$slug': {
       id: '/_public/institute/$slug'
       path: '/institute/$slug'
@@ -6093,6 +6341,13 @@ declare module '@tanstack/react-router' {
       path: '/roi-calculator'
       fullPath: '/tools/roi-calculator'
       preLoaderRoute: typeof PublicToolsRoiCalculatorRouteImport
+      parentRoute: typeof PublicToolsRoute
+    }
+    '/_public/tools/xat-score-calculator': {
+      id: '/_public/tools/xat-score-calculator'
+      path: '/xat-score-calculator'
+      fullPath: '/tools/xat-score-calculator'
+      preLoaderRoute: typeof PublicToolsXatScoreCalculatorRouteImport
       parentRoute: typeof PublicToolsRoute
     }
     '/admin/coaching-institutes_/$id': {
@@ -6886,6 +7141,7 @@ interface PublicToolsRouteChildren {
   PublicToolsPredictorRoute: typeof PublicToolsPredictorRoute
   PublicToolsProfileAnalyzerRoute: typeof PublicToolsProfileAnalyzerRoute
   PublicToolsRoiCalculatorRoute: typeof PublicToolsRoiCalculatorRoute
+  PublicToolsXatScoreCalculatorRoute: typeof PublicToolsXatScoreCalculatorRoute
   PublicToolsIndexRoute: typeof PublicToolsIndexRoute
 }
 
@@ -6897,6 +7153,7 @@ const PublicToolsRouteChildren: PublicToolsRouteChildren = {
   PublicToolsPredictorRoute: PublicToolsPredictorRoute,
   PublicToolsProfileAnalyzerRoute: PublicToolsProfileAnalyzerRoute,
   PublicToolsRoiCalculatorRoute: PublicToolsRoiCalculatorRoute,
+  PublicToolsXatScoreCalculatorRoute: PublicToolsXatScoreCalculatorRoute,
   PublicToolsIndexRoute: PublicToolsIndexRoute,
 }
 
@@ -6950,6 +7207,15 @@ interface PublicRouteChildren {
   PublicRoiCalculatorRoute: typeof PublicRoiCalculatorRoute
   PublicTermsRoute: typeof PublicTermsRoute
   PublicToolsRoute: typeof PublicToolsRouteWithChildren
+  PublicXatAnswerKey2027Route: typeof PublicXatAnswerKey2027Route
+  PublicXatCutoff2027Route: typeof PublicXatCutoff2027Route
+  PublicXatMarkingSchemeRoute: typeof PublicXatMarkingSchemeRoute
+  PublicXatNegativeMarkingCalculatorRoute: typeof PublicXatNegativeMarkingCalculatorRoute
+  PublicXatPercentilePredictorRoute: typeof PublicXatPercentilePredictorRoute
+  PublicXatResponseSheet2027Route: typeof PublicXatResponseSheet2027Route
+  PublicXatScoreCalculatorRoute: typeof PublicXatScoreCalculatorRoute
+  PublicXatScoreVsPercentile2027Route: typeof PublicXatScoreVsPercentile2027Route
+  PublicXlriCallPredictorRoute: typeof PublicXlriCallPredictorRoute
   PublicIndexRoute: typeof PublicIndexRoute
   PublicArticleSlugRoute: typeof PublicArticleSlugRoute
   PublicCategorySlugRoute: typeof PublicCategorySlugRoute
@@ -6961,6 +7227,7 @@ interface PublicRouteChildren {
   PublicFormulaSlugRoute: typeof PublicFormulaSlugRoute
   PublicGuidesIpmatPreparationRoute: typeof PublicGuidesIpmatPreparationRoute
   PublicHiCatScoreCalculatorRoute: typeof PublicHiCatScoreCalculatorRoute
+  PublicHiXatScoreCalculatorRoute: typeof PublicHiXatScoreCalculatorRoute
   PublicInstituteSlugRoute: typeof PublicInstituteSlugRoute
   PublicMbaApplicationCategoryRoute: typeof PublicMbaApplicationCategoryRoute
   PublicMbaApplicationMyApplicationsRoute: typeof PublicMbaApplicationMyApplicationsRoute
@@ -7025,6 +7292,16 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicRoiCalculatorRoute: PublicRoiCalculatorRoute,
   PublicTermsRoute: PublicTermsRoute,
   PublicToolsRoute: PublicToolsRouteWithChildren,
+  PublicXatAnswerKey2027Route: PublicXatAnswerKey2027Route,
+  PublicXatCutoff2027Route: PublicXatCutoff2027Route,
+  PublicXatMarkingSchemeRoute: PublicXatMarkingSchemeRoute,
+  PublicXatNegativeMarkingCalculatorRoute:
+    PublicXatNegativeMarkingCalculatorRoute,
+  PublicXatPercentilePredictorRoute: PublicXatPercentilePredictorRoute,
+  PublicXatResponseSheet2027Route: PublicXatResponseSheet2027Route,
+  PublicXatScoreCalculatorRoute: PublicXatScoreCalculatorRoute,
+  PublicXatScoreVsPercentile2027Route: PublicXatScoreVsPercentile2027Route,
+  PublicXlriCallPredictorRoute: PublicXlriCallPredictorRoute,
   PublicIndexRoute: PublicIndexRoute,
   PublicArticleSlugRoute: PublicArticleSlugRoute,
   PublicCategorySlugRoute: PublicCategorySlugRoute,
@@ -7036,6 +7313,7 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicFormulaSlugRoute: PublicFormulaSlugRoute,
   PublicGuidesIpmatPreparationRoute: PublicGuidesIpmatPreparationRoute,
   PublicHiCatScoreCalculatorRoute: PublicHiCatScoreCalculatorRoute,
+  PublicHiXatScoreCalculatorRoute: PublicHiXatScoreCalculatorRoute,
   PublicInstituteSlugRoute: PublicInstituteSlugRoute,
   PublicMbaApplicationCategoryRoute: PublicMbaApplicationCategoryRoute,
   PublicMbaApplicationMyApplicationsRoute:
@@ -7165,6 +7443,8 @@ interface AdminRouteChildren {
   AdminVocabularyRoute: typeof AdminVocabularyRoute
   AdminWebsiteOptimizerRoute: typeof AdminWebsiteOptimizerRoute
   AdminWhatsappAutomationRoute: typeof AdminWhatsappAutomationRoute
+  AdminXatCalculatorSettingsRoute: typeof AdminXatCalculatorSettingsRoute
+  AdminXatScoresRoute: typeof AdminXatScoresRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCoachingInstitutesIdRoute: typeof AdminCoachingInstitutesIdRoute
   AdminCoachingInstitutesBulkCreateRoute: typeof AdminCoachingInstitutesBulkCreateRoute
@@ -7291,6 +7571,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminVocabularyRoute: AdminVocabularyRoute,
   AdminWebsiteOptimizerRoute: AdminWebsiteOptimizerRoute,
   AdminWhatsappAutomationRoute: AdminWhatsappAutomationRoute,
+  AdminXatCalculatorSettingsRoute: AdminXatCalculatorSettingsRoute,
+  AdminXatScoresRoute: AdminXatScoresRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminCoachingInstitutesIdRoute: AdminCoachingInstitutesIdRoute,
   AdminCoachingInstitutesBulkCreateRoute:
