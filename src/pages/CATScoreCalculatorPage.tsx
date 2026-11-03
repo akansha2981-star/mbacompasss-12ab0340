@@ -9,6 +9,7 @@ import { deriveCatSlot } from "@/lib/catSlot";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import type { CATResult } from "@/lib/catParser";
+import { cohortAverages } from "@/lib/catCohortAverages";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginRequiredDialog from "@/components/LoginRequiredDialog";
@@ -219,7 +220,7 @@ const useLiveStats = () => {
         .select("total_score, estimated_percentile, accuracy, created_at, varc_score, dilr_score, qa_score");
 
       if (error || !data || data.length === 0) {
-        return { total: 0, highest: 0, avgScore: 0, ninety9Plus: 0, year: { count: 0, avg: 0, highest: 0, sections: {} as Record<string, number> } };
+        return { total: 0, highest: 0, avgScore: 0, ninety9Plus: 0, year: { count: 0, avg: 0, tiers: cohortAverages([]), highest: 0, sections: {} as Record<string, number> } };
       }
 
       const scores = data.map(d => Number(d.total_score) || 0);
@@ -610,8 +611,8 @@ const CATScoreCalculatorPage: React.FC = () => {
 
             {/* Score scale vs 2026 aspirants */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <ResultHead index="02" title="Where You Stand" sub="Your score against the average of CAT 2026 aspirants on this calculator" />
-              <ScoreScale you={result.overall.totalScore} max={result.overall.maxScore} avg={liveStats?.year.avg ?? 0} count={liveStats?.year.count ?? 0} top={liveStats?.year.highest ?? 0} />
+              <ResultHead index="02" title="Where You Stand" sub="Your score against top 10%, top 25%, top 50% and overall averages of CAT 2026 aspirants on this calculator" />
+              <ScoreScale you={result.overall.totalScore} max={result.overall.maxScore} avg={liveStats?.year.avg ?? 0} count={liveStats?.year.count ?? 0} top={liveStats?.year.highest ?? 0} tiers={liveStats?.year.tiers} />
             </SectionInView>
 
             {/* Section-wise Breakdown */}
