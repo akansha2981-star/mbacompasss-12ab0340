@@ -2,7 +2,7 @@ import type { ParsedQuestion } from "@/lib/catParser";
 
 export type QuestionOutcome = "correct" | "wrong" | "skipped" | "unknown";
 export function questionOutcome(q: ParsedQuestion): QuestionOutcome {
-  const answered = q.status === "Answered" || q.status === "Answered & Marked for Review";
+  const answered = q.status.startsWith("Answered");
   if (!answered) return "skipped";
   if (!q.correctOption) return "unknown";
   return q.isCorrect ? "correct" : "wrong";
