@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { SectionQuestionAnalysis } from "@/components/cat/QuestionwiseSections";
 import { DeepAnalysis } from "@/components/cat/DeepAnalysis";
+import CatCutoffColleges from "@/components/cat/CatCutoffColleges";
 const loadCharts = () => import("@/components/CATScoreCharts");
 // Charts load after first paint so the page opens fast.
 function lazyChart(name: string): React.ComponentType<any> {
@@ -992,6 +993,45 @@ const CATScoreCalculatorPage: React.FC = () => {
           <p className="text-sm text-muted-foreground mt-4">
             Your raw score from the calculator is exact. Your final percentile is published by the IIMs after normalising scores across slots, and most IIMs also apply sectional cut-offs.
           </p>
+        </div>
+      </section>
+
+      {/* ═══════ CAT CUT-OFF COLLEGES (admin-managed) ═══════ */}
+      <section id="cat-cutoff-colleges" className="bg-muted/20 py-8 md:py-14">
+        <div className="max-w-5xl mx-auto px-4">
+          <SectionInView>
+            <CatCutoffColleges />
+          </SectionInView>
+        </div>
+      </section>
+
+      {/* ═══════ CAT 2026 KEY DATES & SCORECARD ═══════ */}
+      <section className="max-w-5xl mx-auto px-4 py-8 md:py-14">
+        <div className="grid md:grid-cols-2 gap-10">
+          <div className="max-w-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-3">CAT 2026 Response Sheet and Answer Key: What to Expect</h2>
+            <p className="text-base text-muted-foreground leading-relaxed mb-3">
+              The IIMs usually release the candidate response sheet within a week of the exam, followed by the provisional answer key. Once your response sheet link is live on the official CAT portal, you can paste it into the calculator above and see your raw score immediately — weeks before the official scorecard.
+            </p>
+            <p className="text-base text-muted-foreground leading-relaxed mb-3">
+              The objection window after the provisional key is short, typically two to three days. If the IIMs accept a challenge and change a key, scores shift for everyone who attempted that question, so recalculate your score here once the final key is out.
+            </p>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              Your final scorecard shows scaled scores and percentiles for each section and overall. The raw score from this calculator is the starting point; normalisation across slots decides the final scaled number.
+            </p>
+          </div>
+          <div className="max-w-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-3">Sectional Cut-offs: The Filter Most Aspirants Miss</h2>
+            <p className="text-base text-muted-foreground leading-relaxed mb-3">
+              A high overall percentile alone does not guarantee an IIM shortlist. Most older IIMs apply minimum sectional percentiles — commonly around the 80th to 85th percentile in each of VARC, DILR and QA for the General category. A 99 overall with a 72 in one section still gets rejected at these institutes.
+            </p>
+            <p className="text-base text-muted-foreground leading-relaxed mb-3">
+              Use the section-wise breakdown in your report above to check balance, not just the total. If one section lags, the cut-off college table on this page includes a dedicated band of B-schools that apply no sectional cut-off, so a weak section does not end your options.
+            </p>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              Newer and baby IIMs, and many private B-schools, either lower the sectional bar or drop it entirely, which is why profile strength matters more at those institutes.
+            </p>
+          </div>
         </div>
       </section>
 
