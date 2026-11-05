@@ -15728,6 +15728,341 @@ export type Database = {
         }
         Relationships: []
       }
+      utm_allowed_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          note: string | null
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          note?: string | null
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
+      utm_brands: {
+        Row: {
+          created_at: string
+          is_active: boolean
+          key: string
+          name: string
+          utm_source: string
+        }
+        Insert: {
+          created_at?: string
+          is_active?: boolean
+          key: string
+          name: string
+          utm_source: string
+        }
+        Update: {
+          created_at?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          utm_source?: string
+        }
+        Relationships: []
+      }
+      utm_campaigns: {
+        Row: {
+          brand_key: string | null
+          created_at: string
+          default_medium: string
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+        }
+        Insert: {
+          brand_key?: string | null
+          created_at?: string
+          default_medium?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+        }
+        Update: {
+          brand_key?: string | null
+          created_at?: string
+          default_medium?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utm_campaigns_brand_key_fkey"
+            columns: ["brand_key"]
+            isOneToOne: false
+            referencedRelation: "utm_brands"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      utm_clicks: {
+        Row: {
+          browser: string | null
+          clicked_at: string
+          country: string | null
+          device: string | null
+          id: string
+          is_returning: boolean
+          is_unique: boolean
+          link_id: string
+          os: string | null
+          page_path: string | null
+          referrer_host: string | null
+          session_hash: string
+          visitor_hash: string
+        }
+        Insert: {
+          browser?: string | null
+          clicked_at?: string
+          country?: string | null
+          device?: string | null
+          id?: string
+          is_returning?: boolean
+          is_unique?: boolean
+          link_id: string
+          os?: string | null
+          page_path?: string | null
+          referrer_host?: string | null
+          session_hash: string
+          visitor_hash: string
+        }
+        Update: {
+          browser?: string | null
+          clicked_at?: string
+          country?: string | null
+          device?: string | null
+          id?: string
+          is_returning?: boolean
+          is_unique?: boolean
+          link_id?: string
+          os?: string | null
+          page_path?: string | null
+          referrer_host?: string | null
+          session_hash?: string
+          visitor_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utm_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "utm_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      utm_conversions: {
+        Row: {
+          click_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          link_id: string
+          value: number | null
+        }
+        Insert: {
+          click_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          link_id: string
+          value?: number | null
+        }
+        Update: {
+          click_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          link_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utm_conversions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "utm_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      utm_links: {
+        Row: {
+          brand_key: string
+          code: string
+          college_id: string | null
+          college_name: string | null
+          college_needs_review: boolean
+          conversions: number
+          created_at: string
+          created_by: string | null
+          destination_url: string
+          final_url: string
+          health_checked_at: string | null
+          health_http_status: number | null
+          health_status: string
+          host: string
+          id: string
+          last_clicked_at: string | null
+          normalized_url: string
+          origin_module: string | null
+          origin_page: string | null
+          status: string
+          total_clicks: number
+          unique_visitors: number
+          updated_at: string
+          utm_campaign: string
+          utm_content: string
+          utm_medium: string
+          utm_source: string
+          utm_term: string
+        }
+        Insert: {
+          brand_key: string
+          code: string
+          college_id?: string | null
+          college_name?: string | null
+          college_needs_review?: boolean
+          conversions?: number
+          created_at?: string
+          created_by?: string | null
+          destination_url: string
+          final_url: string
+          health_checked_at?: string | null
+          health_http_status?: number | null
+          health_status?: string
+          host: string
+          id?: string
+          last_clicked_at?: string | null
+          normalized_url: string
+          origin_module?: string | null
+          origin_page?: string | null
+          status?: string
+          total_clicks?: number
+          unique_visitors?: number
+          updated_at?: string
+          utm_campaign: string
+          utm_content?: string
+          utm_medium: string
+          utm_source: string
+          utm_term?: string
+        }
+        Update: {
+          brand_key?: string
+          code?: string
+          college_id?: string | null
+          college_name?: string | null
+          college_needs_review?: boolean
+          conversions?: number
+          created_at?: string
+          created_by?: string | null
+          destination_url?: string
+          final_url?: string
+          health_checked_at?: string | null
+          health_http_status?: number | null
+          health_status?: string
+          host?: string
+          id?: string
+          last_clicked_at?: string | null
+          normalized_url?: string
+          origin_module?: string | null
+          origin_page?: string | null
+          status?: string
+          total_clicks?: number
+          unique_visitors?: number
+          updated_at?: string
+          utm_campaign?: string
+          utm_content?: string
+          utm_medium?: string
+          utm_source?: string
+          utm_term?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utm_links_brand_key_fkey"
+            columns: ["brand_key"]
+            isOneToOne: false
+            referencedRelation: "utm_brands"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      utm_pending_urls: {
+        Row: {
+          brand_key: string | null
+          destination_url: string
+          first_seen_at: string
+          first_seen_path: string | null
+          hits: number
+          host: string
+          last_seen_at: string
+          normalized_url: string
+        }
+        Insert: {
+          brand_key?: string | null
+          destination_url: string
+          first_seen_at?: string
+          first_seen_path?: string | null
+          hits?: number
+          host: string
+          last_seen_at?: string
+          normalized_url: string
+        }
+        Update: {
+          brand_key?: string | null
+          destination_url?: string
+          first_seen_at?: string
+          first_seen_path?: string | null
+          hits?: number
+          host?: string
+          last_seen_at?: string
+          normalized_url?: string
+        }
+        Relationships: []
+      }
+      utm_settings: {
+        Row: {
+          auto_convert_links: boolean
+          campaign_year: string
+          conversion_secret: string
+          default_brand: string
+          default_medium: string
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          auto_convert_links?: boolean
+          campaign_year?: string
+          conversion_secret?: string
+          default_brand?: string
+          default_medium?: string
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_convert_links?: boolean
+          campaign_year?: string
+          conversion_secret?: string
+          default_brand?: string
+          default_medium?: string
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vocab_bookmarks: {
         Row: {
           created_at: string
@@ -17558,6 +17893,25 @@ export type Database = {
       user_owns_listing: {
         Args: { _target_id: string; _target_table: string; _user_id: string }
         Returns: boolean
+      }
+      utm_breakdown: {
+        Args: { p_dim: string; p_from: string; p_to: string }
+        Returns: {
+          clicks: number
+          label: string
+        }[]
+      }
+      utm_link_stats: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          clicks: number
+          conversions: number
+          link_id: string
+          prev_clicks: number
+          returning_visitors: number
+          sessions: number
+          uniques: number
+        }[]
       }
       vocab_due_for_review: {
         Args: { _limit?: number; _user_id: string }
