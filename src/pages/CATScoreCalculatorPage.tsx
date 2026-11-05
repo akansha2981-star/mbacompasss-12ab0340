@@ -612,12 +612,25 @@ const CATScoreCalculatorPage: React.FC = () => {
             </SectionInView>
 
             <div className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
-              <div className="flex flex-col items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-base text-foreground">See which B-schools you can target with a score of <span className="font-semibold">{result.overall.totalScore}</span>.</p>
-                <button type="button" onClick={() => document.getElementById("cat-cutoff-colleges")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                  className="rounded-lg bg-primary px-5 py-2.5 text-base font-semibold text-primary-foreground shadow-sm hover:bg-primary/90">
-                  Check Colleges
-                </button>
+              <div className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-accent/40 p-5 md:p-6 shadow-sm">
+                <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-2xl" aria-hidden="true" />
+                <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
+                      <GraduationCap className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-wide text-primary">Your college shortlist is ready</p>
+                      <p className="text-xl font-semibold text-foreground leading-snug">See which B-schools you can target with a score of <span className="text-primary tabular-nums">{result.overall.totalScore}</span></p>
+                      <p className="text-sm text-muted-foreground mt-1">Percentile cut-offs, 2-year fees and placement figures, filtered by band.</p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => document.getElementById("cat-cutoff-colleges")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                    className="cat-college-cta-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-lg transition-transform duration-200 hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0">
+                    Check Colleges
+                    <ChevronDown className="cat-college-cta-arrow h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -695,6 +708,13 @@ const CATScoreCalculatorPage: React.FC = () => {
                 <NegativeMarksCard result={result} />
               </div>
             </SectionInView>
+
+            {/* CAT cut-off colleges (admin-managed) */}
+            <section id="cat-cutoff-colleges" className="max-w-5xl mx-auto px-4 mb-6 md:mb-10 scroll-mt-20">
+              <SectionInView>
+                <CatCutoffColleges />
+              </SectionInView>
+            </section>
 
             {/* Deep Performance Insights */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
@@ -1007,13 +1027,13 @@ const CATScoreCalculatorPage: React.FC = () => {
       </section>
 
       {/* ═══════ CAT CUT-OFF COLLEGES (admin-managed) ═══════ */}
-      <section id="cat-cutoff-colleges" className="bg-muted/20 py-8 md:py-14">
+      {!result && <section id="cat-cutoff-colleges" className="bg-muted/20 py-8 md:py-14">
         <div className="max-w-5xl mx-auto px-4">
           <SectionInView>
             <CatCutoffColleges />
           </SectionInView>
         </div>
-      </section>
+      </section>}
 
       {/* ═══════ CAT 2026 KEY DATES & SCORECARD ═══════ */}
       <section className="max-w-5xl mx-auto px-4 py-8 md:py-14">

@@ -2086,3 +2086,12 @@ html, body, #root {
     linear-gradient(hsl(var(--primary) / 0.13) 1px, transparent 1px),
     linear-gradient(90deg, hsl(var(--primary) / 0.13) 1px, transparent 1px);
 }
+
+/* CAT "Check Colleges" call-to-action */
+@keyframes cat-college-cta-ring { 0% { box-shadow: 0 0 0 0 hsl(var(--primary) / .45); } 70%,100% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); } }
+@keyframes cat-college-cta-shine { 0% { transform: translateX(-120%) skewX(-20deg); } 60%,100% { transform: translateX(260%) skewX(-20deg); } }
+@keyframes cat-college-cta-nudge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+.cat-college-cta-btn { animation: cat-college-cta-ring 2.4s ease-out infinite; }
+.cat-college-cta-btn::after { content: ""; position: absolute; inset: 0; width: 40%; pointer-events: none; background: linear-gradient(90deg, transparent, hsl(var(--primary-foreground) / .35), transparent); animation: cat-college-cta-shine 3.2s ease-in-out infinite; }
+.cat-college-cta-arrow { animation: cat-college-cta-nudge 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .cat-college-cta-btn, .cat-college-cta-btn::after, .cat-college-cta-arrow { animation: none; } }
