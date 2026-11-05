@@ -36,6 +36,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "CAT Score Calculator", path: "/admin/cat-scores", icon: Calculator },
       { label: "CAT Calculator Settings", path: "/admin/cat-calculator-settings", icon: Calculator },
       { label: "CAT Cut-off Colleges", path: "/admin/cat-cutoff-colleges", icon: GraduationCap },
+      { label: "UTM Tracking", path: "/admin/utm-tracking", icon: Link2 },
       { label: "CAT 2026 Alerts", path: "/admin/cat-alerts", icon: Calculator },
       { label: "XAT Score Calculator", path: "/admin/xat-scores", icon: Calculator },
       { label: "XAT Calculator Settings", path: "/admin/xat-calculator-settings", icon: Calculator },

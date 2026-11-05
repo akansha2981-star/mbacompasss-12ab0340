@@ -178,6 +178,7 @@ import { Route as AdminTablesManagerRouteImport } from './routes/admin.tables-ma
 import { Route as AdminTestimonialsRouteImport } from './routes/admin.testimonials'
 import { Route as AdminUserSubmissionsRouteImport } from './routes/admin.user-submissions'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminUtmTrackingRouteImport } from './routes/admin.utm-tracking'
 import { Route as AdminVocabularyRouteImport } from './routes/admin.vocabulary'
 import { Route as AdminWebsiteOptimizerRouteImport } from './routes/admin.website-optimizer'
 import { Route as AdminWhatsappAutomationRouteImport } from './routes/admin.whatsapp-automation'
@@ -213,6 +214,8 @@ import { Route as DemoWeakAreasRouteImport } from './routes/demo.weak-areas'
 import { Route as EditTokenRouteImport } from './routes/edit.$token'
 import { Route as ExamsIndexRouteImport } from './routes/exams.index'
 import { Route as ExamsSlugRouteImport } from './routes/exams.$slug'
+import { Route as GoCodeRouteImport } from './routes/go.$code'
+import { Route as GoRRouteImport } from './routes/go.r'
 import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as StudentAllIndiaRankRouteImport } from './routes/student.all-india-rank'
 import { Route as StudentApplicationsRouteImport } from './routes/student.applications'
@@ -293,6 +296,7 @@ import { Route as AdminFreebiesUsersRouteImport } from './routes/admin.freebies_
 import { Route as AdminInstitutesGenerateAiRouteImport } from './routes/admin.institutes_.generate-ai'
 import { Route as AdminPagesSlugRouteImport } from './routes/admin.pages.$slug'
 import { Route as AdminSeoWriteBlogRouteImport } from './routes/admin.seo.write-blog'
+import { Route as ApiPublicUtmConversionRouteImport } from './routes/api/public/utm-conversion'
 import { Route as CollegeSlugProgrammeRouteImport } from './routes/college.$slug.programme'
 import { Route as DemoAnalysisAttemptIdRouteImport } from './routes/demo.analysis.$attemptId'
 import { Route as DemoDailyTestIndexRouteImport } from './routes/demo.daily-test.index'
@@ -1242,6 +1246,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUtmTrackingRoute = AdminUtmTrackingRouteImport.update({
+  id: '/utm-tracking',
+  path: '/utm-tracking',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminVocabularyRoute = AdminVocabularyRouteImport.update({
   id: '/vocabulary',
   path: '/vocabulary',
@@ -1417,6 +1426,16 @@ const ExamsSlugRoute = ExamsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ExamsRoute,
+} as any)
+const GoCodeRoute = GoCodeRouteImport.update({
+  id: '/go/$code',
+  path: '/go/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoRRoute = GoRRouteImport.update({
+  id: '/go/r',
+  path: '/go/r',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const StudentIndexRoute = StudentIndexRouteImport.update({
   id: '/',
@@ -1838,6 +1857,11 @@ const AdminSeoWriteBlogRoute = AdminSeoWriteBlogRouteImport.update({
   id: '/seo/write-blog',
   path: '/seo/write-blog',
   getParentRoute: () => AdminRoute,
+} as any)
+const ApiPublicUtmConversionRoute = ApiPublicUtmConversionRouteImport.update({
+  id: '/api/public/utm-conversion',
+  path: '/api/public/utm-conversion',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CollegeSlugProgrammeRoute = CollegeSlugProgrammeRouteImport.update({
   id: '/college/$slug/programme',
@@ -2458,6 +2482,7 @@ export interface FileRoutesByFullPath {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/user-submissions': typeof AdminUserSubmissionsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/utm-tracking': typeof AdminUtmTrackingRoute
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
@@ -2491,6 +2516,8 @@ export interface FileRoutesByFullPath {
   '/demo/weak-areas': typeof DemoWeakAreasRoute
   '/edit/$token': typeof EditTokenRoute
   '/exams/$slug': typeof ExamsSlugRoute
+  '/go/$code': typeof GoCodeRoute
+  '/go/r': typeof GoRRoute
   '/student/all-india-rank': typeof StudentAllIndiaRankRoute
   '/student/applications': typeof StudentApplicationsRoute
   '/student/attempts': typeof StudentAttemptsRoute
@@ -2568,6 +2595,7 @@ export interface FileRoutesByFullPath {
   '/admin/institutes/generate-ai': typeof AdminInstitutesGenerateAiRoute
   '/admin/pages/$slug': typeof AdminPagesSlugRoute
   '/admin/seo/write-blog': typeof AdminSeoWriteBlogRoute
+  '/api/public/utm-conversion': typeof ApiPublicUtmConversionRoute
   '/college/$slug/programme': typeof CollegeSlugProgrammeRouteWithChildren
   '/demo/analysis/$attemptId': typeof DemoAnalysisAttemptIdRoute
   '/demo/day-planner/performance': typeof DemoDayPlannerPerformanceRoute
@@ -2817,6 +2845,7 @@ export interface FileRoutesByTo {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/user-submissions': typeof AdminUserSubmissionsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/utm-tracking': typeof AdminUtmTrackingRoute
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
@@ -2844,6 +2873,8 @@ export interface FileRoutesByTo {
   '/demo/weak-areas': typeof DemoWeakAreasRoute
   '/edit/$token': typeof EditTokenRoute
   '/exams/$slug': typeof ExamsSlugRoute
+  '/go/$code': typeof GoCodeRoute
+  '/go/r': typeof GoRRoute
   '/student/all-india-rank': typeof StudentAllIndiaRankRoute
   '/student/applications': typeof StudentApplicationsRoute
   '/student/attempts': typeof StudentAttemptsRoute
@@ -2916,6 +2947,7 @@ export interface FileRoutesByTo {
   '/admin/institutes/generate-ai': typeof AdminInstitutesGenerateAiRoute
   '/admin/pages/$slug': typeof AdminPagesSlugRoute
   '/admin/seo/write-blog': typeof AdminSeoWriteBlogRoute
+  '/api/public/utm-conversion': typeof ApiPublicUtmConversionRoute
   '/college/$slug/programme': typeof CollegeSlugProgrammeRouteWithChildren
   '/demo/analysis/$attemptId': typeof DemoAnalysisAttemptIdRoute
   '/demo/day-planner/performance': typeof DemoDayPlannerPerformanceRoute
@@ -3174,6 +3206,7 @@ export interface FileRoutesById {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/user-submissions': typeof AdminUserSubmissionsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/utm-tracking': typeof AdminUtmTrackingRoute
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
@@ -3207,6 +3240,8 @@ export interface FileRoutesById {
   '/demo/weak-areas': typeof DemoWeakAreasRoute
   '/edit/$token': typeof EditTokenRoute
   '/exams/$slug': typeof ExamsSlugRoute
+  '/go/$code': typeof GoCodeRoute
+  '/go/r': typeof GoRRoute
   '/student/all-india-rank': typeof StudentAllIndiaRankRoute
   '/student/applications': typeof StudentApplicationsRoute
   '/student/attempts': typeof StudentAttemptsRoute
@@ -3285,6 +3320,7 @@ export interface FileRoutesById {
   '/admin/institutes_/generate-ai': typeof AdminInstitutesGenerateAiRoute
   '/admin/pages/$slug': typeof AdminPagesSlugRoute
   '/admin/seo/write-blog': typeof AdminSeoWriteBlogRoute
+  '/api/public/utm-conversion': typeof ApiPublicUtmConversionRoute
   '/college/$slug/programme': typeof CollegeSlugProgrammeRouteWithChildren
   '/demo/analysis/$attemptId': typeof DemoAnalysisAttemptIdRoute
   '/demo/day-planner/performance': typeof DemoDayPlannerPerformanceRoute
@@ -3544,6 +3580,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/user-submissions'
     | '/admin/users'
+    | '/admin/utm-tracking'
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
@@ -3577,6 +3614,8 @@ export interface FileRouteTypes {
     | '/demo/weak-areas'
     | '/edit/$token'
     | '/exams/$slug'
+    | '/go/$code'
+    | '/go/r'
     | '/student/all-india-rank'
     | '/student/applications'
     | '/student/attempts'
@@ -3654,6 +3693,7 @@ export interface FileRouteTypes {
     | '/admin/institutes/generate-ai'
     | '/admin/pages/$slug'
     | '/admin/seo/write-blog'
+    | '/api/public/utm-conversion'
     | '/college/$slug/programme'
     | '/demo/analysis/$attemptId'
     | '/demo/day-planner/performance'
@@ -3903,6 +3943,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/user-submissions'
     | '/admin/users'
+    | '/admin/utm-tracking'
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
@@ -3930,6 +3971,8 @@ export interface FileRouteTypes {
     | '/demo/weak-areas'
     | '/edit/$token'
     | '/exams/$slug'
+    | '/go/$code'
+    | '/go/r'
     | '/student/all-india-rank'
     | '/student/applications'
     | '/student/attempts'
@@ -4002,6 +4045,7 @@ export interface FileRouteTypes {
     | '/admin/institutes/generate-ai'
     | '/admin/pages/$slug'
     | '/admin/seo/write-blog'
+    | '/api/public/utm-conversion'
     | '/college/$slug/programme'
     | '/demo/analysis/$attemptId'
     | '/demo/day-planner/performance'
@@ -4259,6 +4303,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/user-submissions'
     | '/admin/users'
+    | '/admin/utm-tracking'
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
@@ -4292,6 +4337,8 @@ export interface FileRouteTypes {
     | '/demo/weak-areas'
     | '/edit/$token'
     | '/exams/$slug'
+    | '/go/$code'
+    | '/go/r'
     | '/student/all-india-rank'
     | '/student/applications'
     | '/student/attempts'
@@ -4370,6 +4417,7 @@ export interface FileRouteTypes {
     | '/admin/institutes_/generate-ai'
     | '/admin/pages/$slug'
     | '/admin/seo/write-blog'
+    | '/api/public/utm-conversion'
     | '/college/$slug/programme'
     | '/demo/analysis/$attemptId'
     | '/demo/day-planner/performance'
@@ -4473,6 +4521,9 @@ export interface RootRouteChildren {
   AdmissionsSplatRoute: typeof AdmissionsSplatRoute
   CourseSlugRoute: typeof CourseSlugRoute
   EditTokenRoute: typeof EditTokenRoute
+  GoCodeRoute: typeof GoCodeRoute
+  GoRRoute: typeof GoRRoute
+  ApiPublicUtmConversionRoute: typeof ApiPublicUtmConversionRoute
   CollegeSlugProgrammeRoute: typeof CollegeSlugProgrammeRouteWithChildren
   MocksAttemptAttemptIdRoute: typeof MocksAttemptAttemptIdRoute
   MocksCheckoutReturnRoute: typeof MocksCheckoutReturnRoute
@@ -5669,6 +5720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/utm-tracking': {
+      id: '/admin/utm-tracking'
+      path: '/utm-tracking'
+      fullPath: '/admin/utm-tracking'
+      preLoaderRoute: typeof AdminUtmTrackingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/vocabulary': {
       id: '/admin/vocabulary'
       path: '/vocabulary'
@@ -5913,6 +5971,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/exams/$slug'
       preLoaderRoute: typeof ExamsSlugRouteImport
       parentRoute: typeof ExamsRoute
+    }
+    '/go/$code': {
+      id: '/go/$code'
+      path: '/go/$code'
+      fullPath: '/go/$code'
+      preLoaderRoute: typeof GoCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/go/r': {
+      id: '/go/r'
+      path: '/go/r'
+      fullPath: '/go/r'
+      preLoaderRoute: typeof GoRRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/student/': {
       id: '/student/'
@@ -6473,6 +6545,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/seo/write-blog'
       preLoaderRoute: typeof AdminSeoWriteBlogRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/api/public/utm-conversion': {
+      id: '/api/public/utm-conversion'
+      path: '/api/public/utm-conversion'
+      fullPath: '/api/public/utm-conversion'
+      preLoaderRoute: typeof ApiPublicUtmConversionRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/college/$slug/programme': {
       id: '/college/$slug/programme'
@@ -7460,6 +7539,7 @@ interface AdminRouteChildren {
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AdminUserSubmissionsRoute: typeof AdminUserSubmissionsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminUtmTrackingRoute: typeof AdminUtmTrackingRoute
   AdminVocabularyRoute: typeof AdminVocabularyRoute
   AdminWebsiteOptimizerRoute: typeof AdminWebsiteOptimizerRoute
   AdminWhatsappAutomationRoute: typeof AdminWhatsappAutomationRoute
@@ -7589,6 +7669,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   AdminUserSubmissionsRoute: AdminUserSubmissionsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminUtmTrackingRoute: AdminUtmTrackingRoute,
   AdminVocabularyRoute: AdminVocabularyRoute,
   AdminWebsiteOptimizerRoute: AdminWebsiteOptimizerRoute,
   AdminWhatsappAutomationRoute: AdminWhatsappAutomationRoute,
@@ -8014,6 +8095,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdmissionsSplatRoute: AdmissionsSplatRoute,
   CourseSlugRoute: CourseSlugRoute,
   EditTokenRoute: EditTokenRoute,
+  GoCodeRoute: GoCodeRoute,
+  GoRRoute: GoRRoute,
+  ApiPublicUtmConversionRoute: ApiPublicUtmConversionRoute,
   CollegeSlugProgrammeRoute: CollegeSlugProgrammeRouteWithChildren,
   MocksAttemptAttemptIdRoute: MocksAttemptAttemptIdRoute,
   MocksCheckoutReturnRoute: MocksCheckoutReturnRoute,
