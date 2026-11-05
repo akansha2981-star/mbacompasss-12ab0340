@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AdminThemeToggle, { applyAdminTheme, getInitialAdminTheme } from "@/components/admin/AdminThemeToggle";
 import { adminNavGroups, allAdminNavItems } from "./adminNav";
 import { MockGenDockProvider } from "@/contexts/MockGenDockContext";
+import UtmPasteGuard from "@/components/admin/UtmPasteGuard";
 
 const MockGenDock = lazy(() => import("@/components/admin/MockGenDock"));
 
@@ -246,6 +247,7 @@ const AdminLayout = () => {
 
   return (
     <MockGenDockProvider>
+    <UtmPasteGuard />
     <div className="admin-scope min-h-screen flex bg-muted/30">
       {/* Mobile top bar */}
       <header className="lg:hidden fixed top-0 inset-x-0 z-40 h-14 flex items-center justify-between gap-2 px-3 bg-card/95 backdrop-blur border-b border-border">

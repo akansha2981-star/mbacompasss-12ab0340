@@ -39,3 +39,11 @@ describe("utm engine", () => {
     expect(from).toBe("2026-11-04T18:30:00.000Z");
   });
 });
+
+import { needsUtmPrompt } from "./utmEngine";
+describe("needsUtmPrompt", () => {
+  it("prompts for a plain external URL", () => expect(needsUtmPrompt("https://www.iimb.ac.in/admissions")).toBe(true));
+  it("skips URLs that already carry UTM params", () => expect(needsUtmPrompt("https://iimb.ac.in/?utm_source=mbacompass")).toBe(false));
+  it("skips our own tracking links", () => expect(needsUtmPrompt("https://mbacompass.in/go/abc123")).toBe(false));
+  it("skips normal text", () => expect(needsUtmPrompt("hello world")).toBe(false));
+});
