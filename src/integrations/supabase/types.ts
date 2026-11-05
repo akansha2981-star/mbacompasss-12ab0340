@@ -1694,6 +1694,7 @@ export type Database = {
           college_name: string
           created_at: string
           cutoff_band: string
+          cutoff_tags: string[]
           fees: string
           highest_package: string
           id: string
@@ -1708,6 +1709,7 @@ export type Database = {
           college_name: string
           created_at?: string
           cutoff_band: string
+          cutoff_tags?: string[]
           fees?: string
           highest_package?: string
           id?: string
@@ -1722,6 +1724,7 @@ export type Database = {
           college_name?: string
           created_at?: string
           cutoff_band?: string
+          cutoff_tags?: string[]
           fees?: string
           highest_package?: string
           id?: string
