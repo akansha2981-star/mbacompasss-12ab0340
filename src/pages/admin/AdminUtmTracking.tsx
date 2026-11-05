@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRef, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -113,6 +113,32 @@ export default function AdminUtmTracking() {
     } finally { setLoading(false); }
   }, [loadStatic, loadRange]);
   useEffect(() => { refresh(); }, [refresh]);
+
+  const [migrateProgress, setMigrateProgress] = useState("");
+  const migratingRef = useRef(false);
+  const runMigration = useCallback(async () => {
+    if (migratingRef.current) return;
+    migratingRef.current = true; setBusy("migrate");
+    let sourceIndex = 0, offset = 0, created = 0, reused = 0;
+    const t = toast.loading("Converting site links to tracking links...");
+    try {
+      for (let guard = 0; guard < 500; guard++) {
+        const r: any = await migrateFn({ data: { sourceIndex, offset } });
+        created += r.created; reused += r.reused;
+        setMigrateProgress(`${r.source}: ${created} created, ${reused} reused so far`);
+        toast.loading(`Converting ${r.source} links... ${created} created`, { id: t });
+        if (r.done) break;
+        sourceIndex = r.sourceIndex; offset = r.nextOffset;
+      }
+      toast.success(`Done: ${created} new tracking links, ${reused} reused`, { id: t });
+      await loadStatic();
+    } catch (e: any) { toast.error(e?.message || "Conversion failed", { id: t }); }
+    finally { migratingRef.current = false; setBusy(""); setMigrateProgress(""); }
+  }, [migrateFn, loadStatic]);
+  const autoRanRef = useRef(false);
+  useEffect(() => {
+    if (!loading && links.length === 0 && !autoRanRef.current) { autoRanRef.current = true; runMigration(); }
+  }, [loading, links.length, runMigration]);
   useEffect(() => { const t = setInterval(() => loadRange(), 60_000); return () => clearInterval(t); }, [loadRange]);
 
   const rows = useMemo(() => links.map((l) => {
@@ -444,10 +470,9 @@ export default function AdminUtmTracking() {
               <p className="text-sm text-muted-foreground">Scans college websites, application links, cut-off table links, institutes, exams, banners and coaching links, and creates or reuses a tracking link for each.</p>
               <Button disabled={busy === "migrate"} onClick={async () => {
                 setBusy("migrate");
-                try { const r = await migrateFn(); toast.success(r.report.map((x) => `${x.source}: ${x.created} new, ${x.reused} reused`).join(" · ") || "Nothing found"); await loadStatic(); }
-                catch (e: any) { toast.error(e?.message || "Failed"); }
-                setBusy("");
+                await runMigration();
               }}><RefreshCw className={`mr-1 h-4 w-4 ${busy === "migrate" ? "animate-spin" : ""}`} />Run migration</Button>
+              {migrateProgress && <p className="text-sm text-muted-foreground">{migrateProgress}</p>}
             </div>
             <div className="rounded-xl border border-border bg-card p-4 space-y-2">
               <p className="text-base font-semibold">Bulk upload (CSV)</p>

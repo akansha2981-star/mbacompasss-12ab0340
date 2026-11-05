@@ -69,33 +69,37 @@ const SOURCES: { table: string; cols: string[]; campaign: string; module: string
 
 export const migrateExistingLinks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((i: { sourceIndex?: number; offset?: number } | undefined) => ({ sourceIndex: Math.max(0, Number(i?.sourceIndex ?? 0)), offset: Math.max(0, Number(i?.offset ?? 0)) }))
+  .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
     const { getOrCreateLink } = await import("./utm.server");
     const { shouldTrack } = await import("./utmEngine");
-    const report: { source: string; found: number; created: number; reused: number }[] = [];
-    for (const s of SOURCES) {
-      const cols = [...new Set([...s.cols, ...(s.collegeIdCol ? [s.collegeIdCol] : [])])].join(",");
-      const { data, error } = await admin.from(s.table).select(cols).limit(5000);
-      if (error) continue;
-      const r = { source: s.module, found: 0, created: 0, reused: 0 };
-      for (const row of data ?? []) {
+    const BATCH = 100;
+    const s = SOURCES[data.sourceIndex];
+    if (!s) return { done: true, source: "", sourceIndex: data.sourceIndex, nextOffset: 0, found: 0, created: 0, reused: 0, totalSources: SOURCES.length };
+    const cols = [...new Set([...s.cols, ...(s.collegeIdCol ? [s.collegeIdCol] : []), "id"])].join(",");
+    const { data: rows, error } = await admin.from(s.table).select(cols).order("id").range(data.offset, data.offset + BATCH - 1);
+    const r = { found: 0, created: 0, reused: 0 };
+    if (!error) {
+      const jobs: Promise<void>[] = [];
+      for (const row of rows ?? []) {
         for (const c of s.cols) {
           let v = String(row[c] || "").trim();
           if (v && !/^https?:\/\//i.test(v) && /^[\w.-]+\.[a-z]{2,}/i.test(v)) v = `https://${v}`;
           if (!shouldTrack(v)) continue;
           r.found++;
-          try {
-            const res = await getOrCreateLink(admin, { destination: v, campaign: s.campaign, collegeId: s.collegeIdCol ? row[s.collegeIdCol] : null, originModule: s.module, createdBy: context.userId });
-            res.created ? r.created++ : r.reused++;
-          } catch { /* skip invalid */ }
+          jobs.push(getOrCreateLink(admin, { destination: v, campaign: s.campaign, collegeId: s.collegeIdCol ? row[s.collegeIdCol] : null, originModule: s.module, createdBy: context.userId })
+            .then((res: any) => { res.created ? r.created++ : r.reused++; }).catch(() => {}));
+          if (jobs.length >= 10) { await Promise.all(jobs.splice(0)); }
         }
       }
-      report.push(r);
+      await Promise.all(jobs);
     }
-    return { report };
+    const more = !error && (rows?.length ?? 0) === BATCH;
+    const nextIndex = more ? data.sourceIndex : data.sourceIndex + 1;
+    return { done: nextIndex >= SOURCES.length, source: s.module, sourceIndex: nextIndex, nextOffset: more ? data.offset + BATCH : 0, ...r, totalSources: SOURCES.length };
   });
 
 export const approvePendingUrl = createServerFn({ method: "POST" })
