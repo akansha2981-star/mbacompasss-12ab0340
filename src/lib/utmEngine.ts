@@ -133,3 +133,17 @@ export function rangeBounds(range: UtmDateRange, now = new Date(), custom?: { fr
     default: return { from: "2020-01-01T00:00:00.000Z", to: end.toISOString() };
   }
 }
+
+/**
+ * Should a URL pasted by an admin trigger the "Convert to UTM" prompt?
+ * Already-tracked links (our /go/ links or URLs carrying utm_ params) are left alone.
+ */
+export function needsUtmPrompt(text: string): boolean {
+  const t = (text || "").trim();
+  if (!t || /\s/.test(t) || !shouldTrack(t)) return false;
+  try {
+    const u = new URL(t);
+    if ([...u.searchParams.keys()].some((k) => /^utm_/i.test(k))) return false;
+  } catch { return false; }
+  return true;
+}
