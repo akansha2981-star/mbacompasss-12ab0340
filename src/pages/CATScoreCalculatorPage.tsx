@@ -611,6 +611,16 @@ const CATScoreCalculatorPage: React.FC = () => {
               </div>
             </SectionInView>
 
+            <div className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
+              <div className="flex flex-col items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-base text-foreground">See which B-schools you can target with a score of <span className="font-semibold">{result.overall.totalScore}</span>.</p>
+                <button type="button" onClick={() => document.getElementById("cat-cutoff-colleges")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  className="rounded-lg bg-primary px-5 py-2.5 text-base font-semibold text-primary-foreground shadow-sm hover:bg-primary/90">
+                  Check Colleges
+                </button>
+              </div>
+            </div>
+
             {/* Score scale vs 2026 aspirants */}
             <SectionInView className="max-w-5xl mx-auto px-4 mb-6 md:mb-10">
               <ResultHead index="02" title="Where You Stand" sub="Your score against top 10%, top 25%, top 50% and overall averages of CAT 2026 aspirants on this calculator" />
