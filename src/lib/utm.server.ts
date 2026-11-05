@@ -102,3 +102,43 @@ export async function sha256(s: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
 }
+
+function readCookie(request: Request, name: string): string | null {
+  const m = (request.headers.get("cookie") || "").match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+/** Records the click and returns the redirect response with visitor/session cookies. */
+export async function trackAndRedirect(admin: any, request: Request, link: any, fromPath?: string | null): Promise<Response> {
+  const { parseUserAgent } = await import("./utmEngine");
+  const ua = request.headers.get("user-agent") || "";
+  const info = parseUserAgent(ua);
+  let vid = readCookie(request, "mc_vid");
+  let sid = readCookie(request, "mc_sid");
+  const newVisitor = !vid;
+  if (!vid) vid = crypto.randomUUID();
+  if (!sid) sid = crypto.randomUUID();
+  const dest = new URL(link.final_url);
+  if (!info.bot && link.status === "active") {
+    const visitor_hash = await sha256(vid);
+    const session_hash = await sha256(sid);
+    const [{ count: seenLink }, { count: seenAny }] = await Promise.all([
+      admin.from("utm_clicks").select("id", { count: "exact", head: true }).eq("link_id", link.id).eq("visitor_hash", visitor_hash),
+      newVisitor ? Promise.resolve({ count: 0 }) : admin.from("utm_clicks").select("id", { count: "exact", head: true }).eq("visitor_hash", visitor_hash),
+    ]);
+    let refHost: string | null = null, path: string | null = fromPath ?? null;
+    const ref = request.headers.get("referer");
+    try { if (ref) { const r = new URL(ref); refHost = r.hostname.replace(/^www\./, ""); path = path ?? r.pathname; } } catch { /* ignore */ }
+    const { data: click } = await admin.from("utm_clicks").insert({
+      link_id: link.id, visitor_hash, session_hash, is_unique: (seenLink ?? 0) === 0, is_returning: (seenAny ?? 0) > 0,
+      referrer_host: refHost?.slice(0, 120) ?? null, page_path: path?.slice(0, 400) ?? null,
+      device: info.device, browser: info.browser, os: info.os,
+      country: request.headers.get("cf-ipcountry") || null,
+    }).select("id").single();
+    if (click?.id) dest.searchParams.set("mc_tid", click.id); // lets the college post back a conversion
+  }
+  const headers = new Headers({ Location: dest.toString(), "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "Referrer-Policy": "no-referrer-when-downgrade" });
+  headers.append("Set-Cookie", `mc_vid=${vid}; Path=/go; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly`);
+  headers.append("Set-Cookie", `mc_sid=${sid}; Path=/go; Max-Age=1800; SameSite=Lax; Secure; HttpOnly`);
+  return new Response(null, { status: 302, headers });
+}
