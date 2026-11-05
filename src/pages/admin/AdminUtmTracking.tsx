@@ -80,8 +80,17 @@ export default function AdminUtmTracking() {
   const bounds = useMemo(() => rangeBounds(range, new Date(), custom), [range, custom]);
 
   const loadStatic = useCallback(async () => {
+    const fetchAllLinks = async () => {
+      const all: any[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await db.from("utm_links").select("*").order("created_at", { ascending: false }).order("id").range(from, from + 999);
+        if (error) return { data: all, error };
+        all.push(...(data ?? []));
+        if ((data?.length ?? 0) < 1000) return { data: all, error: null };
+      }
+    };
     const [l, b, c, d, p, s, v] = await Promise.all([
-      db.from("utm_links").select("*").order("created_at", { ascending: false }).limit(5000),
+      fetchAllLinks(),
       db.from("utm_brands").select("*").order("name"),
       db.from("utm_campaigns").select("*").order("name"),
       db.from("utm_allowed_domains").select("*").order("domain"),
@@ -123,7 +132,11 @@ export default function AdminUtmTracking() {
     const t = toast.loading("Converting site links to tracking links...");
     try {
       for (let guard = 0; guard < 500; guard++) {
-        const r: any = await migrateFn({ data: { sourceIndex, offset } });
+        let r: any;
+        for (let attempt = 0; ; attempt++) {
+          try { r = await migrateFn({ data: { sourceIndex, offset } }); break; }
+          catch (e) { if (attempt >= 3) throw e; await new Promise((res) => setTimeout(res, 1500 * (attempt + 1))); }
+        }
         created += r.created; reused += r.reused;
         setMigrateProgress(`${r.source}: ${created} created, ${reused} reused so far`);
         toast.loading(`Converting ${r.source} links... ${created} created`, { id: t });
