@@ -90,6 +90,7 @@ import { Route as AdminCacheDiagnosticsRouteImport } from './routes/admin.cache-
 import { Route as AdminCallbacksRouteImport } from './routes/admin.callbacks'
 import { Route as AdminCatAlertsRouteImport } from './routes/admin.cat-alerts'
 import { Route as AdminCatCalculatorSettingsRouteImport } from './routes/admin.cat-calculator-settings'
+import { Route as AdminCatCutoffCollegesRouteImport } from './routes/admin.cat-cutoff-colleges'
 import { Route as AdminCatScoresRouteImport } from './routes/admin.cat-scores'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminClearCacheRouteImport } from './routes/admin.clear-cache'
@@ -796,6 +797,11 @@ const AdminCatCalculatorSettingsRoute =
     path: '/cat-calculator-settings',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminCatCutoffCollegesRoute = AdminCatCutoffCollegesRouteImport.update({
+  id: '/cat-cutoff-colleges',
+  path: '/cat-cutoff-colleges',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCatScoresRoute = AdminCatScoresRouteImport.update({
   id: '/cat-scores',
   path: '/cat-scores',
@@ -2364,6 +2370,7 @@ export interface FileRoutesByFullPath {
   '/admin/callbacks': typeof AdminCallbacksRoute
   '/admin/cat-alerts': typeof AdminCatAlertsRoute
   '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
+  '/admin/cat-cutoff-colleges': typeof AdminCatCutoffCollegesRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -2722,6 +2729,7 @@ export interface FileRoutesByTo {
   '/admin/callbacks': typeof AdminCallbacksRoute
   '/admin/cat-alerts': typeof AdminCatAlertsRoute
   '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
+  '/admin/cat-cutoff-colleges': typeof AdminCatCutoffCollegesRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -3078,6 +3086,7 @@ export interface FileRoutesById {
   '/admin/callbacks': typeof AdminCallbacksRoute
   '/admin/cat-alerts': typeof AdminCatAlertsRoute
   '/admin/cat-calculator-settings': typeof AdminCatCalculatorSettingsRoute
+  '/admin/cat-cutoff-colleges': typeof AdminCatCutoffCollegesRoute
   '/admin/cat-scores': typeof AdminCatScoresRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/clear-cache': typeof AdminClearCacheRoute
@@ -3447,6 +3456,7 @@ export interface FileRouteTypes {
     | '/admin/callbacks'
     | '/admin/cat-alerts'
     | '/admin/cat-calculator-settings'
+    | '/admin/cat-cutoff-colleges'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -3805,6 +3815,7 @@ export interface FileRouteTypes {
     | '/admin/callbacks'
     | '/admin/cat-alerts'
     | '/admin/cat-calculator-settings'
+    | '/admin/cat-cutoff-colleges'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -4160,6 +4171,7 @@ export interface FileRouteTypes {
     | '/admin/callbacks'
     | '/admin/cat-alerts'
     | '/admin/cat-calculator-settings'
+    | '/admin/cat-cutoff-colleges'
     | '/admin/cat-scores'
     | '/admin/categories'
     | '/admin/clear-cache'
@@ -5039,6 +5051,13 @@ declare module '@tanstack/react-router' {
       path: '/cat-calculator-settings'
       fullPath: '/admin/cat-calculator-settings'
       preLoaderRoute: typeof AdminCatCalculatorSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cat-cutoff-colleges': {
+      id: '/admin/cat-cutoff-colleges'
+      path: '/cat-cutoff-colleges'
+      fullPath: '/admin/cat-cutoff-colleges'
+      preLoaderRoute: typeof AdminCatCutoffCollegesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/cat-scores': {
@@ -7353,6 +7372,7 @@ interface AdminRouteChildren {
   AdminCallbacksRoute: typeof AdminCallbacksRoute
   AdminCatAlertsRoute: typeof AdminCatAlertsRoute
   AdminCatCalculatorSettingsRoute: typeof AdminCatCalculatorSettingsRoute
+  AdminCatCutoffCollegesRoute: typeof AdminCatCutoffCollegesRoute
   AdminCatScoresRoute: typeof AdminCatScoresRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminClearCacheRoute: typeof AdminClearCacheRoute
@@ -7481,6 +7501,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCallbacksRoute: AdminCallbacksRoute,
   AdminCatAlertsRoute: AdminCatAlertsRoute,
   AdminCatCalculatorSettingsRoute: AdminCatCalculatorSettingsRoute,
+  AdminCatCutoffCollegesRoute: AdminCatCutoffCollegesRoute,
   AdminCatScoresRoute: AdminCatScoresRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminClearCacheRoute: AdminClearCacheRoute,

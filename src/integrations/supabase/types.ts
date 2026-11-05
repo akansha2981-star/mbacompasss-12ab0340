@@ -1687,6 +1687,51 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_cutoff_colleges: {
+        Row: {
+          apply_url: string
+          average_package: string
+          college_name: string
+          created_at: string
+          cutoff_band: string
+          fees: string
+          highest_package: string
+          id: string
+          is_active: boolean
+          overall_percentile: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          apply_url?: string
+          average_package?: string
+          college_name: string
+          created_at?: string
+          cutoff_band: string
+          fees?: string
+          highest_package?: string
+          id?: string
+          is_active?: boolean
+          overall_percentile?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          apply_url?: string
+          average_package?: string
+          college_name?: string
+          created_at?: string
+          cutoff_band?: string
+          fees?: string
+          highest_package?: string
+          id?: string
+          is_active?: boolean
+          overall_percentile?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cat_score_aggregates: {
         Row: {
           created_at: string

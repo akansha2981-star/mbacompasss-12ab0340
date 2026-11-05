@@ -281,6 +281,13 @@
       "when": 1793887335283,
       "tag": "0039_fix_coaching_search_query_normalization",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793887647110,
+      "tag": "0040_create_cat_cutoff_colleges",
+      "breakpoints": true
     }
   ]
 }
