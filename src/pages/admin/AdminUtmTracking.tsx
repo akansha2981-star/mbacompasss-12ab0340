@@ -103,7 +103,15 @@ export default function AdminUtmTracking() {
     setBreakdown(Object.fromEntries(dims.map((d, i) => [d, (bd[i].data ?? []).map((r: any) => ({ label: r.label, clicks: Number(r.clicks) }))])));
   }, [bounds]);
 
-  const refresh = useCallback(async () => { setLoading(true); await Promise.all([loadStatic(), loadRange()]); setLoading(false); }, [loadStatic, loadRange]);
+  const refresh = useCallback(async (manual = false) => {
+    setLoading(true);
+    try {
+      await Promise.all([loadStatic(), loadRange()]);
+      if (manual) toast.success(`Updated at ${new Date().toLocaleTimeString()}`);
+    } catch (e: any) {
+      toast.error(`Could not refresh: ${e?.message ?? "unknown error"}`);
+    } finally { setLoading(false); }
+  }, [loadStatic, loadRange]);
   useEffect(() => { refresh(); }, [refresh]);
   useEffect(() => { const t = setInterval(() => loadRange(), 60_000); return () => clearInterval(t); }, [loadRange]);
 
@@ -273,7 +281,7 @@ export default function AdminUtmTracking() {
             <Input type="date" value={custom.from} onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))} className="w-40" />
             <Input type="date" value={custom.to} onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))} className="w-40" />
           </>) : null}
-          <Button variant="outline" onClick={refresh} disabled={loading}><RefreshCw className={`mr-1 h-4 w-4 ${loading ? "animate-spin" : ""}`} />Refresh</Button>
+          <Button variant="outline" onClick={() => refresh(true)} disabled={loading}><RefreshCw className={`mr-1 h-4 w-4 ${loading ? "animate-spin" : ""}`} />Refresh</Button>
         </div>
       </div>
 
