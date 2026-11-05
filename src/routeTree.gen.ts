@@ -178,6 +178,7 @@ import { Route as AdminTablesManagerRouteImport } from './routes/admin.tables-ma
 import { Route as AdminTestimonialsRouteImport } from './routes/admin.testimonials'
 import { Route as AdminUserSubmissionsRouteImport } from './routes/admin.user-submissions'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminUtmTrackingRouteImport } from './routes/admin.utm-tracking'
 import { Route as AdminVocabularyRouteImport } from './routes/admin.vocabulary'
 import { Route as AdminWebsiteOptimizerRouteImport } from './routes/admin.website-optimizer'
 import { Route as AdminWhatsappAutomationRouteImport } from './routes/admin.whatsapp-automation'
@@ -1243,6 +1244,11 @@ const AdminUserSubmissionsRoute = AdminUserSubmissionsRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUtmTrackingRoute = AdminUtmTrackingRouteImport.update({
+  id: '/utm-tracking',
+  path: '/utm-tracking',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminVocabularyRoute = AdminVocabularyRouteImport.update({
@@ -2476,6 +2482,7 @@ export interface FileRoutesByFullPath {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/user-submissions': typeof AdminUserSubmissionsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/utm-tracking': typeof AdminUtmTrackingRoute
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
@@ -2838,6 +2845,7 @@ export interface FileRoutesByTo {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/user-submissions': typeof AdminUserSubmissionsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/utm-tracking': typeof AdminUtmTrackingRoute
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
@@ -3198,6 +3206,7 @@ export interface FileRoutesById {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/user-submissions': typeof AdminUserSubmissionsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/admin/utm-tracking': typeof AdminUtmTrackingRoute
   '/admin/vocabulary': typeof AdminVocabularyRoute
   '/admin/website-optimizer': typeof AdminWebsiteOptimizerRoute
   '/admin/whatsapp-automation': typeof AdminWhatsappAutomationRoute
@@ -3571,6 +3580,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/user-submissions'
     | '/admin/users'
+    | '/admin/utm-tracking'
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
@@ -3933,6 +3943,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/user-submissions'
     | '/admin/users'
+    | '/admin/utm-tracking'
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
@@ -4292,6 +4303,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/user-submissions'
     | '/admin/users'
+    | '/admin/utm-tracking'
     | '/admin/vocabulary'
     | '/admin/website-optimizer'
     | '/admin/whatsapp-automation'
@@ -5706,6 +5718,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/utm-tracking': {
+      id: '/admin/utm-tracking'
+      path: '/utm-tracking'
+      fullPath: '/admin/utm-tracking'
+      preLoaderRoute: typeof AdminUtmTrackingRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/vocabulary': {
@@ -7520,6 +7539,7 @@ interface AdminRouteChildren {
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AdminUserSubmissionsRoute: typeof AdminUserSubmissionsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminUtmTrackingRoute: typeof AdminUtmTrackingRoute
   AdminVocabularyRoute: typeof AdminVocabularyRoute
   AdminWebsiteOptimizerRoute: typeof AdminWebsiteOptimizerRoute
   AdminWhatsappAutomationRoute: typeof AdminWhatsappAutomationRoute
@@ -7649,6 +7669,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   AdminUserSubmissionsRoute: AdminUserSubmissionsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminUtmTrackingRoute: AdminUtmTrackingRoute,
   AdminVocabularyRoute: AdminVocabularyRoute,
   AdminWebsiteOptimizerRoute: AdminWebsiteOptimizerRoute,
   AdminWhatsappAutomationRoute: AdminWhatsappAutomationRoute,

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import OutboundLinkTracker from "@/components/OutboundLinkTracker";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -315,6 +316,7 @@ function RootComponent() {
         <DeferredToasters />
         <SettingsPrefetcher />
         <SubdomainGuard />
+        <OutboundLinkTracker />
         <StudentBackGuard />
         <AuthProvider>
           <OAuthRedirectHandler />
