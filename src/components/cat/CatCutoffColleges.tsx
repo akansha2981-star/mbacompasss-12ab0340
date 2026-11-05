@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, GraduationCap } from "lucide-react";
-import { CUTOFF_BANDS, type CatCutoffCollege } from "@/lib/catCutoffColleges";
+import { CUTOFF_BANDS, collegeTags, type CatCutoffCollege } from "@/lib/catCutoffColleges";
 
 /**
  * CAT-based cut-off college table with percentile-band filters.
@@ -17,7 +17,7 @@ const CatCutoffColleges: React.FC = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cat_cutoff_colleges")
-        .select("id, college_name, cutoff_band, overall_percentile, fees, highest_package, average_package, apply_url, sort_order")
+        .select("id, college_name, cutoff_band, cutoff_tags, overall_percentile, fees, highest_package, average_package, apply_url, sort_order")
         .eq("is_active", true)
         .order("sort_order", { ascending: true })
         .order("college_name", { ascending: true });
@@ -29,11 +29,11 @@ const CatCutoffColleges: React.FC = () => {
 
   const counts = useMemo(() => {
     const m: Record<string, number> = {};
-    for (const c of colleges) m[c.cutoff_band] = (m[c.cutoff_band] || 0) + 1;
+    for (const c of colleges) for (const k of collegeTags(c)) m[k] = (m[k] || 0) + 1;
     return m;
   }, [colleges]);
 
-  const rows = useMemo(() => colleges.filter((c) => c.cutoff_band === band), [colleges, band]);
+  const rows = useMemo(() => colleges.filter((c) => collegeTags(c).includes(band)), [colleges, band]);
 
   // Hide the whole section until the admin has added at least one college.
   if (!isLoading && colleges.length === 0) return null;

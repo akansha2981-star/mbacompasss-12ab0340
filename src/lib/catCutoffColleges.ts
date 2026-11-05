@@ -27,6 +27,7 @@ export interface CatCutoffCollege {
   id: string;
   college_name: string;
   cutoff_band: string;
+  cutoff_tags?: string[];
   overall_percentile: string;
   fees: string;
   highest_package: string;
@@ -40,6 +41,7 @@ export interface CatCutoffCollege {
 export interface CatCutoffCollegeInput {
   college_name: string;
   cutoff_band: string;
+  cutoff_tags?: string[];
   overall_percentile: string;
   fees: string;
   highest_package: string;
@@ -58,3 +60,9 @@ export const emptyCutoffRow = (band: string): CatCutoffCollegeInput => ({
   average_package: "",
   apply_url: "",
 });
+
+/** All filters a college appears under (tags, falling back to its primary band). */
+export const collegeTags = (c: { cutoff_band: string; cutoff_tags?: string[] | null }): string[] => {
+  const t = (c.cutoff_tags || []).filter((k) => BAND_KEYS.includes(k));
+  return t.length ? t : [c.cutoff_band];
+};

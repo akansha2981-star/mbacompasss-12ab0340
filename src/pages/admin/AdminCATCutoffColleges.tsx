@@ -4,17 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Save, Eye, EyeOff, GraduationCap } from "lucide-react";
-import { CUTOFF_BANDS, bandLabel, emptyCutoffRow, type CatCutoffCollege, type CatCutoffCollegeInput } from "@/lib/catCutoffColleges";
+import { CUTOFF_BANDS, BAND_KEYS, bandLabel, collegeTags, emptyCutoffRow, type CatCutoffCollege, type CatCutoffCollegeInput } from "@/lib/catCutoffColleges";
 
-type DraftRow = CatCutoffCollegeInput & { _key: number };
+type DraftRow = CatCutoffCollegeInput & { _key: number; tags: string[] };
 let keySeq = 1;
-const newDraft = (band: string): DraftRow => ({ ...emptyCutoffRow(band), _key: keySeq++ });
+const newDraft = (band: string): DraftRow => ({ ...emptyCutoffRow(band), tags: [band], _key: keySeq++ });
 
 export default function AdminCATCutoffColleges() {
   const [band, setBand] = useState<string>(CUTOFF_BANDS[0].key);
   const [rows, setRows] = useState<CatCutoffCollege[]>([]);
   const [drafts, setDrafts] = useState<DraftRow[]>([newDraft(CUTOFF_BANDS[0].key)]);
-  const [edits, setEdits] = useState<Record<string, CatCutoffCollegeInput>>({});
+  const [edits, setEdits] = useState<Record<string, CatCutoffCollegeInput & { tags: string[] }>>({});
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -32,11 +32,11 @@ export default function AdminCATCutoffColleges() {
 
   useEffect(() => { load(); }, [load]);
 
-  const bandRows = rows.filter((r) => r.cutoff_band === band);
+  const bandRows = rows.filter((r) => collegeTags(r).includes(band));
 
   const pickBand = (b: string) => {
     setBand(b);
-    setDrafts((d) => d.map((r) => ({ ...r, cutoff_band: b })));
+    setDrafts((d) => d.map((r) => ({ ...r, cutoff_band: b, tags: r.tags.includes(b) ? r.tags : [b, ...r.tags] })));
   };
 
   const setDraft = (key: number, patch: Partial<DraftRow>) =>
@@ -48,7 +48,8 @@ export default function AdminCATCutoffColleges() {
     setBusy(true);
     const payload = valid.map((d, i) => ({
       college_name: d.college_name.trim(),
-      cutoff_band: band,
+      cutoff_band: d.tags[0] || band,
+      cutoff_tags: d.tags.length ? d.tags : [band],
       overall_percentile: d.overall_percentile.trim(),
       fees: d.fees.trim(),
       highest_package: d.highest_package.trim(),
@@ -60,7 +61,7 @@ export default function AdminCATCutoffColleges() {
     const { error } = await supabase.from("cat_cutoff_colleges").insert(payload);
     setBusy(false);
     if (error) return toast.error(`Save failed: ${error.message}`);
-    toast.success(`${valid.length} college${valid.length > 1 ? "s" : ""} added to ${bandLabel(band)} — live now.`);
+    toast.success(`${valid.length} college${valid.length > 1 ? "s" : ""} added — live now.`);
     setDrafts([newDraft(band)]);
     load();
   };
@@ -72,19 +73,23 @@ export default function AdminCATCutoffColleges() {
         college_name: r.college_name, cutoff_band: r.cutoff_band,
         overall_percentile: r.overall_percentile, fees: r.fees,
         highest_package: r.highest_package, average_package: r.average_package,
-        apply_url: r.apply_url, sort_order: r.sort_order, is_active: r.is_active,
+        apply_url: r.apply_url, sort_order: r.sort_order, is_active: r.is_active, tags: collegeTags(r),
       },
     }));
 
-  const setEdit = (id: string, patch: Partial<CatCutoffCollegeInput>) =>
+  const setEdit = (id: string, patch: Partial<CatCutoffCollegeInput & { tags: string[] }>) =>
     setEdits((e) => ({ ...e, [id]: { ...e[id], ...patch } }));
+
 
   const saveEdit = async (id: string) => {
     const e = edits[id];
     if (!e?.college_name.trim()) return toast.error("College name is required.");
+    if (!e.tags.length) return toast.error("Pick at least one filter tag.");
     setBusy(true);
     const { error } = await supabase.from("cat_cutoff_colleges").update({
       college_name: e.college_name.trim(),
+      cutoff_band: e.tags[0],
+      cutoff_tags: e.tags,
       overall_percentile: e.overall_percentile.trim(),
       fees: e.fees.trim(),
       highest_package: e.highest_package.trim(),
@@ -120,14 +125,14 @@ export default function AdminCATCutoffColleges() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">CAT Cut-off Colleges</h1>
         <p className="text-sm text-muted-foreground">
-          Manage the college table shown on the CAT score calculator page. Pick a band, add one or many colleges, save — they go live instantly.
+          Manage the college table shown on the CAT score calculator page. Pick a band, add one or many colleges, tick every filter each college should appear under, save — they go live instantly.
         </p>
       </div>
 
       {/* Band picker */}
       <div className="flex flex-wrap gap-2">
         {CUTOFF_BANDS.map((b) => {
-          const count = rows.filter((r) => r.cutoff_band === b.key).length;
+          const count = rows.filter((r) => collegeTags(r).includes(b.key)).length;
           return (
             <button key={b.key} onClick={() => pickBand(b.key)}
               className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all ${band === b.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
@@ -160,11 +165,14 @@ export default function AdminCATCutoffColleges() {
               <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setDrafts((x) => x.filter((r) => r._key !== d._key))} disabled={drafts.length === 1}>
                 <Trash2 className="h-4 w-4 text-muted-foreground" />
               </Button>
+              <div className="md:col-span-7">
+                <TagPicker value={d.tags} onChange={(tags) => setDraft(d._key, { tags })} />
+              </div>
             </div>
           ))}
         </div>
         <Button onClick={saveAll} disabled={busy} className="font-semibold">
-          <Save className="mr-1 h-4 w-4" /> {busy ? "Saving…" : `Save all to ${bandLabel(band)}`}
+          <Save className="mr-1 h-4 w-4" /> {busy ? "Saving…" : "Save all"}
         </Button>
       </section>
 
@@ -194,6 +202,7 @@ export default function AdminCATCutoffColleges() {
                         <Input className={inputCls} value={e.average_package} onChange={(ev) => setEdit(r.id, { average_package: ev.target.value })} />
                         <Input className={inputCls} value={e.apply_url} onChange={(ev) => setEdit(r.id, { apply_url: ev.target.value })} />
                       </div>
+                      <TagPicker value={e.tags} onChange={(tags) => setEdit(r.id, { tags })} />
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => saveEdit(r.id)} disabled={busy}><Save className="mr-1 h-3.5 w-3.5" /> Save</Button>
                         <Button size="sm" variant="outline" onClick={() => setEdits((x) => { const n = { ...x }; delete n[r.id]; return n; })}>Cancel</Button>
@@ -206,6 +215,11 @@ export default function AdminCATCutoffColleges() {
                       <p className="text-sm text-muted-foreground">Fees: <span className="text-foreground">{r.fees || "—"}</span></p>
                       <p className="text-sm text-muted-foreground">High: <span className="text-foreground">{r.highest_package || "—"}</span></p>
                       <p className="text-sm text-muted-foreground">Avg: <span className="text-foreground">{r.average_package || "—"}</span></p>
+                      <div className="flex flex-wrap gap-1">
+                        {collegeTags(r).map((k) => (
+                          <span key={k} className="rounded-full bg-accent px-2 py-0.5 text-sm text-accent-foreground">{CUTOFF_BANDS.find((b) => b.key === k)?.short ?? k}</span>
+                        ))}
+                      </div>
                       <div className="ml-auto flex gap-1">
                         <Button size="sm" variant="outline" onClick={() => startEdit(r)}>Edit</Button>
                         <Button size="sm" variant="ghost" onClick={() => toggleActive(r)} title={r.is_active ? "Hide from site" : "Show on site"}>
@@ -221,6 +235,25 @@ export default function AdminCATCutoffColleges() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function TagPicker({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) {
+  const toggle = (k: string) =>
+    onChange(value.includes(k) ? value.filter((x) => x !== k) : BAND_KEYS.filter((x) => x === k || value.includes(x)));
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-sm text-muted-foreground">Show under:</span>
+      {CUTOFF_BANDS.map((b) => {
+        const on = value.includes(b.key);
+        return (
+          <button type="button" key={b.key} onClick={() => toggle(b.key)} aria-pressed={on}
+            className={`rounded-full border px-2.5 py-0.5 text-sm transition-colors ${on ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"}`}>
+            {b.short}
+          </button>
+        );
+      })}
     </div>
   );
 }
