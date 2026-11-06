@@ -32,6 +32,19 @@ const fallbackStats = [
 
 const fallbackSearches = ["CAT Coaching Delhi", "Best GMAT Prep", "Online MBA Coaching", "IIM Coaching"];
 
+// "Find" stays fixed; everything after it cycles through what MBA Compass does.
+const rotatingPhrases = [
+  "the Best MBA Coaching",
+  "Free MBA Guidance",
+  "MBA College Predictor",
+  "Advanced Mock Tests",
+  "AI Mock Interviews",
+  "MBA ROI Calculator",
+  "MBA Profile Analyzer",
+  "Personalised MBA Mentorship",
+];
+const PHRASE_INTERVAL = 2400;
+
 const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<HeroSuggestion[]>([]);
@@ -45,6 +58,19 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const [, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
+
+  // Headline rotator: "Find" is fixed, the phrase after it keeps shuffling.
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const tick = () => setPhraseIdx((p) => (p + 1) % rotatingPhrases.length);
+    const start = () => { if (timer === undefined) timer = setInterval(tick, PHRASE_INTERVAL); };
+    const stop = () => { if (timer !== undefined) { clearInterval(timer); timer = undefined; } };
+    const onVisibility = () => (document.visibilityState === "visible" ? start() : stop());
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
+  }, []);
 
   const heading = heroSettings?.heading || "Find the Best MBA Coaching";
   const subheading = heroSettings?.subheading || "Compare top MBA coaching institutes, read reviews, and make informed decisions";
@@ -154,9 +180,12 @@ const HeroSection = () => {
 
           {/* Heading — editorial: bold sans + italic serif accent */}
           <h1 className="font-heading text-[clamp(1.9rem,6.5vw,3.75rem)] leading-[1.06] font-extrabold text-primary-foreground mb-3 tracking-[-0.025em]">
-            Find the Best{" "}
-            <span className="font-editorial italic font-normal bg-gradient-to-r from-yellow-100 via-amber-100 to-yellow-200 bg-clip-text text-transparent tracking-tight">
-              MBA Coaching
+            Find{" "}
+            <span
+              key={phraseIdx}
+              className="hero-phrase font-editorial italic font-normal bg-gradient-to-r from-yellow-100 via-amber-100 to-yellow-200 bg-clip-text text-transparent tracking-tight"
+            >
+              {rotatingPhrases[phraseIdx]}
             </span>
             <span className="block font-editorial italic font-normal text-lg sm:text-2xl md:text-3xl lg:text-4xl text-primary-foreground/90 mt-2 tracking-tight">
               for your dream B-School
