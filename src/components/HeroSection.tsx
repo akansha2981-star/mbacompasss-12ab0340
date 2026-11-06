@@ -32,6 +32,19 @@ const fallbackStats = [
 
 const fallbackSearches = ["CAT Coaching Delhi", "Best GMAT Prep", "Online MBA Coaching", "IIM Coaching"];
 
+// "Find" stays fixed; everything after it cycles through what MBA Compass does.
+const rotatingPhrases = [
+  "the Best MBA Coaching",
+  "Free MBA Guidance",
+  "MBA College Predictor",
+  "Advanced Mock Tests",
+  "AI Mock Interviews",
+  "MBA ROI Calculator",
+  "MBA Profile Analyzer",
+  "Personalised MBA Mentorship",
+];
+const PHRASE_INTERVAL = 2400;
+
 const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<HeroSuggestion[]>([]);
