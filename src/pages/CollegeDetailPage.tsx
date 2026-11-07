@@ -1118,6 +1118,26 @@ const CollegeDetailPage = () => {
                       </div>
                     </div>
                   )}
+                  {rankCertificates.length > 0 && (
+                    <div className="pt-4 border-t border-dashed border-border mt-4">
+                      <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
+                        <Medal className="w-4 h-4 text-amber-600" /> Certificates & Awards
+                      </h3>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        {rankCertificates.map((c: any, i: number) => (
+                          <figure key={i} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
+                            <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.02] transition-transform" loading="lazy" decoding="async" />
+                            {(c.title || c.issuer) && (
+                              <figcaption className="p-2.5">
+                                {c.title && <div className="text-xs font-bold text-foreground leading-snug">{c.title}</div>}
+                                {(c.issuer || c.year) && <div className="text-[11px] text-muted-foreground mt-0.5">{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>}
+                              </figcaption>
+                            )}
+                          </figure>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <AIExtensionBlock section={getAIExtension("rankings")} extensionLabel="Rankings Context & Recognition" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </Card>
