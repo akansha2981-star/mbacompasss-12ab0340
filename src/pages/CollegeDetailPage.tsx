@@ -1399,13 +1399,14 @@ const CollegeDetailPage = () => {
                         <p className="text-xs text-muted-foreground">Side-by-side analysis of fees, placements & more.</p>
                       </div>
                     </div>
-                    <Link to="/compare">
+                    <Link to="/compare" aria-label={`Compare ${college.name} with other MBA colleges`}>
                       <Button variant="outline" className="w-full font-semibold border-primary/30 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all">
                         Open Compare Tool
                       </Button>
                     </Link>
                   </CardContent>
                 </Card>
+                </motion.div>
 
                 {/* Quick Info Card */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.35 }}>
