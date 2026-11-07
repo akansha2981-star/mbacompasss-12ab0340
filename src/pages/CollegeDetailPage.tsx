@@ -879,6 +879,7 @@ const CollegeDetailPage = () => {
                   college={college}
                   topRecruiters={topRecruiters}
                   onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
+                  reportUrl={placementReportUrl}
                 />
               )}
               <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} quickItems={quickInfoItems} />
@@ -1792,6 +1793,7 @@ const CollegeDetailPage = () => {
                       college={college}
                       topRecruiters={topRecruiters}
                       onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
+                      reportUrl={placementReportUrl}
                     />
                   </motion.div>
                 )}
