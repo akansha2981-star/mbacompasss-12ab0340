@@ -140,6 +140,18 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { c
 );
 
 // Key facts, accreditations and actions — shared between the desktop sidebar and the mobile stack.
+// Auto-sliding marquee for logo/certificate strips — loops seamlessly, pauses on hover.
+const AutoMarquee = ({ items, render, speed = 40 }: { items: any[]; render: (item: any, i: number) => React.ReactNode; speed?: number }) => (
+  <div className="relative overflow-hidden marquee-hover-pause">
+    <div className="flex gap-3 w-max animate-marquee" style={{ animationDuration: `${speed}s` }}>
+      {items.map((it, i) => <div key={`a-${i}`} className="shrink-0">{render(it, i)}</div>)}
+      {items.map((it, i) => <div key={`b-${i}`} className="shrink-0" aria-hidden="true">{render(it, i)}</div>)}
+    </div>
+    <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-card to-transparent" />
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card to-transparent" />
+  </div>
+);
+
 const quickInfoIcon = (label: string) => {
   const l = label.toLowerCase();
   if (l.includes("location") || l.includes("address")) return MapPin;
