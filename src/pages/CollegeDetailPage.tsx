@@ -1220,7 +1220,7 @@ const CollegeDetailPage = () => {
           </div>
 
           {/* ===== Premium Sidebar ===== */}
-          <aside className="hidden lg:block min-w-0 w-full self-start">
+          <aside className="hidden lg:block min-w-0 w-full self-start" aria-label={`${college.name} quick actions and summary`}>
             <div className="sticky top-32 max-h-[calc(100vh-9rem)] overflow-y-auto flex flex-col gap-4 z-10">
               <div data-ad-sidebar className="order-last shrink-0" />
               {/* Premium Fees + Brochure Card — pinned at top of sticky sidebar */}
@@ -1356,6 +1356,7 @@ const CollegeDetailPage = () => {
 
                 {/* You May Also Like */}
                 {suggestedColleges.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }}>
                   <Card className="overflow-hidden border-border/60">
                     <CardContent className="pt-6">
                       <div className="flex items-center gap-2 mb-4">
