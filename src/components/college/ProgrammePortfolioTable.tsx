@@ -190,7 +190,7 @@ const ProgrammePortfolioTable = ({ programmes, fallbackCourses }: Props) => {
                     <td className="py-3 px-3 text-muted-foreground whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
-                        {p.duration || "—"}
+                        {clean(p.duration) || "—"}
                       </div>
                     </td>
                     <td className="py-3 px-3">
