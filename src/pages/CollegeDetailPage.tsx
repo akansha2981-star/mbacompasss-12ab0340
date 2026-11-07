@@ -466,17 +466,8 @@ const CollegeDetailPage = () => {
     toast({ title: "Brochure downloaded!" });
   }, "Sign in to download the college brochure.");
 
-  const tabItems = [
-    { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
-    { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
-    { value: "international", label: "Global Exposure" },
-    { value: "knowledge_partners", label: "Knowledge Partners" },
-    { value: "cutoff", label: "Cut-off" }, { value: "rankings", label: "Rankings" },
-    { value: "reviews", label: "Reviews" }, { value: "gallery", label: "Gallery" },
-    { value: "scholarships", label: "Scholarships" }, { value: "faculty", label: "Faculty" },
-    { value: "hostel", label: "Hostel & Campus" }, { value: "qa", label: "Q&A" },
-    { value: "news", label: "News" },
-  ];
+  // tabItems is built after section data is computed (see below) so tabs only
+  // appear when their section actually renders.
 
   // ── Helpers to clean already-saved AI data that may contain raw HTML/citations ──
   const stripText = (v: any): string => {
