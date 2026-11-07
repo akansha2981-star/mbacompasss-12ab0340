@@ -430,6 +430,8 @@ const CollegeDetailPage = () => {
   const tabItems = [
     { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
     { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
+    { value: "international", label: "Global Exposure" },
+    { value: "knowledge_partners", label: "Knowledge Partners" },
     { value: "cutoff", label: "Cut-off" }, { value: "rankings", label: "Rankings" },
     { value: "reviews", label: "Reviews" }, { value: "gallery", label: "Gallery" },
     { value: "scholarships", label: "Scholarships" }, { value: "faculty", label: "Faculty" },
@@ -472,6 +474,29 @@ const CollegeDetailPage = () => {
   const rankAccreditations = rankingsData.accreditations?.length > 0
     ? rankingsData.accreditations.map((a: any) => stripText(a.name)).filter(Boolean)
     : accreditations;
+
+  // International collaborations (partner universities with logos)
+  const internationalData = getSectionData("international");
+  const intlPartners = Array.isArray(internationalData.partners)
+    ? internationalData.partners
+        .map((p: any) => ({ name: stripText(p?.name), country: stripText(p?.country), logo: typeof p?.logo === "string" ? p.logo : "" }))
+        .filter((p: any) => p.name)
+    : [];
+
+  // Knowledge partners (industry/academic partners with logos)
+  const knowledgePartnersData = getSectionData("knowledge_partners");
+  const knowledgePartners = Array.isArray(knowledgePartnersData.partners)
+    ? knowledgePartnersData.partners
+        .map((p: any) => ({ name: stripText(p?.name), tagline: stripText(p?.tagline), logo: typeof p?.logo === "string" ? p.logo : "" }))
+        .filter((p: any) => p.name)
+    : [];
+
+  // Award/ranking certificates uploaded by admin (image + caption)
+  const rankCertificates = Array.isArray(rankingsData.certificates)
+    ? rankingsData.certificates
+        .map((c: any) => ({ image: typeof c?.image === "string" ? c.image : "", title: stripText(c?.title), issuer: stripText(c?.issuer), year: stripText(c?.year) }))
+        .filter((c: any) => c.image)
+    : [];
 
   // Scholarships from DB or fallback
   const scholarships = scholarshipsData.scholarships?.length > 0
@@ -624,7 +649,9 @@ const CollegeDetailPage = () => {
             {/* Premium Stats Strip */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
               {[
-                { label: "NIRF Ranking", value: Number(college.ranking) > 0 ? rankOnly(college.ranking) : "Not ranked", source: "NIRF", icon: Award, year: new Date().getFullYear().toString() },
+                ...(Number(college.ranking) > 0
+                  ? [{ label: "NIRF Ranking", value: rankOnly(college.ranking), source: "NIRF", icon: Award, year: new Date().getFullYear().toString() }]
+                  : [{ label: "Placement Rate", value: numericStat(placementData.placement_rate) || "Not disclosed", source: "Placement Report", icon: CheckCircle, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` }]),
                 { label: "Total Fees", value: formatMoney(college.fees) || "Not disclosed", source: "Brochure", icon: Banknote, year: new Date().getFullYear().toString() },
                 { label: "Avg Package", value: formatMoney(college.placement_avg) || "Not disclosed", source: "Placement Report", icon: TrendingUp, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
                 { label: "Highest Package", value: formatMoney(college.placement_highest) || "Not disclosed", source: "Placement Report", icon: Medal, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
@@ -1013,6 +1040,84 @@ const CollegeDetailPage = () => {
 
             <InlineAIToolCTA variant="college-shortlister" />
 
+            {/* International Collaborations */}
+            {(intlPartners.length > 0 || getSectionContent("international")) && (
+              <div id="international" ref={el => { sectionRefs.current["international"] = el; }} className="scroll-mt-32">
+                <Card className="overflow-hidden border-border/60 shadow-md">
+                  <div className="h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-transparent" />
+                  <CardHeader>
+                    <CardTitle className="font-heading flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500/20 to-sky-500/5 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-sky-600" />
+                      </div>
+                      International Collaborations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {getSectionContent("international") && (
+                      <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("international"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
+                    )}
+                    {intlPartners.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {intlPartners.map((p: any, i: number) => (
+                          <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            {p.logo ? (
+                              <img src={p.logo} alt={`${p.name} logo`} className="h-14 w-full object-contain" loading="lazy" decoding="async" />
+                            ) : (
+                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-sky-500/30">{p.name.charAt(0)}</div>
+                            )}
+                            <div>
+                              <div className="text-xs font-bold text-foreground leading-snug">{p.name}</div>
+                              {p.country && <div className="text-[11px] text-muted-foreground mt-0.5">{p.country}</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Knowledge Partners */}
+            {(knowledgePartners.length > 0 || getSectionContent("knowledge_partners")) && (
+              <div id="knowledge_partners" ref={el => { sectionRefs.current["knowledge_partners"] = el; }} className="scroll-mt-32">
+                <Card className="overflow-hidden border-border/60 shadow-md">
+                  <div className="h-1 bg-gradient-to-r from-violet-500 via-violet-400 to-transparent" />
+                  <CardHeader>
+                    <CardTitle className="font-heading flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-violet-600" />
+                      </div>
+                      Knowledge Partners
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {getSectionContent("knowledge_partners") && (
+                      <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("knowledge_partners"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
+                    )}
+                    {knowledgePartners.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {knowledgePartners.map((p: any, i: number) => (
+                          <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            {p.logo ? (
+                              <img src={p.logo} alt={`${p.name} logo`} className="h-12 w-full object-contain" loading="lazy" decoding="async" />
+                            ) : (
+                              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-violet-500/30">{p.name.charAt(0)}</div>
+                            )}
+                            <div>
+                              <div className="text-xs font-bold text-foreground leading-snug">{p.name}</div>
+                              {p.tagline && <div className="text-[11px] text-muted-foreground mt-0.5">{p.tagline}</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {/* Cutoff */}
             <div id="cutoff" ref={el => { sectionRefs.current["cutoff"] = el; }} className="scroll-mt-32">
               <Card>
@@ -1107,6 +1212,26 @@ const CollegeDetailPage = () => {
                             <Award className="w-3.5 h-3.5 text-emerald-600" />
                             <span className="text-xs font-bold text-foreground">{a}</span>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {rankCertificates.length > 0 && (
+                    <div className="pt-4 border-t border-dashed border-border mt-4">
+                      <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
+                        <Medal className="w-4 h-4 text-amber-600" /> Certificates & Awards
+                      </h3>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        {rankCertificates.map((c: any, i: number) => (
+                          <figure key={i} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
+                            <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.02] transition-transform" loading="lazy" decoding="async" />
+                            {(c.title || c.issuer) && (
+                              <figcaption className="p-2.5">
+                                {c.title && <div className="text-xs font-bold text-foreground leading-snug">{c.title}</div>}
+                                {(c.issuer || c.year) && <div className="text-[11px] text-muted-foreground mt-0.5">{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>}
+                              </figcaption>
+                            )}
+                          </figure>
                         ))}
                       </div>
                     </div>
