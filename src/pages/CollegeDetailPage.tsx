@@ -473,6 +473,13 @@ const CollegeDetailPage = () => {
     ? rankingsData.accreditations.map((a: any) => stripText(a.name)).filter(Boolean)
     : accreditations;
 
+  // Award/ranking certificates uploaded by admin (image + caption)
+  const rankCertificates = Array.isArray(rankingsData.certificates)
+    ? rankingsData.certificates
+        .map((c: any) => ({ image: typeof c?.image === "string" ? c.image : "", title: stripText(c?.title), issuer: stripText(c?.issuer), year: stripText(c?.year) }))
+        .filter((c: any) => c.image)
+    : [];
+
   // Scholarships from DB or fallback
   const scholarships = scholarshipsData.scholarships?.length > 0
     ? scholarshipsData.scholarships.map((s: any) => ({
