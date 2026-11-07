@@ -293,7 +293,7 @@ const CollegeDetailPage = () => {
 
   // Gallery auto-slide
   const galleryData = getSectionData("gallery");
-  const galleryImages = galleryData.images?.length > 0 ? galleryData.images.map((i: any) => i.url) : fallbackGallery;
+  const galleryImages = galleryData.images?.length > 0 ? galleryData.images.map((i: any) => i.url).filter((u: any) => typeof u === "string" && u.trim()) : fallbackGallery;
 
   useEffect(() => {
     galleryRef.current = setInterval(() => setGalleryIdx(p => (p + 1) % galleryImages.length), 3000);
