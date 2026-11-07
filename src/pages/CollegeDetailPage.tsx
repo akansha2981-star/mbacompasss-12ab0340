@@ -1603,10 +1603,10 @@ const CollegeDetailPage = () => {
                             setScholarshipCat(cat);
                             scholarshipSliderRef.current?.scrollTo({ left: 0 });
                           }}
-                          className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-all ${
+                          className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-all duration-300 ${
                             scholarshipCat === cat
-                              ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                              : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                              ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-500/30 scale-[1.03]"
+                              : "bg-muted/40 text-muted-foreground border-border hover:border-emerald-500/40 hover:text-foreground hover:bg-emerald-500/5"
                           }`}
                         >
                           {cat}
@@ -1642,21 +1642,23 @@ const CollegeDetailPage = () => {
                       {filteredScholarships.map((s: any, i: number) => (
                         <div
                           key={`${s.category}-${s.level}-${i}`}
-                          className="snap-start shrink-0 w-[240px] sm:w-[260px] rounded-2xl border border-border/60 bg-gradient-to-br from-muted/40 to-transparent p-5 flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-all"
+                          className="group relative snap-start shrink-0 w-[250px] sm:w-[270px] rounded-2xl border border-border/60 bg-gradient-to-b from-card to-emerald-500/5 p-5 pt-6 flex flex-col overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/40 transition-all duration-300"
                         >
+                          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500" />
+                          <div className="pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors" />
                           {s.category && (
-                            <span className="self-start text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-1 mb-3">
+                            <span className="self-start text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 rounded-full px-2.5 py-1 mb-3">
                               {s.category}
                             </span>
                           )}
                           {s.name && <h4 className="font-heading font-semibold text-foreground text-base leading-snug break-words mb-1">{s.name}</h4>}
-                          {s.level && <div className="font-heading font-bold text-foreground text-sm">{s.level}</div>}
-                          {s.criteria && <p className="text-xs text-muted-foreground mt-1 break-words flex-1">{s.criteria}</p>}
-                          {s.description && <p className="text-xs text-muted-foreground mt-1 break-words flex-1">{s.description}</p>}
+                          {s.level && <div className="font-heading font-bold text-foreground text-base leading-snug">{s.level}</div>}
+                          {s.criteria && <p className="text-xs text-muted-foreground mt-1.5 break-words flex-1 leading-relaxed">{s.criteria}</p>}
+                          {s.description && <p className="text-xs text-muted-foreground mt-1.5 break-words flex-1 leading-relaxed">{s.description}</p>}
                           {s.amount && (
-                            <div className="mt-4 rounded-xl bg-primary/10 border border-primary/15 px-3 py-2.5 text-center">
-                              <div className="font-heading font-extrabold text-primary text-lg leading-tight">{s.amount}</div>
-                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Scholarship</div>
+                            <div className="mt-4 rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/5 border border-emerald-500/25 px-3 py-3 text-center">
+                              <div className="font-heading font-extrabold text-emerald-700 dark:text-emerald-400 text-xl leading-tight">{s.amount}</div>
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-1">Scholarship Amount</div>
                             </div>
                           )}
                         </div>
@@ -1664,16 +1666,18 @@ const CollegeDetailPage = () => {
                     </div>
                   </div>
                   {scholarshipPolicy.length > 0 && (
-                    <div className="mt-6 rounded-xl border border-border/60 bg-muted/30 p-5">
-                      <h4 className="font-heading font-semibold text-foreground mb-3">Scholarship Policy</h4>
-                      <ul className="space-y-2">
+                    <div className="mt-6 rounded-2xl border border-border/60 bg-gradient-to-br from-muted/40 to-transparent p-5">
+                      <h4 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-emerald-600" /> Scholarship Policy
+                      </h4>
+                      <div className="grid sm:grid-cols-2 gap-3">
                         {scholarshipPolicy.map((p, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                            <span>{p}</span>
-                          </li>
+                          <div key={i} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-3.5 py-3">
+                            <span className="shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-[11px] font-extrabold flex items-center justify-center mt-0.5">{i + 1}</span>
+                            <span className="text-sm text-muted-foreground leading-relaxed">{p}</span>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
                   <AIExtensionBlock section={getAIExtension("scholarships")} extensionLabel="Scholarship Eligibility Guide" entityName={college.name} entityWebsite={(college as any).website} />
