@@ -1230,9 +1230,16 @@ const CollegeDetailPage = () => {
                 <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{ backgroundImage: 'radial-gradient(hsl(0 0% 100%) 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
                 <CardContent className="px-5 py-5 relative z-10">
                   <div className="flex flex-col gap-2 mb-3.5">
-                    <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md self-start">
-                      ★ Featured
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md">
+                        ★ Featured
+                      </span>
+                      {applyUrl && (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider bg-white/15 border border-white/25 text-primary-foreground px-2 py-0.5 rounded-md">
+                          <LiveDot /> Applications Open
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs uppercase tracking-wider text-primary-foreground/70 font-semibold">Total Program Fees</span>
                   </div>
                   <p className="font-heading text-2xl xl:text-3xl font-extrabold leading-tight mb-1 break-words [text-shadow:_0_2px_8px_rgb(0_0_0_/_0.15)]">
