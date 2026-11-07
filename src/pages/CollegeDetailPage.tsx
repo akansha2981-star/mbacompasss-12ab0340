@@ -1029,6 +1029,45 @@ const CollegeDetailPage = () => {
 
             <InlineAIToolCTA variant="college-shortlister" />
 
+            {/* International Collaborations */}
+            {(intlPartners.length > 0 || getSectionContent("international")) && (
+              <div id="international" ref={el => { sectionRefs.current["international"] = el; }} className="scroll-mt-32">
+                <Card className="overflow-hidden border-border/60 shadow-md">
+                  <div className="h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-transparent" />
+                  <CardHeader>
+                    <CardTitle className="font-heading flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500/20 to-sky-500/5 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-sky-600" />
+                      </div>
+                      International Collaborations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {getSectionContent("international") && (
+                      <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("international"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
+                    )}
+                    {intlPartners.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {intlPartners.map((p: any, i: number) => (
+                          <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            {p.logo ? (
+                              <img src={p.logo} alt={`${p.name} logo`} className="h-14 w-full object-contain" loading="lazy" decoding="async" />
+                            ) : (
+                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-sky-500/30">{p.name.charAt(0)}</div>
+                            )}
+                            <div>
+                              <div className="text-xs font-bold text-foreground leading-snug">{p.name}</div>
+                              {p.country && <div className="text-[11px] text-muted-foreground mt-0.5">{p.country}</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {/* Cutoff */}
             <div id="cutoff" ref={el => { sectionRefs.current["cutoff"] = el; }} className="scroll-mt-32">
               <Card>
