@@ -168,21 +168,9 @@ export const OnboardingGate = () => {
 
   useEffect(() => {
     const path = location.pathname;
-    const onDashboardHost =
-      typeof window !== "undefined" && window.location.hostname === "dashboard.mbacompass.in";
-    const inDemoContext = path.startsWith("/demo") || onDashboardHost;
-    // Skip onboarding (phone OTP) dialog inside the student LMS. Mobile verification
-    // is only required at course-purchase time — EXCEPT for the demo flow, where
-    // OTP-verified mobile is mandatory to access the demo dashboard.
-    if (!inDemoContext) {
-      if (
-        path.startsWith("/admin") ||
-        path.startsWith("/student") ||
-        path.startsWith("/mocks/attempt") ||
-        path === "/tools/profile-analyzer"
-      )
-        return;
-    }
+    // Mobile OTP verification is mandatory for every signed-in user, on every
+    // page — only the admin panel is exempt (admins have a server-side fast-path).
+    if (path.startsWith("/admin")) return;
     if (loading || !user || checked) return;
 
     let cancelled = false;
@@ -199,11 +187,10 @@ export const OnboardingGate = () => {
 
       if (data) {
         const d = data as { onboarding_completed?: boolean | null; phone?: string | null };
-        // In the demo flow, treat missing/empty phone as "onboarding not complete"
-        // so existing accounts without a verified mobile still hit the OTP step.
-        const needsOtp = inDemoContext
-          ? !d.onboarding_completed || !d.phone
-          : !d.onboarding_completed;
+        // A verified mobile is required for every account: treat missing/empty
+        // phone as "onboarding not complete" everywhere, so older accounts
+        // without a number also hit the OTP step.
+        const needsOtp = !d.onboarding_completed || !d.phone;
         if (needsOtp) setShowOnboarding(true);
         setChecked(true);
         return;
@@ -224,13 +211,6 @@ export const OnboardingGate = () => {
   }, [loading, user, checked, location.pathname]);
 
   if (!showOnboarding || !user) return null;
-  if (typeof window !== "undefined") {
-    const path = window.location.pathname;
-    const onDashHost = window.location.hostname === "dashboard.mbacompass.in";
-    const inDemo = path.startsWith("/demo") || onDashHost;
-    // Suppress inside student LMS only — allow inside demo / dashboard host.
-    if (!inDemo && path.startsWith("/student")) return null;
-  }
 
   return (
     <Suspense fallback={null}>
