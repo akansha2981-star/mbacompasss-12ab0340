@@ -198,6 +198,15 @@ const CollegeDetailPage = () => {
   const coursesFeesData = getSectionData("courses_fees");
   const whyJoinData = getSectionData("why_join");
 
+  // External application link (admin-managed via the admission section's data.applyUrl).
+  // When present, Apply buttons open the college's own application portal in a new tab.
+  const applyUrl = typeof admissionData.applyUrl === "string" && /^https:\/\//.test(admissionData.applyUrl)
+    ? admissionData.applyUrl
+    : "";
+  const applyLabel = typeof admissionData.applyLabel === "string" && admissionData.applyLabel.trim()
+    ? admissionData.applyLabel.trim()
+    : "Fill Application Form";
+
   // collegeJsonLd already computed above before early returns
 
   // Q&A items from DB or fallback
@@ -487,14 +496,25 @@ const CollegeDetailPage = () => {
               >
                 <Download className="w-4 h-4" /> Download Brochure
               </Button>
-              <Button
-                onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })}
-                size="lg"
-                variant="outline"
-                className="bg-white/10 backdrop-blur-md border-white/30 text-primary-foreground hover:bg-white/20 hover:border-white/50 hover:text-primary-foreground font-bold gap-2"
-              >
-                <GraduationCap className="w-4 h-4" /> Apply Now
-              </Button>
+              {applyUrl ? (
+                <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored">
+                  <Button
+                    size="lg"
+                    className="bg-amber-400 text-amber-950 hover:bg-amber-300 font-bold shadow-2xl hover:scale-[1.02] transition-all gap-2 px-6"
+                  >
+                    <GraduationCap className="w-4 h-4" /> Apply Now
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })}
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/10 backdrop-blur-md border-white/30 text-primary-foreground hover:bg-white/20 hover:border-white/50 hover:text-primary-foreground font-bold gap-2"
+                >
+                  <GraduationCap className="w-4 h-4" /> Apply Now
+                </Button>
+              )}
               <Link to="/compare">
                 <Button
                   size="lg"
