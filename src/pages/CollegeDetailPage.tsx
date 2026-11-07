@@ -1383,9 +1383,11 @@ const CollegeDetailPage = () => {
                       </div>
                     </CardContent>
                   </Card>
+                  </motion.div>
                 )}
 
                 {/* Compare Card */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.4 }}>
                 <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors group">
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3 mb-3">
