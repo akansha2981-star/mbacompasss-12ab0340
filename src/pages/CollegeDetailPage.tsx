@@ -62,6 +62,28 @@ const fallbackGallery = [
   "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=600",
 ];
 
+// Highlighted application CTA shown on colleges with an admin-managed external application link.
+const ApplyBanner = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
+  <Card className="overflow-hidden border-0 shadow-xl shadow-primary/15 bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-primary-foreground relative">
+    <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+    <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+    <CardContent className="relative z-10 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-4">
+      <div className="flex-1 min-w-0 text-center sm:text-left">
+        <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md mb-2">
+          Applications Open
+        </span>
+        <h3 className="font-heading font-extrabold text-lg sm:text-xl leading-tight">Apply to {collegeName}</h3>
+        <p className="text-sm text-primary-foreground/80 mt-1">Fill the official application form on the {collegeName} admissions portal. It takes only a few minutes.</p>
+      </div>
+      <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="shrink-0">
+        <Button size="lg" className="bg-amber-400 text-amber-950 hover:bg-amber-300 font-bold gap-2 shadow-2xl hover:scale-[1.03] transition-all px-6">
+          <GraduationCap className="w-4 h-4" /> {applyLabel}
+        </Button>
+      </a>
+    </CardContent>
+  </Card>
+);
+
 const CollegeDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: college, isLoading } = useCollegeBySlug(slug);
@@ -813,6 +835,7 @@ const CollegeDetailPage = () => {
                   <AIExtensionBlock section={getAIExtension("placements")} extensionLabel="Placement Insights & Trends" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </Card>
+              {applyUrl && <div className="mt-6"><ApplyBanner collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} /></div>}
             </div>
 
             <InlineAIToolCTA variant="college-shortlister" />
