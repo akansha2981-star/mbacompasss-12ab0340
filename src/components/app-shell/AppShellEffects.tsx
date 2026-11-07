@@ -211,13 +211,6 @@ export const OnboardingGate = () => {
   }, [loading, user, checked, location.pathname]);
 
   if (!showOnboarding || !user) return null;
-  if (typeof window !== "undefined") {
-    const path = window.location.pathname;
-    const onDashHost = window.location.hostname === "dashboard.mbacompass.in";
-    const inDemo = path.startsWith("/demo") || onDashHost;
-    // Suppress inside student LMS only — allow inside demo / dashboard host.
-    if (!inDemo && path.startsWith("/student")) return null;
-  }
 
   return (
     <Suspense fallback={null}>
