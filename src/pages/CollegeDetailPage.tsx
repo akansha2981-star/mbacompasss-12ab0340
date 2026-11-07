@@ -1309,6 +1309,51 @@ const CollegeDetailPage = () => {
                   ]}
                 />
 
+                {/* Animated application strip — quick entry to the official form */}
+                {applyUrl && <SidebarApplyStrip collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} />}
+
+                {/* Placement Snapshot — key outcomes at a glance */}
+                {(college.placement_avg || college.placement_highest) && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 }}>
+                    <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                            <TrendingUp className="w-4 h-4 text-emerald-600" />
+                          </div>
+                          <h4 className="font-heading font-bold text-foreground">Placement Snapshot</h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {college.placement_avg && (
+                            <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 text-center">
+                              <div className="font-heading font-extrabold text-primary text-lg leading-tight">{numericStat(college.placement_avg)}</div>
+                              <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Average Package</div>
+                            </div>
+                          )}
+                          {college.placement_highest && (
+                            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+                              <div className="font-heading font-extrabold text-amber-700 text-lg leading-tight">{numericStat(college.placement_highest)}</div>
+                              <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Highest Package</div>
+                            </div>
+                          )}
+                        </div>
+                        {topRecruiters.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-3">
+                            Recruiters include <span className="font-semibold text-foreground">{topRecruiters.slice(0, 3).join(", ")}</span>{topRecruiters.length > 3 ? ` & ${topRecruiters.length - 3} more` : ""}.
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
+                          className="mt-3 w-full text-center text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                        >
+                          View full placement report ↓
+                        </button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
                 {/* You May Also Like */}
                 {suggestedColleges.length > 0 && (
                   <Card className="overflow-hidden border-border/60">
