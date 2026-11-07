@@ -1597,7 +1597,7 @@ const CollegeDetailPage = () => {
                         <Banknote className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h2 className="font-heading text-xl font-extrabold text-white leading-tight">Scholarships 2026-27</h2>
+                        <h2 className="font-heading text-xl font-extrabold text-white leading-tight">Scholarships &amp; Financial Aid</h2>
                         <p className="text-emerald-50/90 text-xs mt-0.5">Merit, entrance-score and special-category awards at {college.name}</p>
                       </div>
                     </div>
