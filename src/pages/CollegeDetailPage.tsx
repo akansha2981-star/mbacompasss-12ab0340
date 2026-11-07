@@ -1405,6 +1405,7 @@ const CollegeDetailPage = () => {
                 </Card>
 
                 {/* Quick Info Card */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.35 }}>
                 <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
                   <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
                   <CardContent className="pt-6">
@@ -1434,15 +1435,35 @@ const CollegeDetailPage = () => {
                         </div>
                       ))}
                     </div>
+                    {accreditations.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-border/60">
+                        <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">Accreditations</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {accreditations.slice(0, 6).map((acc: string, i: number) => (
+                            <span key={i} className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                              <CheckCircle className="w-3 h-3" /> {acc}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {applyUrl && (
+                      <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" aria-label={`${applyLabel} — official application form for ${college.name}`} className="block mt-4">
+                        <Button className="w-full gap-1.5 font-bold bg-amber-400 text-amber-950 hover:bg-amber-300 shadow-md">
+                          <GraduationCap className="w-4 h-4" /> {applyLabel}
+                        </Button>
+                      </a>
+                    )}
                     {college.website && (
-                      <a href={college.website} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" className="w-full mt-4 gap-1.5 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50">
+                      <a href={college.website} target="_blank" rel="noopener noreferrer" aria-label={`Visit the official website of ${college.name}`}>
+                        <Button variant="outline" className="w-full mt-2 gap-1.5 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50">
                           <Globe className="w-4 h-4" /> Visit Official Site
                         </Button>
                       </a>
                     )}
                   </CardContent>
                 </Card>
+                </motion.div>
               </div>
             </div>
           </aside>
