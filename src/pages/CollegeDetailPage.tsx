@@ -1474,63 +1474,7 @@ const CollegeDetailPage = () => {
 
                 {/* Quick Info Card */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.35 }}>
-                <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
-                  <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Building className="w-4 h-4 text-primary" />
-                      </div>
-                      <h3 className="font-heading font-bold text-foreground">Quick Info</h3>
-                    </div>
-                    <div className="space-y-2.5">
-                      {[
-                        { icon: MapPin, label: "Location", value: `${college.city}, ${college.state}` },
-                        { icon: Award, label: "Ranking", value: Number(college.ranking) > 0 ? `#${college.ranking}` : "—" },
-                        { icon: BookOpen, label: "Type", value: college.type || "N/A" },
-                        { icon: Users, label: "Students", value: college.total_students ? `${college.total_students}+` : "N/A" },
-                        { icon: Building, label: "Campus", value: college.campus_size || "N/A" },
-                        { icon: Calendar, label: "Established", value: college.established ? String(college.established) : "N/A" },
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 transition-colors">
-                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0">
-                            <item.icon className="w-4 h-4 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{item.label}</div>
-                            <div className="font-bold text-foreground text-sm truncate">{item.value}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {accreditations.length > 0 && (
-                      <div className="mt-4 pt-3 border-t border-border/60">
-                        <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">Accreditations</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {accreditations.slice(0, 6).map((acc: string, i: number) => (
-                            <span key={i} className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                              <CheckCircle className="w-3 h-3" /> {acc}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {applyUrl && (
-                      <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" aria-label={`${applyLabel} — official application form for ${college.name}`} className="block mt-4">
-                        <Button className="w-full gap-1.5 font-bold bg-amber-400 text-amber-950 hover:bg-amber-300 shadow-md">
-                          <GraduationCap className="w-4 h-4" /> {applyLabel}
-                        </Button>
-                      </a>
-                    )}
-                    {college.website && (
-                      <a href={college.website} target="_blank" rel="noopener noreferrer" aria-label={`Visit the official website of ${college.name}`}>
-                        <Button variant="outline" className="w-full mt-2 gap-1.5 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50">
-                          <Globe className="w-4 h-4" /> Visit Official Site
-                        </Button>
-                      </a>
-                    )}
-                  </CardContent>
-                </Card>
+                  <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} />
                 </motion.div>
               </div>
             </div>
