@@ -152,13 +152,13 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, repor
 // Key facts, accreditations and actions — shared between the desktop sidebar and the mobile stack.
 // Auto-sliding marquee for logo/certificate strips — loops seamlessly, pauses on hover.
 const AutoMarquee = ({ items, render, speed = 40 }: { items: any[]; render: (item: any, i: number) => React.ReactNode; speed?: number }) => (
-  <div className="relative overflow-hidden marquee-hover-pause">
-    <div className="flex gap-3 w-max animate-marquee" style={{ animationDuration: `${speed}s` }}>
+  <div className="relative overflow-hidden marquee-hover-pause -mx-1 px-1">
+    <div className="flex gap-4 w-max animate-marquee py-2" style={{ animationDuration: `${speed}s` }}>
       {items.map((it, i) => <div key={`a-${i}`} className="shrink-0">{render(it, i)}</div>)}
       {items.map((it, i) => <div key={`b-${i}`} className="shrink-0" aria-hidden="true">{render(it, i)}</div>)}
     </div>
-    <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-card to-transparent" />
-    <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card to-transparent" />
+    <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-card via-card/70 to-transparent" />
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-card via-card/70 to-transparent" />
   </div>
 );
 
@@ -1288,9 +1288,11 @@ const CollegeDetailPage = () => {
                         items={intlPartners}
                         speed={35}
                         render={(p: any) => (
-                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
+                          <div className="w-52 rounded-2xl border border-border/60 bg-gradient-to-b from-card to-sky-500/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-sky-500/40 transition-all duration-300">
                             {p.logo ? (
-                              <img src={p.logo} alt={`${p.name} logo`} className="h-14 w-full object-contain" loading="lazy" decoding="async" />
+                              <div className="h-16 w-full flex items-center justify-center rounded-xl bg-background/80 border border-border/40 px-3 py-2">
+                                <img src={p.logo} alt={`${p.name} logo`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                              </div>
                             ) : (
                               <div className="h-14 w-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-sky-500/30">{p.name.charAt(0)}</div>
                             )}
@@ -1329,11 +1331,13 @@ const CollegeDetailPage = () => {
                         items={knowledgePartners}
                         speed={40}
                         render={(p: any) => (
-                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
+                          <div className="w-52 rounded-2xl border border-border/60 bg-gradient-to-b from-card to-violet-500/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-violet-500/40 transition-all duration-300">
                             {p.logo ? (
-                              <img src={p.logo} alt={`${p.name} logo`} className="h-12 w-full object-contain" loading="lazy" decoding="async" />
+                              <div className="h-16 w-full flex items-center justify-center rounded-xl bg-background/80 border border-border/40 px-3 py-2">
+                                <img src={p.logo} alt={`${p.name} logo`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                              </div>
                             ) : (
-                              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-violet-500/30">{p.name.charAt(0)}</div>
+                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-violet-500/30">{p.name.charAt(0)}</div>
                             )}
                             <div>
                               <div className="text-xs font-bold text-foreground leading-snug">{p.name}</div>
@@ -1455,8 +1459,10 @@ const CollegeDetailPage = () => {
                         items={rankCertificates}
                         speed={45}
                         render={(c: any, i: number) => (
-                          <figure className="group w-60 rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
-                            <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.02] transition-transform" loading="lazy" decoding="async" />
+                          <figure className="group w-64 rounded-2xl overflow-hidden border border-border/60 bg-card shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-amber-500/40 transition-all duration-300">
+                            <div className="overflow-hidden">
+                              <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.04] transition-transform duration-500" loading="lazy" decoding="async" />
+                            </div>
                             {(c.title || c.issuer) && (
                               <figcaption className="p-2.5">
                                 {c.title && <div className="text-xs font-bold text-foreground leading-snug">{c.title}</div>}
