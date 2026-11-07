@@ -12,5 +12,5 @@
 - [x] Enrich why_join/courses/quick_info with new screenshot content (ABBSSM advantage, PGDM objectives, full address)
 - [x] Wire Quick Info card to admin-managed items
 - [x] Add tabbed six-term curriculum section
-- [ ] Fix old wrong programme cards (MBA Sustainability, FPM etc.) from programme courses source
-- [ ] Make Knowledge Partners, International Collaborations and Certificates animated auto-sliders
+- [x] Fix old wrong programme cards (MBA Sustainability, FPM etc.) from programme courses source
+- [x] Make Knowledge Partners, International Collaborations and Certificates animated auto-sliders
