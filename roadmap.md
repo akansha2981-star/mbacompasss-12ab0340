@@ -241,3 +241,11 @@
 ## Compact application filter bar
 - [x] Fold search, reset and dropdowns into short toolbar rows and slim deadline/category/exam chips
 - [x] Verify every filter applies and resets at 390/820/1280px and on category landing pages
+
+## ABBS college page upgrade — November 7
+- [x] Official stats/content refresh (2008, NAAC A, IACBE/SAQS/AIU, placements 2022-24, 5 reasons, exchange, admission steps)
+- [x] Apply link in 7 places (hero, overview banner, admission CTA, placements banner, sidebar x2, mobile bar)
+- [x] Sidebar upgrade: animated apply strip, placement snapshot card, accreditations, entrance animations
+- [ ] Verify sidebar strip + accreditations render (probe missed "Applications Open"/"Accreditations")
+- [ ] Add professional placement charts (year-wise bar/line, sector donut) via recharts
+- [ ] Make page more informative overall; final visual verification
