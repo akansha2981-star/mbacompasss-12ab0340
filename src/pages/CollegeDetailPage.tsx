@@ -62,6 +62,28 @@ const fallbackGallery = [
   "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=600",
 ];
 
+// Highlighted application CTA shown on colleges with an admin-managed external application link.
+const ApplyBanner = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
+  <Card className="overflow-hidden border-0 shadow-xl shadow-primary/15 bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-primary-foreground relative">
+    <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+    <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+    <CardContent className="relative z-10 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-4">
+      <div className="flex-1 min-w-0 text-center sm:text-left">
+        <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md mb-2">
+          Applications Open
+        </span>
+        <h3 className="font-heading font-extrabold text-lg sm:text-xl leading-tight">Apply to {collegeName}</h3>
+        <p className="text-sm text-primary-foreground/80 mt-1">Fill the official application form on the {collegeName} admissions portal. It takes only a few minutes.</p>
+      </div>
+      <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="shrink-0">
+        <Button size="lg" className="bg-amber-400 text-amber-950 hover:bg-amber-300 font-bold gap-2 shadow-2xl hover:scale-[1.03] transition-all px-6">
+          <GraduationCap className="w-4 h-4" /> {applyLabel}
+        </Button>
+      </a>
+    </CardContent>
+  </Card>
+);
+
 const CollegeDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: college, isLoading } = useCollegeBySlug(slug);
@@ -197,6 +219,15 @@ const CollegeDetailPage = () => {
   const admissionData = getSectionData("admission");
   const coursesFeesData = getSectionData("courses_fees");
   const whyJoinData = getSectionData("why_join");
+
+  // External application link (admin-managed via the admission section's data.applyUrl).
+  // When present, Apply buttons open the college's own application portal in a new tab.
+  const applyUrl = typeof admissionData.applyUrl === "string" && /^https:\/\//.test(admissionData.applyUrl)
+    ? admissionData.applyUrl
+    : "";
+  const applyLabel = typeof admissionData.applyLabel === "string" && admissionData.applyLabel.trim()
+    ? admissionData.applyLabel.trim()
+    : "Fill Application Form";
 
   // collegeJsonLd already computed above before early returns
 
@@ -487,14 +518,25 @@ const CollegeDetailPage = () => {
               >
                 <Download className="w-4 h-4" /> Download Brochure
               </Button>
-              <Button
-                onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })}
-                size="lg"
-                variant="outline"
-                className="bg-white/10 backdrop-blur-md border-white/30 text-primary-foreground hover:bg-white/20 hover:border-white/50 hover:text-primary-foreground font-bold gap-2"
-              >
-                <GraduationCap className="w-4 h-4" /> Apply Now
-              </Button>
+              {applyUrl ? (
+                <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored">
+                  <Button
+                    size="lg"
+                    className="bg-amber-400 text-amber-950 hover:bg-amber-300 font-bold shadow-2xl hover:scale-[1.02] transition-all gap-2 px-6"
+                  >
+                    <GraduationCap className="w-4 h-4" /> Apply Now
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })}
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/10 backdrop-blur-md border-white/30 text-primary-foreground hover:bg-white/20 hover:border-white/50 hover:text-primary-foreground font-bold gap-2"
+                >
+                  <GraduationCap className="w-4 h-4" /> Apply Now
+                </Button>
+              )}
               <Link to="/compare">
                 <Button
                   size="lg"
@@ -650,6 +692,8 @@ const CollegeDetailPage = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {applyUrl && <ApplyBanner collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} />}
             </div>
 
             {/* Courses & Fees — verified MBA programme portfolio */}
@@ -722,6 +766,19 @@ const CollegeDetailPage = () => {
                       ))}
                     </ul>
                   </div>
+                  {applyUrl && (
+                    <div className="mt-5 flex flex-col sm:flex-row items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+                      <div className="flex-1 min-w-0 text-center sm:text-left">
+                        <p className="font-heading font-bold text-foreground text-sm">Ready to apply to {college.name}?</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">You will be taken to the official {college.name} application portal.</p>
+                      </div>
+                      <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="shrink-0">
+                        <Button size="lg" className="font-bold gap-2 shadow-md">
+                          <GraduationCap className="w-4 h-4" /> {applyLabel}
+                        </Button>
+                      </a>
+                    </div>
+                  )}
                   <AIExtensionBlock section={getAIExtension("admission")} extensionLabel="Detailed Admission Guide" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </Card>
@@ -754,6 +811,33 @@ const CollegeDetailPage = () => {
                       </div>
                     ))}
                   </div>
+                  {Array.isArray(placementData.yearly) && placementData.yearly.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="font-heading font-semibold text-foreground mb-3">Year-wise Placement Trends</h3>
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-sm border-collapse min-w-[420px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Year</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Average CTC</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Median CTC</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Highest CTC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {placementData.yearly.map((y: any, i: number) => (
+                              <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-3 px-3 font-medium text-foreground">{stripText(y.year)}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-primary">{stripText(y.average)}</td>
+                                <td className="py-3 px-3 text-right text-muted-foreground">{stripText(y.median)}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-amber-600">{stripText(y.highest)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                   <h3 className="font-heading font-semibold text-foreground mb-3">Sector-wise Placements</h3>
                   <div className="space-y-3 mb-6">
                     {placementSectors.map((s: any) => (
@@ -780,6 +864,7 @@ const CollegeDetailPage = () => {
                   <AIExtensionBlock section={getAIExtension("placements")} extensionLabel="Placement Insights & Trends" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </Card>
+              {applyUrl && <div className="mt-6"><ApplyBanner collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} /></div>}
             </div>
 
             <InlineAIToolCTA variant="college-shortlister" />
@@ -1123,9 +1208,17 @@ const CollegeDetailPage = () => {
                   <Button onClick={handleDownloadBrochure} size="lg" className="w-full bg-white text-primary hover:bg-white/95 font-bold gap-2 shadow-xl mb-2">
                     <Download className="w-4 h-4" /> Download Brochure
                   </Button>
-                  <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-white/10 backdrop-blur-sm border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground hover:border-white/50 font-semibold gap-2">
-                    <GraduationCap className="w-4 h-4" /> Apply Now
-                  </Button>
+                  {applyUrl ? (
+                    <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="block">
+                      <Button variant="outline" className="w-full bg-amber-400 border-amber-400 text-amber-950 hover:bg-amber-300 hover:border-amber-300 hover:text-amber-950 font-bold gap-2 shadow-lg">
+                        <GraduationCap className="w-4 h-4" /> Apply Now
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-white/10 backdrop-blur-sm border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground hover:border-white/50 font-semibold gap-2">
+                      <GraduationCap className="w-4 h-4" /> Apply Now
+                    </Button>
+                  )}
 
                   <div className="mt-5 pt-4 border-t border-white/20 grid grid-cols-3 gap-2 text-center">
                     <div>
@@ -1270,7 +1363,9 @@ const CollegeDetailPage = () => {
       />
       <MobileActionBar
         actions={[
-          { icon: <Phone />, label: "Enquire", primary: true, onClick: () => sectionRefs.current["overview"]?.scrollIntoView({ behavior: "smooth" }) },
+          applyUrl
+            ? { icon: <GraduationCap />, label: "Apply", primary: true, onClick: () => window.open(applyUrl, "_blank", "noopener,noreferrer") }
+            : { icon: <Phone />, label: "Enquire", primary: true, onClick: () => sectionRefs.current["overview"]?.scrollIntoView({ behavior: "smooth" }) },
           { icon: <Download />, label: "Brochure", onClick: handleDownloadBrochure },
           { icon: <Share2 />, label: "Share", onClick: () => { if (navigator.share) navigator.share({ title: college.name, url: window.location.href }); else { navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied!" }); } } },
         ]}
