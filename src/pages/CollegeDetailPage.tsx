@@ -602,10 +602,29 @@ const CollegeDetailPage = () => {
   const filteredScholarships = scholarshipCat === "All"
     ? scholarships
     : scholarships.filter((s: any) => s.category === scholarshipCat);
+  // Parse the highest ₹ amount across scholarship entries. Handles "₹50,000",
+  // "₹1.5 Lakh", "2 Crore", ranges like "₹50,000 - ₹1,00,000" (takes the max),
+  // and ignores percentage waivers like "Up to 50% waiver".
+  const parseScholarshipAmount = (raw: string): number => {
+    const text = stripText(raw);
+    if (!text || /%/.test(text)) return 0;
+    let max = 0;
+    const re = /([\d,]+(?:\.\d+)?)\s*(crore|cr|lakh|lac|l)?\b/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text))) {
+      let n = Number(m[1].replace(/,/g, ""));
+      if (!Number.isFinite(n)) continue;
+      const unit = (m[2] || "").toLowerCase();
+      if (unit === "lakh" || unit === "lac" || unit === "l") n *= 100000;
+      else if (unit === "crore" || unit === "cr") n *= 10000000;
+      if (n > max) max = n;
+    }
+    return max;
+  };
   const maxScholarship = (() => {
     let max = 0;
     for (const s of scholarships) {
-      const n = Number(stripText(s.amount).replace(/[^\d]/g, ""));
+      const n = parseScholarshipAmount(s.amount);
       if (n > max) max = n;
     }
     return max > 0 ? `₹${max.toLocaleString("en-IN")}` : "";
