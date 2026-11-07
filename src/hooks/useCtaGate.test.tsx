@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+vi.mock("react", async () => {
+  const { createRequire } = await import("node:module");
+  return createRequire(import.meta.url)("react");
+});
 
 const mocks = vi.hoisted(() => ({
   subscribe: vi.fn(() => { throw new Error("WebSocket not available: Failed to construct WebSocket"); }),
