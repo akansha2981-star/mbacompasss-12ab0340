@@ -62,6 +62,42 @@ const fallbackGallery = [
   "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=600",
 ];
 
+// Pulsing "live" dot used on application CTAs.
+const LiveDot = () => (
+  <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
+    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+  </span>
+);
+
+// Slim animated application strip for the sidebar — another entry point to the official form.
+const SidebarApplyStrip = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
+  <motion.a
+    href={applyUrl}
+    target="_blank"
+    rel="noopener noreferrer sponsored"
+    aria-label={`${applyLabel} — official application form for ${collegeName}`}
+    className="block group"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, delay: 0.15 }}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <div className="relative overflow-hidden rounded-xl border border-amber-300/70 bg-gradient-to-r from-amber-50 via-amber-100/70 to-amber-50 px-4 py-3.5 shadow-sm">
+      <div className="absolute -top-8 -right-8 w-24 h-24 bg-amber-200/40 rounded-full blur-2xl pointer-events-none" />
+      <div className="relative z-10 flex items-center gap-3">
+        <LiveDot />
+        <div className="min-w-0 flex-1">
+          <div className="text-xs font-extrabold uppercase tracking-wider text-amber-700">Applications Open · 2027-29</div>
+          <div className="font-bold text-foreground text-sm truncate">{applyLabel}</div>
+        </div>
+        <ChevronUp className="w-4 h-4 rotate-90 text-amber-700 shrink-0 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+      </div>
+    </div>
+  </motion.a>
+);
+
 // Highlighted application CTA shown on colleges with an admin-managed external application link.
 const ApplyBanner = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
   <Card className="overflow-hidden border-0 shadow-xl shadow-primary/15 bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-primary-foreground relative">
