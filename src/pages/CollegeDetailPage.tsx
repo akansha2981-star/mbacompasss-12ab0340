@@ -758,6 +758,19 @@ const CollegeDetailPage = () => {
               />
             )}
 
+            {/* Mobile/tablet: key sidebar cards (the desktop sidebar is hidden below lg) */}
+            <div className="lg:hidden space-y-4" aria-label={`${college.name} quick actions and summary`}>
+              {applyUrl && <SidebarApplyStrip collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} />}
+              {(college.placement_avg || college.placement_highest) && (
+                <PlacementSnapshotCard
+                  college={college}
+                  topRecruiters={topRecruiters}
+                  onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
+                />
+              )}
+              <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} />
+            </div>
+
 
 
             {/* Overview */}
