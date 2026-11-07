@@ -1142,6 +1142,35 @@ const CollegeDetailPage = () => {
                       </div>
                     ))}
                   </div>
+                  {placementStats && (
+                    <div className="mb-6">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {[
+                          placementStats.companies && { label: "Companies Visited", value: String(placementStats.companies) },
+                          placementStats.offers && { label: "Offers Made", value: String(placementStats.offers) },
+                          placementStats.distinct_recruiters && { label: "Distinct Recruiters", value: String(placementStats.distinct_recruiters) },
+                          placementStats.internships && { label: "Internships Completed", value: String(placementStats.internships) },
+                          placementStats.internship_conversion && { label: "Converted to Offers", value: String(placementStats.internship_conversion) },
+                          placementStats.top10_mean && { label: "Top 10% Average", value: String(placementStats.top10_mean) },
+                        ].filter(Boolean).map((s: any) => (
+                          <div key={s.label} className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-3.5 py-2">
+                            <span className="font-heading font-extrabold text-foreground text-sm">{s.value}</span>
+                            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{s.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {placementReportUrl && (
+                        <a
+                          href={placementReportUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md transition-all"
+                        >
+                          <Download className="w-4 h-4" /> Download Official Placement Report{placementData.batch ? ` — ${stripText(placementData.batch)}` : ""} (PDF)
+                        </a>
+                      )}
+                    </div>
+                  )}
                   {Array.isArray(placementData.yearly) && placementData.yearly.length > 0 && (
                     <div className="mb-6">
                       <h3 className="font-heading font-semibold text-foreground mb-3">Year-wise Placement Trends</h3>
@@ -1174,6 +1203,50 @@ const CollegeDetailPage = () => {
                   <div className="mb-6">
                     <SectorDonut sectors={placementSectors} />
                   </div>
+                  {salaryBands.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="font-heading font-semibold text-foreground mb-3">Salary Break-up Bands</h3>
+                      <div className="space-y-3">
+                        {salaryBands.map((b: any) => (
+                          <div key={b.band}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium text-foreground">{b.band}</span>
+                              <span className="font-heading font-bold text-primary text-sm">{b.pct}%</span>
+                            </div>
+                            <div className="h-2.5 rounded-full bg-muted overflow-hidden">
+                              <div className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary" style={{ width: `${b.pct}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {topOffers.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="font-heading font-semibold text-foreground mb-1">Top Offers by CTC</h3>
+                      {placementStats?.top10_mean && (
+                        <p className="text-xs text-muted-foreground mb-3">Top 10% of offers: mean {stripText(placementStats.top10_mean)}{placementStats.top10_median ? `, median ${stripText(placementStats.top10_median)}` : ""}.</p>
+                      )}
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-sm border-collapse min-w-[320px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-2.5 px-3 font-heading font-semibold text-foreground border-b border-border">Company</th>
+                              <th className="text-right py-2.5 px-3 font-heading font-semibold text-foreground border-b border-border">CTC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {topOffers.map((o: any, i: number) => (
+                              <tr key={o.company} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-2.5 px-3 font-medium text-foreground">{o.company}</td>
+                                <td className={`py-2.5 px-3 text-right font-heading font-bold ${i < 3 ? "text-amber-600" : "text-primary"}`}>{o.ctc}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                   {placementRecruiters.length > 0 && (
                     <div>
                       <h3 className="font-heading font-semibold text-foreground mb-3">Top Recruiters</h3>
