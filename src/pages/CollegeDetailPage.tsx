@@ -493,6 +493,18 @@ const CollegeDetailPage = () => {
     ? placementData.recruiters.map((r: any) => stripText(r.name)).filter(Boolean)
     : topRecruiters;
 
+  // Official placement report extras (stats, salary bands, top offers, downloadable report)
+  const placementStats = placementData.stats && typeof placementData.stats === "object" ? placementData.stats : null;
+  const salaryBands = Array.isArray(placementData.salary_bands)
+    ? placementData.salary_bands.map((b: any) => ({ band: stripText(b?.band), pct: toPctNum(b?.percentage) })).filter((b: any) => b.band && b.pct > 0)
+    : [];
+  const topOffers = Array.isArray(placementData.top_offers)
+    ? placementData.top_offers.map((o: any) => ({ company: stripText(o?.company), ctc: stripText(o?.ctc) })).filter((o: any) => o.company && o.ctc)
+    : [];
+  const placementReportUrl = typeof placementData.reportUrl === "string" && /^\/__l5e\//.test(placementData.reportUrl)
+    ? placementData.reportUrl
+    : "";
+
   // Rankings from DB or fallback
   const rankingsList = rankingsData.rankings?.length > 0
     ? rankingsData.rankings.map((r: any) => ({ body: stripText(r.body), rank: stripText(r.rank), year: stripText(r.year) }))
