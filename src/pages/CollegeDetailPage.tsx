@@ -466,17 +466,8 @@ const CollegeDetailPage = () => {
     toast({ title: "Brochure downloaded!" });
   }, "Sign in to download the college brochure.");
 
-  const tabItems = [
-    { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
-    { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
-    { value: "international", label: "Global Exposure" },
-    { value: "knowledge_partners", label: "Knowledge Partners" },
-    { value: "cutoff", label: "Cut-off" }, { value: "rankings", label: "Rankings" },
-    { value: "reviews", label: "Reviews" }, { value: "gallery", label: "Gallery" },
-    { value: "scholarships", label: "Scholarships" }, { value: "faculty", label: "Faculty" },
-    { value: "hostel", label: "Hostel & Campus" }, { value: "qa", label: "Q&A" },
-    { value: "news", label: "News" },
-  ];
+  // tabItems is built after section data is computed (see below) so tabs only
+  // appear when their section actually renders.
 
   // ── Helpers to clean already-saved AI data that may contain raw HTML/citations ──
   const stripText = (v: any): string => {
@@ -565,6 +556,21 @@ const CollegeDetailPage = () => {
         .filter((p: any) => p.name)
     : [];
 
+  // Tab nav / TOC — only include sections that actually render for this college
+  const hasInternational = intlPartners.length > 0 || !!getSectionContent("international");
+  const hasKnowledgePartners = knowledgePartners.length > 0 || !!getSectionContent("knowledge_partners");
+  const tabItems = [
+    { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
+    { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
+    ...(hasInternational ? [{ value: "international", label: "Global Exposure" }] : []),
+    ...(hasKnowledgePartners ? [{ value: "knowledge_partners", label: "Knowledge Partners" }] : []),
+    { value: "cutoff", label: "Cut-off" }, { value: "rankings", label: "Rankings" },
+    { value: "reviews", label: "Reviews" }, { value: "gallery", label: "Gallery" },
+    { value: "scholarships", label: "Scholarships" }, { value: "faculty", label: "Faculty" },
+    { value: "hostel", label: "Hostel & Campus" }, { value: "qa", label: "Q&A" },
+    { value: "news", label: "News" },
+  ];
+
   // Award/ranking certificates uploaded by admin (image + caption)
   const rankCertificates = Array.isArray(rankingsData.certificates)
     ? rankingsData.certificates
@@ -596,10 +602,29 @@ const CollegeDetailPage = () => {
   const filteredScholarships = scholarshipCat === "All"
     ? scholarships
     : scholarships.filter((s: any) => s.category === scholarshipCat);
+  // Parse the highest ₹ amount across scholarship entries. Handles "₹50,000",
+  // "₹1.5 Lakh", "2 Crore", ranges like "₹50,000 - ₹1,00,000" (takes the max),
+  // and ignores percentage waivers like "Up to 50% waiver".
+  const parseScholarshipAmount = (raw: string): number => {
+    const text = stripText(raw);
+    if (!text || /%/.test(text)) return 0;
+    let max = 0;
+    const re = /([\d,]+(?:\.\d+)?)\s*(crore|cr|lakh|lac|l)?\b/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text))) {
+      let n = Number(m[1].replace(/,/g, ""));
+      if (!Number.isFinite(n)) continue;
+      const unit = (m[2] || "").toLowerCase();
+      if (unit === "lakh" || unit === "lac" || unit === "l") n *= 100000;
+      else if (unit === "crore" || unit === "cr") n *= 10000000;
+      if (n > max) max = n;
+    }
+    return max;
+  };
   const maxScholarship = (() => {
     let max = 0;
     for (const s of scholarships) {
-      const n = Number(stripText(s.amount).replace(/[^\d]/g, ""));
+      const n = parseScholarshipAmount(s.amount);
       if (n > max) max = n;
     }
     return max > 0 ? `₹${max.toLocaleString("en-IN")}` : "";
@@ -1572,7 +1597,7 @@ const CollegeDetailPage = () => {
                         <Banknote className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h2 className="font-heading text-xl font-extrabold text-white leading-tight">Scholarships 2026-27</h2>
+                        <h2 className="font-heading text-xl font-extrabold text-white leading-tight">Scholarships &amp; Financial Aid</h2>
                         <p className="text-emerald-50/90 text-xs mt-0.5">Merit, entrance-score and special-category awards at {college.name}</p>
                       </div>
                     </div>
