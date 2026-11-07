@@ -246,6 +246,6 @@
 - [x] Official stats/content refresh (2008, NAAC A, IACBE/SAQS/AIU, placements 2022-24, 5 reasons, exchange, admission steps)
 - [x] Apply link in 7 places (hero, overview banner, admission CTA, placements banner, sidebar x2, mobile bar)
 - [x] Sidebar upgrade: animated apply strip, placement snapshot card, accreditations, entrance animations
-- [ ] Verify sidebar strip + accreditations render (probe missed "Applications Open"/"Accreditations")
-- [ ] Add professional placement charts (year-wise bar/line, sector donut) via recharts
-- [ ] Make page more informative overall; final visual verification
+- [x] Sidebar strip + accreditations verified via screenshots
+- [x] Placement charts added: year-wise trend (bars + highest line) and sector donut; verified rendering
+- [x] Final visual verification passed; build OK, no page errors
