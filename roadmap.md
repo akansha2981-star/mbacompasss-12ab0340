@@ -1,5 +1,10 @@
 # Roadmap
 
+## GIM Meritto submission error — November 7
+- [x] Reproduce function rejection safely: sixth request returns 429; recent provider replies are successful or duplicates
+- [ ] Handle throttling with a safe wait and show actual submission errors across bulk, manual and retry actions
+- [ ] Run regression tests and verify authenticated submission UI — requesting account has no matching preview login
+
 ## Section-wise question analysis — November 3
 - [x] Add compact question blocks, answer-review dialog and response-derived section statistics; 15 tests pass and temporary browser inputs verify colours, filters and phone layout without overflow
 - [ ] Verify full response-sheet/contact flow with a real student sheet; no real sheet available for this check
