@@ -1,5 +1,10 @@
 # Roadmap
 
+## Login-gate live-update crash — November 7
+- [x] Confirm current subscription throws synchronously and reproduce the crash in a hook regression test
+- [x] Catch optional live-update startup failures without changing saved login rules or retrying per button
+- [ ] Verify regression tests and representative public page with WebSocket construction blocked
+
 ## GIM Meritto submission error — November 7
 - [x] Reproduce function rejection safely: sixth request returns 429; recent provider replies are successful or duplicates
 - [x] Handle throttling with a safe wait and show actual submission errors across bulk, manual and retry actions; deployed function returns Retry-After

@@ -34,8 +34,11 @@ const fetchAll = async (): Promise<CtaMap> => {
 
 const ensureRealtime = () => {
   if (channelInitialized) return;
+  // Attempt once per page session; a blocked socket must not prevent fetchAll()
+  // or trigger repeated connection attempts from every gated button.
   channelInitialized = true;
-  supabase
+  try {
+    supabase
     .channel("cta_settings_changes")
     .on(
       "postgres_changes",
@@ -54,6 +57,9 @@ const ensureRealtime = () => {
       }
     )
     .subscribe();
+  } catch {
+    // Live updates are optional. Keep the cached/HTTP-fetched login rules.
+  }
 };
 
 // Global event so any place can open the login dialog without prop drilling.
