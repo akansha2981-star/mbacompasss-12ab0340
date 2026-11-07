@@ -1174,9 +1174,11 @@ const CollegeDetailPage = () => {
                       <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("international"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
                     )}
                     {intlPartners.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        {intlPartners.map((p: any, i: number) => (
-                          <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                      <AutoMarquee
+                        items={intlPartners}
+                        speed={35}
+                        render={(p: any) => (
+                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
                             {p.logo ? (
                               <img src={p.logo} alt={`${p.name} logo`} className="h-14 w-full object-contain" loading="lazy" decoding="async" />
                             ) : (
@@ -1187,8 +1189,8 @@ const CollegeDetailPage = () => {
                               {p.country && <div className="text-[11px] text-muted-foreground mt-0.5">{p.country}</div>}
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -1213,9 +1215,11 @@ const CollegeDetailPage = () => {
                       <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("knowledge_partners"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
                     )}
                     {knowledgePartners.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {knowledgePartners.map((p: any, i: number) => (
-                          <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                      <AutoMarquee
+                        items={knowledgePartners}
+                        speed={40}
+                        render={(p: any) => (
+                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
                             {p.logo ? (
                               <img src={p.logo} alt={`${p.name} logo`} className="h-12 w-full object-contain" loading="lazy" decoding="async" />
                             ) : (
@@ -1226,8 +1230,8 @@ const CollegeDetailPage = () => {
                               {p.tagline && <div className="text-[11px] text-muted-foreground mt-0.5">{p.tagline}</div>}
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -1337,9 +1341,11 @@ const CollegeDetailPage = () => {
                       <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
                         <Medal className="w-4 h-4 text-amber-600" /> Certificates & Awards
                       </h3>
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        {rankCertificates.map((c: any, i: number) => (
-                          <figure key={i} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
+                      <AutoMarquee
+                        items={rankCertificates}
+                        speed={45}
+                        render={(c: any, i: number) => (
+                          <figure className="group w-60 rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
                             <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.02] transition-transform" loading="lazy" decoding="async" />
                             {(c.title || c.issuer) && (
                               <figcaption className="p-2.5">
@@ -1348,8 +1354,8 @@ const CollegeDetailPage = () => {
                               </figcaption>
                             )}
                           </figure>
-                        ))}
-                      </div>
+                        )}
+                      />
                     </div>
                   )}
                   <AIExtensionBlock section={getAIExtension("rankings")} extensionLabel="Rankings Context & Recognition" entityName={college.name} entityWebsite={(college as any).website} />
