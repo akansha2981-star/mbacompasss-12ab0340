@@ -431,6 +431,7 @@ const CollegeDetailPage = () => {
     { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
     { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
     { value: "international", label: "Global Exposure" },
+    { value: "knowledge_partners", label: "Knowledge Partners" },
     { value: "cutoff", label: "Cut-off" }, { value: "rankings", label: "Rankings" },
     { value: "reviews", label: "Reviews" }, { value: "gallery", label: "Gallery" },
     { value: "scholarships", label: "Scholarships" }, { value: "faculty", label: "Faculty" },
@@ -479,6 +480,14 @@ const CollegeDetailPage = () => {
   const intlPartners = Array.isArray(internationalData.partners)
     ? internationalData.partners
         .map((p: any) => ({ name: stripText(p?.name), country: stripText(p?.country), logo: typeof p?.logo === "string" ? p.logo : "" }))
+        .filter((p: any) => p.name)
+    : [];
+
+  // Knowledge partners (industry/academic partners with logos)
+  const knowledgePartnersData = getSectionData("knowledge_partners");
+  const knowledgePartners = Array.isArray(knowledgePartnersData.partners)
+    ? knowledgePartnersData.partners
+        .map((p: any) => ({ name: stripText(p?.name), tagline: stripText(p?.tagline), logo: typeof p?.logo === "string" ? p.logo : "" }))
         .filter((p: any) => p.name)
     : [];
 
@@ -640,7 +649,9 @@ const CollegeDetailPage = () => {
             {/* Premium Stats Strip */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
               {[
-                { label: "NIRF Ranking", value: Number(college.ranking) > 0 ? rankOnly(college.ranking) : "Not ranked", source: "NIRF", icon: Award, year: new Date().getFullYear().toString() },
+                ...(Number(college.ranking) > 0
+                  ? [{ label: "NIRF Ranking", value: rankOnly(college.ranking), source: "NIRF", icon: Award, year: new Date().getFullYear().toString() }]
+                  : [{ label: "Placement Rate", value: numericStat(placementData.placement_rate) || "Not disclosed", source: "Placement Report", icon: CheckCircle, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` }]),
                 { label: "Total Fees", value: formatMoney(college.fees) || "Not disclosed", source: "Brochure", icon: Banknote, year: new Date().getFullYear().toString() },
                 { label: "Avg Package", value: formatMoney(college.placement_avg) || "Not disclosed", source: "Placement Report", icon: TrendingUp, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
                 { label: "Highest Package", value: formatMoney(college.placement_highest) || "Not disclosed", source: "Placement Report", icon: Medal, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
