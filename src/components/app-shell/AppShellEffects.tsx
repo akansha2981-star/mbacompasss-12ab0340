@@ -187,11 +187,10 @@ export const OnboardingGate = () => {
 
       if (data) {
         const d = data as { onboarding_completed?: boolean | null; phone?: string | null };
-        // In the demo flow, treat missing/empty phone as "onboarding not complete"
-        // so existing accounts without a verified mobile still hit the OTP step.
-        const needsOtp = inDemoContext
-          ? !d.onboarding_completed || !d.phone
-          : !d.onboarding_completed;
+        // A verified mobile is required for every account: treat missing/empty
+        // phone as "onboarding not complete" everywhere, so older accounts
+        // without a number also hit the OTP step.
+        const needsOtp = !d.onboarding_completed || !d.phone;
         if (needsOtp) setShowOnboarding(true);
         setChecked(true);
         return;
