@@ -249,3 +249,5 @@
 - [x] Sidebar strip + accreditations verified via screenshots
 - [x] Placement charts added: year-wise trend (bars + highest line) and sector donut; verified rendering
 - [x] Final visual verification passed; build OK, no page errors
+- [x] Campus photo set as optimized header background (WebP via image transformer, 1280w q70)
+- [x] Sidebar cards now visible on mobile/tablet (apply strip, placement snapshot, quick info below summary)
