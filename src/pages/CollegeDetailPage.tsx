@@ -140,7 +140,19 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { c
 );
 
 // Key facts, accreditations and actions — shared between the desktop sidebar and the mobile stack.
-const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel }: { college: any; accreditations: string[]; applyUrl: string; applyLabel: string }) => (
+const quickInfoIcon = (label: string) => {
+  const l = label.toLowerCase();
+  if (l.includes("location") || l.includes("address")) return MapPin;
+  if (l.includes("rank")) return Award;
+  if (l.includes("established") || l.includes("cycle")) return Calendar;
+  if (l.includes("student")) return Users;
+  if (l.includes("fee") || l.includes("package") || l.includes("placement")) return Banknote;
+  if (l.includes("exam")) return BookOpen;
+  if (l.includes("contact") || l.includes("email") || l.includes("website")) return Globe;
+  return Building;
+};
+
+const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel, quickItems }: { college: any; accreditations: string[]; applyUrl: string; applyLabel: string; quickItems?: { label: string; value: string }[] }) => (
   <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
     <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
     <CardContent className="pt-6">
@@ -151,14 +163,16 @@ const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel }: { coll
         <h3 className="font-heading font-bold text-foreground">Quick Info</h3>
       </div>
       <div className="space-y-2.5">
-        {[
+        {(quickItems && quickItems.length > 0
+          ? quickItems.map((it) => ({ icon: quickInfoIcon(it.label), label: it.label, value: it.value }))
+          : [
           { icon: MapPin, label: "Location", value: `${college.city}, ${college.state}` },
           { icon: Award, label: "Ranking", value: Number(college.ranking) > 0 ? `#${college.ranking}` : "—" },
           { icon: BookOpen, label: "Type", value: college.type || "N/A" },
           { icon: Users, label: "Students", value: college.total_students ? `${college.total_students}+` : "N/A" },
           { icon: Building, label: "Campus", value: college.campus_size || "N/A" },
           { icon: Calendar, label: "Established", value: college.established ? String(college.established) : "N/A" },
-        ].map((item, i) => (
+        ]).map((item, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 transition-colors">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0">
               <item.icon className="w-4 h-4 text-primary" />
