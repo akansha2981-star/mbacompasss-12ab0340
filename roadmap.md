@@ -9,3 +9,8 @@
 - [x] Add Knowledge Partners section with 7 logos (BSE, Harvard Business Publishing, Datagami, Case Centre, Toastmasters, NHRD, SLX)
 - [x] Replace hero NIRF card with Placement Rate when no NIRF rank exists
 - [x] Final browser verification of the full page (desktop + mobile)
+- [x] Enrich why_join/courses/quick_info with new screenshot content (ABBSSM advantage, PGDM objectives, full address)
+- [x] Wire Quick Info card to admin-managed items
+- [x] Add tabbed six-term curriculum section
+- [x] Fix old wrong programme cards (MBA Sustainability, FPM etc.) from programme courses source
+- [x] Make Knowledge Partners, International Collaborations and Certificates animated auto-sliders

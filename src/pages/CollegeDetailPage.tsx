@@ -140,7 +140,31 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { c
 );
 
 // Key facts, accreditations and actions — shared between the desktop sidebar and the mobile stack.
-const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel }: { college: any; accreditations: string[]; applyUrl: string; applyLabel: string }) => (
+// Auto-sliding marquee for logo/certificate strips — loops seamlessly, pauses on hover.
+const AutoMarquee = ({ items, render, speed = 40 }: { items: any[]; render: (item: any, i: number) => React.ReactNode; speed?: number }) => (
+  <div className="relative overflow-hidden marquee-hover-pause">
+    <div className="flex gap-3 w-max animate-marquee" style={{ animationDuration: `${speed}s` }}>
+      {items.map((it, i) => <div key={`a-${i}`} className="shrink-0">{render(it, i)}</div>)}
+      {items.map((it, i) => <div key={`b-${i}`} className="shrink-0" aria-hidden="true">{render(it, i)}</div>)}
+    </div>
+    <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-card to-transparent" />
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card to-transparent" />
+  </div>
+);
+
+const quickInfoIcon = (label: string) => {
+  const l = label.toLowerCase();
+  if (l.includes("location") || l.includes("address")) return MapPin;
+  if (l.includes("rank")) return Award;
+  if (l.includes("established") || l.includes("cycle")) return Calendar;
+  if (l.includes("student")) return Users;
+  if (l.includes("fee") || l.includes("package") || l.includes("placement")) return Banknote;
+  if (l.includes("exam")) return BookOpen;
+  if (l.includes("contact") || l.includes("email") || l.includes("website")) return Globe;
+  return Building;
+};
+
+const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel, quickItems }: { college: any; accreditations: string[]; applyUrl: string; applyLabel: string; quickItems?: { label: string; value: string }[] }) => (
   <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
     <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
     <CardContent className="pt-6">
@@ -151,14 +175,16 @@ const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel }: { coll
         <h3 className="font-heading font-bold text-foreground">Quick Info</h3>
       </div>
       <div className="space-y-2.5">
-        {[
+        {(quickItems && quickItems.length > 0
+          ? quickItems.map((it) => ({ icon: quickInfoIcon(it.label), label: it.label, value: it.value }))
+          : [
           { icon: MapPin, label: "Location", value: `${college.city}, ${college.state}` },
           { icon: Award, label: "Ranking", value: Number(college.ranking) > 0 ? `#${college.ranking}` : "—" },
           { icon: BookOpen, label: "Type", value: college.type || "N/A" },
           { icon: Users, label: "Students", value: college.total_students ? `${college.total_students}+` : "N/A" },
           { icon: Building, label: "Campus", value: college.campus_size || "N/A" },
           { icon: Calendar, label: "Established", value: college.established ? String(college.established) : "N/A" },
-        ].map((item, i) => (
+        ]).map((item, i) => (
           <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 transition-colors">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0">
               <item.icon className="w-4 h-4 text-primary" />
@@ -229,6 +255,7 @@ const CollegeDetailPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [galleryIdx, setGalleryIdx] = useState(0);
+  const [curriculumTerm, setCurriculumTerm] = useState(0);
   const [qaOpen, setQaOpen] = useState<number | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const galleryRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -481,6 +508,29 @@ const CollegeDetailPage = () => {
     ? internationalData.partners
         .map((p: any) => ({ name: stripText(p?.name), country: stripText(p?.country), logo: typeof p?.logo === "string" ? p.logo : "" }))
         .filter((p: any) => p.name)
+    : [];
+
+  // Quick info items (admin-managed; falls back to college fields)
+  const quickInfoData = getSectionData("quick_info");
+  const quickInfoItems = Array.isArray(quickInfoData.items)
+    ? quickInfoData.items
+        .map((i: any) => ({ label: stripText(i?.label), value: stripText(i?.value) }))
+        .filter((i: any) => i.label && i.value)
+    : [];
+
+  // Term-wise curriculum (tabbed academic experience)
+  const curriculumData = getSectionData("curriculum");
+  const curriculumTerms = Array.isArray(curriculumData.terms)
+    ? curriculumData.terms
+        .map((t: any) => ({
+          term: stripText(t?.term),
+          total: stripText(t?.total),
+          note: stripText(t?.note),
+          subjects: Array.isArray(t?.subjects)
+            ? t.subjects.map((s: any) => ({ code: stripText(s?.code), name: stripText(s?.name), credits: stripText(s?.credits) })).filter((s: any) => s.name)
+            : [],
+        }))
+        .filter((t: any) => t.term && t.subjects.length > 0)
     : [];
 
   // Knowledge partners (industry/academic partners with logos)
@@ -795,7 +845,7 @@ const CollegeDetailPage = () => {
                   onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
                 />
               )}
-              <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} />
+              <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} quickItems={quickInfoItems} />
             </div>
 
 
@@ -916,6 +966,72 @@ const CollegeDetailPage = () => {
                 </Card>
               )}
             </div>
+
+            {/* Term-wise Curriculum */}
+            {curriculumTerms.length > 0 && (
+              <div id="curriculum" ref={el => { sectionRefs.current["curriculum"] = el; }} className="scroll-mt-32">
+                <Card className="overflow-hidden border-border/60 shadow-md">
+                  <div className="h-1 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
+                  <CardHeader>
+                    <CardTitle className="font-heading flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                      </div>
+                      Our Academic Experience
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">Six structured terms across two years — each progressively building deeper expertise in business management.</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2 mb-5" role="tablist" aria-label="Curriculum terms">
+                      {curriculumTerms.map((t: any, i: number) => (
+                        <button
+                          key={i}
+                          role="tab"
+                          aria-selected={curriculumTerm === i}
+                          onClick={() => setCurriculumTerm(i)}
+                          className={`px-4 py-2 rounded-t-xl rounded-b-md text-sm font-bold transition-all ${curriculumTerm === i
+                            ? "bg-amber-400 text-amber-950 shadow-md"
+                            : "bg-primary/90 text-primary-foreground hover:bg-primary"}`}
+                        >
+                          {t.term}
+                        </button>
+                      ))}
+                    </div>
+                    {curriculumTerms[curriculumTerm] && (
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-sm border-collapse min-w-[420px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">{curriculumTerms[curriculumTerm].term}</th>
+                              <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Subject</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Credits</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {curriculumTerms[curriculumTerm].subjects.map((s: any, i: number) => (
+                              <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-3 px-3 text-muted-foreground whitespace-nowrap">{s.code}</td>
+                                <td className="py-3 px-3 font-medium text-foreground">{s.name}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-primary">{s.credits}</td>
+                              </tr>
+                            ))}
+                            {curriculumTerms[curriculumTerm].total && (
+                              <tr className="bg-primary/5">
+                                <td className="py-3 px-3 font-heading font-bold text-foreground" colSpan={2}>Total Credits</td>
+                                <td className="py-3 px-3 text-right font-heading font-extrabold text-primary">{curriculumTerms[curriculumTerm].total}</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {curriculumTerms[curriculumTerm]?.note && (
+                      <p className="text-xs text-muted-foreground mt-3">{curriculumTerms[curriculumTerm].note}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Admissions */}
             <div id="admission" ref={el => { sectionRefs.current["admission"] = el; }} className="scroll-mt-32">
@@ -1058,9 +1174,11 @@ const CollegeDetailPage = () => {
                       <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("international"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
                     )}
                     {intlPartners.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        {intlPartners.map((p: any, i: number) => (
-                          <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                      <AutoMarquee
+                        items={intlPartners}
+                        speed={35}
+                        render={(p: any) => (
+                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
                             {p.logo ? (
                               <img src={p.logo} alt={`${p.name} logo`} className="h-14 w-full object-contain" loading="lazy" decoding="async" />
                             ) : (
@@ -1071,8 +1189,8 @@ const CollegeDetailPage = () => {
                               {p.country && <div className="text-[11px] text-muted-foreground mt-0.5">{p.country}</div>}
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -1097,9 +1215,11 @@ const CollegeDetailPage = () => {
                       <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("knowledge_partners"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
                     )}
                     {knowledgePartners.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {knowledgePartners.map((p: any, i: number) => (
-                          <div key={i} className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                      <AutoMarquee
+                        items={knowledgePartners}
+                        speed={40}
+                        render={(p: any) => (
+                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
                             {p.logo ? (
                               <img src={p.logo} alt={`${p.name} logo`} className="h-12 w-full object-contain" loading="lazy" decoding="async" />
                             ) : (
@@ -1110,8 +1230,8 @@ const CollegeDetailPage = () => {
                               {p.tagline && <div className="text-[11px] text-muted-foreground mt-0.5">{p.tagline}</div>}
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -1221,9 +1341,11 @@ const CollegeDetailPage = () => {
                       <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
                         <Medal className="w-4 h-4 text-amber-600" /> Certificates & Awards
                       </h3>
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        {rankCertificates.map((c: any, i: number) => (
-                          <figure key={i} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
+                      <AutoMarquee
+                        items={rankCertificates}
+                        speed={45}
+                        render={(c: any, i: number) => (
+                          <figure className="group w-60 rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
                             <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.02] transition-transform" loading="lazy" decoding="async" />
                             {(c.title || c.issuer) && (
                               <figcaption className="p-2.5">
@@ -1232,8 +1354,8 @@ const CollegeDetailPage = () => {
                               </figcaption>
                             )}
                           </figure>
-                        ))}
-                      </div>
+                        )}
+                      />
                     </div>
                   )}
                   <AIExtensionBlock section={getAIExtension("rankings")} extensionLabel="Rankings Context & Recognition" entityName={college.name} entityWebsite={(college as any).website} />
@@ -1612,7 +1734,7 @@ const CollegeDetailPage = () => {
 
                 {/* Quick Info Card */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.35 }}>
-                  <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} />
+                  <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} quickItems={quickInfoItems} />
                 </motion.div>
               </div>
             </div>
