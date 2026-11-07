@@ -596,6 +596,14 @@ const CollegeDetailPage = () => {
   const filteredScholarships = scholarshipCat === "All"
     ? scholarships
     : scholarships.filter((s: any) => s.category === scholarshipCat);
+  const maxScholarship = (() => {
+    let max = 0;
+    for (const s of scholarships) {
+      const n = Number(stripText(s.amount).replace(/[^\d]/g, ""));
+      if (n > max) max = n;
+    }
+    return max > 0 ? `₹${max.toLocaleString("en-IN")}` : "";
+  })();
 
   // Faculty from DB or fallback
   const facultyList = facultyData.faculty?.length > 0
@@ -1554,20 +1562,33 @@ const CollegeDetailPage = () => {
 
             {/* Scholarships — filter-wise slider */}
             <div id="scholarships" ref={el => { sectionRefs.current["scholarships"] = el; }} className="scroll-mt-32">
-              <Card className="overflow-hidden border-border/60 shadow-md">
-                <div className="h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-transparent" />
-                <CardHeader>
-                  <CardTitle className="font-heading flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center">
-                      <Banknote className="w-5 h-5 text-emerald-600" />
+              <Card className="overflow-hidden border-border/60 shadow-lg">
+                <div className="relative bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 px-6 py-6">
+                  <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
+                  <div className="pointer-events-none absolute -bottom-12 left-1/3 w-32 h-32 rounded-full bg-white/5" />
+                  <div className="relative flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 backdrop-blur flex items-center justify-center shadow-lg">
+                        <Banknote className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="font-heading text-xl font-extrabold text-white leading-tight">Scholarships 2026-27</h2>
+                        <p className="text-emerald-50/90 text-xs mt-0.5">Merit, entrance-score and special-category awards at {college.name}</p>
+                      </div>
                     </div>
-                    Scholarships 2026-27
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                    {maxScholarship && (
+                      <div className="rounded-xl bg-white/15 border border-white/25 backdrop-blur px-5 py-2.5 text-center shadow-lg">
+                        <div className="font-heading text-lg font-extrabold text-white leading-tight">Up to {maxScholarship}</div>
+                        <div className="text-[10px] uppercase tracking-wider text-emerald-50/90 font-semibold mt-0.5">Scholarship available</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <CardContent className="pt-6">
                   {scholarshipNote && (
-                    <div className="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-800 dark:text-amber-300">
-                      {scholarshipNote}
+                    <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 to-amber-500/5 px-4 py-3">
+                      <Award className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{scholarshipNote}</p>
                     </div>
                   )}
                   {scholarshipCategories.length > 0 && (
