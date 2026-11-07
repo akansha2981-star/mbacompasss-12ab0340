@@ -1252,11 +1252,19 @@ const CollegeDetailPage = () => {
                     <Download className="w-4 h-4" /> Download Brochure
                   </Button>
                   {applyUrl ? (
-                    <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="block">
+                    <motion.a
+                      href={applyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer sponsored"
+                      aria-label={`${applyLabel} — official application form for ${college.name}`}
+                      className="block"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <Button variant="outline" className="w-full bg-amber-400 border-amber-400 text-amber-950 hover:bg-amber-300 hover:border-amber-300 hover:text-amber-950 font-bold gap-2 shadow-lg">
-                        <GraduationCap className="w-4 h-4" /> Apply Now
+                        <GraduationCap className="w-4 h-4" /> {applyLabel}
                       </Button>
-                    </a>
+                    </motion.a>
                   ) : (
                     <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-white/10 backdrop-blur-sm border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground hover:border-white/50 font-semibold gap-2">
                       <GraduationCap className="w-4 h-4" /> Apply Now
