@@ -100,7 +100,7 @@ const SidebarApplyStrip = ({ collegeName, applyUrl, applyLabel }: { collegeName:
 );
 
 // Placement outcomes at a glance — shared between the desktop sidebar and the mobile stack.
-const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { college: any; topRecruiters: string[]; onViewPlacements: () => void }) => (
+const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, reportUrl }: { college: any; topRecruiters: string[]; onViewPlacements: () => void; reportUrl?: string }) => (
   <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
     <CardContent className="pt-6">
       <div className="flex items-center gap-2 mb-4">
@@ -135,6 +135,16 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { c
       >
         View full placement report ↓
       </button>
+      {reportUrl && (
+        <a
+          href={reportUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 flex items-center justify-center gap-1.5 w-full rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-xs font-bold text-primary hover:bg-primary/10 transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" /> Download Placement Report (PDF)
+        </a>
+      )}
     </CardContent>
   </Card>
 );
