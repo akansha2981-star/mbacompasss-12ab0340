@@ -430,6 +430,7 @@ const CollegeDetailPage = () => {
   const tabItems = [
     { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
     { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
+    { value: "international", label: "Global Exposure" },
     { value: "cutoff", label: "Cut-off" }, { value: "rankings", label: "Rankings" },
     { value: "reviews", label: "Reviews" }, { value: "gallery", label: "Gallery" },
     { value: "scholarships", label: "Scholarships" }, { value: "faculty", label: "Faculty" },
@@ -472,6 +473,14 @@ const CollegeDetailPage = () => {
   const rankAccreditations = rankingsData.accreditations?.length > 0
     ? rankingsData.accreditations.map((a: any) => stripText(a.name)).filter(Boolean)
     : accreditations;
+
+  // International collaborations (partner universities with logos)
+  const internationalData = getSectionData("international");
+  const intlPartners = Array.isArray(internationalData.partners)
+    ? internationalData.partners
+        .map((p: any) => ({ name: stripText(p?.name), country: stripText(p?.country), logo: typeof p?.logo === "string" ? p.logo : "" }))
+        .filter((p: any) => p.name)
+    : [];
 
   // Award/ranking certificates uploaded by admin (image + caption)
   const rankCertificates = Array.isArray(rankingsData.certificates)
