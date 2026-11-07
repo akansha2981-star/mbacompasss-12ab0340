@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import ExportExcelButton from "@/components/admin/ExportExcelButton";
+import { submitMerittoWithWait } from "@/lib/merittoSubmission";
 
 const MERITTO_FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "name", label: "Name", required: true },
@@ -132,6 +133,7 @@ export default function AdminMerittoLogs() {
   const [bulkMapping, setBulkMapping] = useState<Record<string, string>>({});
   const [bulkResults, setBulkResults] = useState<BulkResult[]>([]);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
+  const [submissionNotice, setSubmissionNotice] = useState("");
   const [originDomain, setOriginDomain] = useState<string>("bschoolbuzz.in");
   const [integrationEnabled, setIntegrationEnabled] = useState<boolean>(false);
   const [switchBusy, setSwitchBusy] = useState<boolean>(false);
@@ -241,7 +243,7 @@ export default function AdminMerittoLogs() {
 
   const pushOne = async (mapped: Record<string, string>): Promise<{ ok: boolean; outcome: BulkResult["status"]; error?: string; http?: number }> => {
     try {
-      const { data, error } = await supabase.functions.invoke("push-to-meritto", {
+      const { data, error } = await submitMerittoWithWait(() => supabase.functions.invoke("push-to-meritto", {
         body: {
           source: mapped.source || "bulk_upload",
           name: mapped.name || undefined,
@@ -255,8 +257,9 @@ export default function AdminMerittoLogs() {
           campaign: mapped.campaign || "bulk_upload",
           origin_domain: originDomain,
         },
-      });
-      if (error) return { ok: false, outcome: "failed" as const, error: error.message };
+      }), (seconds) => setSubmissionNotice(`Meritto submission limit reached. Waiting ${seconds} seconds before continuing; keep this page open.`));
+      setSubmissionNotice("");
+      if (error) return { ok: false, outcome: "failed" as const, error: error instanceof Error ? error.message : "Submission failed" };
       const outcome = (data?.outcome as BulkResult["status"]) ?? (data?.ok ? "success" : "failed");
       if (!data?.ok && outcome !== "duplicate") {
         const msg = data?.response?.message ? `Meritto: ${data.response.message}` : `Meritto rejected (HTTP ${data?.status ?? "?"})`;
@@ -420,9 +423,9 @@ export default function AdminMerittoLogs() {
     if (!guardEnabled()) return;
     setRetrying(id);
     try {
-      const { data, error } = await supabase.functions.invoke("push-to-meritto", {
+      const { data, error } = await submitMerittoWithWait(() => supabase.functions.invoke("push-to-meritto", {
         body: { retry_log_id: id },
-      });
+      }), (seconds) => toast.info(`Submission limit reached — retrying in ${seconds} seconds. Keep this page open.`));
       if (error) throw error;
       toast.success(data?.ok ? "Pushed to Meritto" : "Retry attempted — see details");
       await load();
@@ -446,7 +449,7 @@ export default function AdminMerittoLogs() {
     }
     setManualBusy(true);
     try {
-      const { data, error } = await supabase.functions.invoke("push-to-meritto", {
+      const { data, error } = await submitMerittoWithWait(() => supabase.functions.invoke("push-to-meritto", {
         body: {
           source: manual.source || "manual",
           name: manual.name || undefined,
@@ -461,7 +464,7 @@ export default function AdminMerittoLogs() {
           origin_domain: originDomain,
           extra,
         },
-      });
+      }), (seconds) => toast.info(`Submission limit reached — retrying in ${seconds} seconds. Keep this page open.`));
       if (error) throw error;
       const oc = data?.outcome as string | undefined;
       if (oc === "success") toast.success("Lead pushed to Meritto ✅");
@@ -480,6 +483,7 @@ export default function AdminMerittoLogs() {
 
   return (
     <div className="space-y-6">
+      {submissionNotice && <p role="status" className="text-sm text-muted-foreground">{submissionNotice}</p>}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold">Meritto (NoPaperForms) Integration</h1>
