@@ -24,12 +24,22 @@ const acceptedExamLabels = (p: ProgrammeCourse) => {
   return arr;
 };
 
+// Imported rows sometimes carry literal "undefined"/"NA"/"null" strings — treat them as missing.
+const clean = (v: unknown): string => {
+  if (typeof v !== "string") return "";
+  const t = v.trim();
+  return /^(undefined|null|na|n\/a|-)$/i.test(t) ? "" : t;
+};
+
 const eligibilitySummary = (p: ProgrammeCourse) => {
   const bits: string[] = [];
   if (p.min_graduation_percent != null) bits.push(`Grad ≥ ${p.min_graduation_percent}%`);
-  if (p.accepts_cat && p.cat_percentile_target) bits.push(`CAT ${p.cat_percentile_target}%`);
-  if (p.accepts_xat && p.xat_percentile_target) bits.push(`XAT ${p.xat_percentile_target}%`);
-  if (p.accepts_gmat && p.gmat_score_target) bits.push(`GMAT ${p.gmat_score_target}`);
+  const cat = clean(p.cat_percentile_target);
+  const xat = clean(p.xat_percentile_target);
+  const gmat = clean(p.gmat_score_target);
+  if (p.accepts_cat && cat) bits.push(`CAT ${cat}%`);
+  if (p.accepts_xat && xat) bits.push(`XAT ${xat}%`);
+  if (p.accepts_gmat && gmat) bits.push(`GMAT ${gmat}`);
   if ((p.min_work_ex_months || 0) > 0) bits.push(`Work-ex ≥ ${Math.round((p.min_work_ex_months || 0) / 12)}y`);
   return bits.join(" · ") || "—";
 };
@@ -109,9 +119,9 @@ const ProgrammePortfolioTable = ({ programmes, fallbackCourses }: Props) => {
                   <div className="flex flex-wrap items-center gap-1.5 mt-1">
                     <Badge variant="outline" className="text-xs py-0 px-1.5">{p.programme_type}</Badge>
                     {p.mode && <span className="text-xs text-muted-foreground">{p.mode}</span>}
-                    {p.duration && (
+                    {clean(p.duration) && (
                       <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" /> {p.duration}
+                        <Clock className="w-3 h-3" /> {clean(p.duration)}
                       </span>
                     )}
                   </div>
