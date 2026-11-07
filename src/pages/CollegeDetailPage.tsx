@@ -261,6 +261,7 @@ const CollegeDetailPage = () => {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const galleryRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scholarshipSliderRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch verified MBA programme portfolio for this college
   const { data: programmes = [] } = useProgrammeCourses(college?.id);
@@ -1449,27 +1450,109 @@ const CollegeDetailPage = () => {
               </Card>
             </div>
 
-            {/* Scholarships */}
+            {/* Scholarships — filter-wise slider */}
             <div id="scholarships" ref={el => { sectionRefs.current["scholarships"] = el; }} className="scroll-mt-32">
-              <Card>
-                <CardHeader><CardTitle className="font-heading flex items-center gap-2"><Banknote className="w-5 h-5 text-primary" /> Scholarships</CardTitle></CardHeader>
+              <Card className="overflow-hidden border-border/60 shadow-md">
+                <div className="h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-transparent" />
+                <CardHeader>
+                  <CardTitle className="font-heading flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center">
+                      <Banknote className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    Scholarships 2026-27
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {scholarships.map((s: any, i: number) => (
-                      <div key={i} className="border border-border rounded-lg p-4 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                          <h4 className="font-heading font-semibold text-foreground text-base leading-snug break-words">{s.name}</h4>
-                          {s.amount && (
-                            <span className="inline-flex max-w-full bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-md break-words whitespace-normal text-left sm:text-right sm:shrink-0 sm:max-w-[55%] leading-snug">
-                              {s.amount}
+                  {scholarshipNote && (
+                    <div className="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-800 dark:text-amber-300">
+                      {scholarshipNote}
+                    </div>
+                  )}
+                  {scholarshipCategories.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-2 mb-5 -mx-1 px-1 scrollbar-thin" role="tablist" aria-label="Scholarship categories">
+                      {["All", ...scholarshipCategories].map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          role="tab"
+                          aria-selected={scholarshipCat === cat}
+                          onClick={() => {
+                            setScholarshipCat(cat);
+                            scholarshipSliderRef.current?.scrollTo({ left: 0 });
+                          }}
+                          className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-all ${
+                            scholarshipCat === cat
+                              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                              : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="relative">
+                    {filteredScholarships.length > 3 && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Scroll scholarships left"
+                          onClick={() => scholarshipSliderRef.current?.scrollBy({ left: -280, behavior: "smooth" })}
+                          className="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-muted transition-colors"
+                        >
+                          <ChevronDown className="w-4 h-4 rotate-90" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Scroll scholarships right"
+                          onClick={() => scholarshipSliderRef.current?.scrollBy({ left: 280, behavior: "smooth" })}
+                          className="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-muted transition-colors"
+                        >
+                          <ChevronDown className="w-4 h-4 -rotate-90" />
+                        </button>
+                      </>
+                    )}
+                    <div
+                      ref={scholarshipSliderRef}
+                      className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-thin"
+                    >
+                      {filteredScholarships.map((s: any, i: number) => (
+                        <div
+                          key={`${s.category}-${s.level}-${i}`}
+                          className="snap-start shrink-0 w-[240px] sm:w-[260px] rounded-2xl border border-border/60 bg-gradient-to-br from-muted/40 to-transparent p-5 flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-all"
+                        >
+                          {s.category && (
+                            <span className="self-start text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-1 mb-3">
+                              {s.category}
                             </span>
                           )}
+                          {s.name && <h4 className="font-heading font-semibold text-foreground text-base leading-snug break-words mb-1">{s.name}</h4>}
+                          {s.level && <div className="font-heading font-bold text-foreground text-sm">{s.level}</div>}
+                          {s.criteria && <p className="text-xs text-muted-foreground mt-1 break-words flex-1">{s.criteria}</p>}
+                          {s.description && <p className="text-xs text-muted-foreground mt-1 break-words flex-1">{s.description}</p>}
+                          {s.amount && (
+                            <div className="mt-4 rounded-xl bg-primary/10 border border-primary/15 px-3 py-2.5 text-center">
+                              <div className="font-heading font-extrabold text-primary text-lg leading-tight">{s.amount}</div>
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Scholarship</div>
+                            </div>
+                          )}
                         </div>
-                        {s.description && <p className="text-sm text-muted-foreground mb-1 break-words">{s.description}</p>}
-                        {s.criteria && <p className="text-xs text-primary font-medium break-words">Criteria: {s.criteria}</p>}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
+                  {scholarshipPolicy.length > 0 && (
+                    <div className="mt-6 rounded-xl border border-border/60 bg-muted/30 p-5">
+                      <h4 className="font-heading font-semibold text-foreground mb-3">Scholarship Policy</h4>
+                      <ul className="space-y-2">
+                        {scholarshipPolicy.map((p, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                            <span>{p}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <AIExtensionBlock section={getAIExtension("scholarships")} extensionLabel="Scholarship Eligibility Guide" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </Card>
