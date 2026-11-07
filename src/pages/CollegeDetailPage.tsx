@@ -692,6 +692,8 @@ const CollegeDetailPage = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {applyUrl && <ApplyBanner collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} />}
             </div>
 
             {/* Courses & Fees — verified MBA programme portfolio */}
@@ -809,6 +811,33 @@ const CollegeDetailPage = () => {
                       </div>
                     ))}
                   </div>
+                  {Array.isArray(placementData.yearly) && placementData.yearly.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="font-heading font-semibold text-foreground mb-3">Year-wise Placement Trends</h3>
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-sm border-collapse min-w-[420px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Year</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Average CTC</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Median CTC</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Highest CTC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {placementData.yearly.map((y: any, i: number) => (
+                              <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-3 px-3 font-medium text-foreground">{stripText(y.year)}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-primary">{stripText(y.average)}</td>
+                                <td className="py-3 px-3 text-right text-muted-foreground">{stripText(y.median)}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-amber-600">{stripText(y.highest)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                   <h3 className="font-heading font-semibold text-foreground mb-3">Sector-wise Placements</h3>
                   <div className="space-y-3 mb-6">
                     {placementSectors.map((s: any) => (
@@ -1334,7 +1363,9 @@ const CollegeDetailPage = () => {
       />
       <MobileActionBar
         actions={[
-          { icon: <Phone />, label: "Enquire", primary: true, onClick: () => sectionRefs.current["overview"]?.scrollIntoView({ behavior: "smooth" }) },
+          applyUrl
+            ? { icon: <GraduationCap />, label: "Apply", primary: true, onClick: () => window.open(applyUrl, "_blank", "noopener,noreferrer") }
+            : { icon: <Phone />, label: "Enquire", primary: true, onClick: () => sectionRefs.current["overview"]?.scrollIntoView({ behavior: "smooth" }) },
           { icon: <Download />, label: "Brochure", onClick: handleDownloadBrochure },
           { icon: <Share2 />, label: "Share", onClick: () => { if (navigator.share) navigator.share({ title: college.name, url: window.location.href }); else { navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied!" }); } } },
         ]}
