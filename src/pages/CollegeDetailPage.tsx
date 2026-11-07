@@ -256,6 +256,7 @@ const CollegeDetailPage = () => {
   const { toast } = useToast();
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [curriculumTerm, setCurriculumTerm] = useState(0);
+  const [scholarshipCat, setScholarshipCat] = useState("All");
   const [qaOpen, setQaOpen] = useState<number | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const galleryRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -548,18 +549,30 @@ const CollegeDetailPage = () => {
         .filter((c: any) => c.image)
     : [];
 
-  // Scholarships from DB or fallback
+  // Scholarships from DB or fallback — category-aware for the filter-wise slider
   const scholarships = scholarshipsData.scholarships?.length > 0
     ? scholarshipsData.scholarships.map((s: any) => ({
         name: stripText(s.name),
+        category: stripText(s.category),
         criteria: stripText(s.criteria),
+        level: stripText(s.level),
         amount: stripText(s.amount),
         description: stripText(s.description),
       }))
     : [
-        { name: "Merit Scholarship", criteria: "Top 10% CAT percentile", amount: "Up to 50% waiver", description: "For exceptional entrance exam scores." },
-        { name: "Need-Based Aid", criteria: "Family income < ₹8 LPA", amount: "₹1-3 Lakh/year", description: "Financial assistance for deserving students." },
+        { name: "Merit Scholarship", category: "", criteria: "Top 10% CAT percentile", level: "", amount: "Up to 50% waiver", description: "For exceptional entrance exam scores." },
+        { name: "Need-Based Aid", category: "", criteria: "Family income < ₹8 LPA", level: "", amount: "₹1-3 Lakh/year", description: "Financial assistance for deserving students." },
       ];
+  const scholarshipCategories: string[] = Array.isArray(scholarshipsData.categories)
+    ? scholarshipsData.categories.map((c: any) => stripText(c)).filter(Boolean)
+    : [];
+  const scholarshipNote = stripText(scholarshipsData.note);
+  const scholarshipPolicy: string[] = Array.isArray(scholarshipsData.policy)
+    ? scholarshipsData.policy.map((p: any) => stripText(p)).filter(Boolean)
+    : [];
+  const filteredScholarships = scholarshipCat === "All"
+    ? scholarships
+    : scholarships.filter((s: any) => s.category === scholarshipCat);
 
   // Faculty from DB or fallback
   const facultyList = facultyData.faculty?.length > 0
