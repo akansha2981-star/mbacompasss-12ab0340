@@ -742,6 +742,19 @@ const CollegeDetailPage = () => {
                       ))}
                     </ul>
                   </div>
+                  {applyUrl && (
+                    <div className="mt-5 flex flex-col sm:flex-row items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+                      <div className="flex-1 min-w-0 text-center sm:text-left">
+                        <p className="font-heading font-bold text-foreground text-sm">Ready to apply to {college.name}?</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">You will be taken to the official {college.name} application portal.</p>
+                      </div>
+                      <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="shrink-0">
+                        <Button size="lg" className="font-bold gap-2 shadow-md">
+                          <GraduationCap className="w-4 h-4" /> {applyLabel}
+                        </Button>
+                      </a>
+                    </div>
+                  )}
                   <AIExtensionBlock section={getAIExtension("admission")} extensionLabel="Detailed Admission Guide" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </Card>
@@ -1143,9 +1156,17 @@ const CollegeDetailPage = () => {
                   <Button onClick={handleDownloadBrochure} size="lg" className="w-full bg-white text-primary hover:bg-white/95 font-bold gap-2 shadow-xl mb-2">
                     <Download className="w-4 h-4" /> Download Brochure
                   </Button>
-                  <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-white/10 backdrop-blur-sm border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground hover:border-white/50 font-semibold gap-2">
-                    <GraduationCap className="w-4 h-4" /> Apply Now
-                  </Button>
+                  {applyUrl ? (
+                    <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="block">
+                      <Button variant="outline" className="w-full bg-amber-400 border-amber-400 text-amber-950 hover:bg-amber-300 hover:border-amber-300 hover:text-amber-950 font-bold gap-2 shadow-lg">
+                        <GraduationCap className="w-4 h-4" /> Apply Now
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-white/10 backdrop-blur-sm border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground hover:border-white/50 font-semibold gap-2">
+                      <GraduationCap className="w-4 h-4" /> Apply Now
+                    </Button>
+                  )}
 
                   <div className="mt-5 pt-4 border-t border-white/20 grid grid-cols-3 gap-2 text-center">
                     <div>
