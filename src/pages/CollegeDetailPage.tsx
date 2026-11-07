@@ -100,7 +100,7 @@ const SidebarApplyStrip = ({ collegeName, applyUrl, applyLabel }: { collegeName:
 );
 
 // Placement outcomes at a glance — shared between the desktop sidebar and the mobile stack.
-const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { college: any; topRecruiters: string[]; onViewPlacements: () => void }) => (
+const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, reportUrl }: { college: any; topRecruiters: string[]; onViewPlacements: () => void; reportUrl?: string }) => (
   <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
     <CardContent className="pt-6">
       <div className="flex items-center gap-2 mb-4">
@@ -135,6 +135,16 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { c
       >
         View full placement report ↓
       </button>
+      {reportUrl && (
+        <a
+          href={reportUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 flex items-center justify-center gap-1.5 w-full rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-xs font-bold text-primary hover:bg-primary/10 transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" /> Download Placement Report (PDF)
+        </a>
+      )}
     </CardContent>
   </Card>
 );
@@ -142,13 +152,13 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { c
 // Key facts, accreditations and actions — shared between the desktop sidebar and the mobile stack.
 // Auto-sliding marquee for logo/certificate strips — loops seamlessly, pauses on hover.
 const AutoMarquee = ({ items, render, speed = 40 }: { items: any[]; render: (item: any, i: number) => React.ReactNode; speed?: number }) => (
-  <div className="relative overflow-hidden marquee-hover-pause">
-    <div className="flex gap-3 w-max animate-marquee" style={{ animationDuration: `${speed}s` }}>
+  <div className="relative overflow-hidden marquee-hover-pause -mx-1 px-1">
+    <div className="flex gap-4 w-max animate-marquee py-2" style={{ animationDuration: `${speed}s` }}>
       {items.map((it, i) => <div key={`a-${i}`} className="shrink-0">{render(it, i)}</div>)}
       {items.map((it, i) => <div key={`b-${i}`} className="shrink-0" aria-hidden="true">{render(it, i)}</div>)}
     </div>
-    <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-card to-transparent" />
-    <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card to-transparent" />
+    <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-card via-card/70 to-transparent" />
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-card via-card/70 to-transparent" />
   </div>
 );
 
@@ -256,10 +266,12 @@ const CollegeDetailPage = () => {
   const { toast } = useToast();
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [curriculumTerm, setCurriculumTerm] = useState(0);
+  const [scholarshipCat, setScholarshipCat] = useState("All");
   const [qaOpen, setQaOpen] = useState<number | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const galleryRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scholarshipSliderRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch verified MBA programme portfolio for this college
   const { data: programmes = [] } = useProgrammeCourses(college?.id);
@@ -491,6 +503,18 @@ const CollegeDetailPage = () => {
     ? placementData.recruiters.map((r: any) => stripText(r.name)).filter(Boolean)
     : topRecruiters;
 
+  // Official placement report extras (stats, salary bands, top offers, downloadable report)
+  const placementStats = placementData.stats && typeof placementData.stats === "object" ? placementData.stats : null;
+  const salaryBands = Array.isArray(placementData.salary_bands)
+    ? placementData.salary_bands.map((b: any) => ({ band: stripText(b?.band), pct: toPctNum(b?.percentage) })).filter((b: any) => b.band && b.pct > 0)
+    : [];
+  const topOffers = Array.isArray(placementData.top_offers)
+    ? placementData.top_offers.map((o: any) => ({ company: stripText(o?.company), ctc: stripText(o?.ctc) })).filter((o: any) => o.company && o.ctc)
+    : [];
+  const placementReportUrl = typeof placementData.reportUrl === "string" && /^\/__l5e\//.test(placementData.reportUrl)
+    ? placementData.reportUrl
+    : "";
+
   // Rankings from DB or fallback
   const rankingsList = rankingsData.rankings?.length > 0
     ? rankingsData.rankings.map((r: any) => ({ body: stripText(r.body), rank: stripText(r.rank), year: stripText(r.year) }))
@@ -548,18 +572,30 @@ const CollegeDetailPage = () => {
         .filter((c: any) => c.image)
     : [];
 
-  // Scholarships from DB or fallback
+  // Scholarships from DB or fallback — category-aware for the filter-wise slider
   const scholarships = scholarshipsData.scholarships?.length > 0
     ? scholarshipsData.scholarships.map((s: any) => ({
         name: stripText(s.name),
+        category: stripText(s.category),
         criteria: stripText(s.criteria),
+        level: stripText(s.level),
         amount: stripText(s.amount),
         description: stripText(s.description),
       }))
     : [
-        { name: "Merit Scholarship", criteria: "Top 10% CAT percentile", amount: "Up to 50% waiver", description: "For exceptional entrance exam scores." },
-        { name: "Need-Based Aid", criteria: "Family income < ₹8 LPA", amount: "₹1-3 Lakh/year", description: "Financial assistance for deserving students." },
+        { name: "Merit Scholarship", category: "", criteria: "Top 10% CAT percentile", level: "", amount: "Up to 50% waiver", description: "For exceptional entrance exam scores." },
+        { name: "Need-Based Aid", category: "", criteria: "Family income < ₹8 LPA", level: "", amount: "₹1-3 Lakh/year", description: "Financial assistance for deserving students." },
       ];
+  const scholarshipCategories: string[] = Array.isArray(scholarshipsData.categories)
+    ? scholarshipsData.categories.map((c: any) => stripText(c)).filter(Boolean)
+    : [];
+  const scholarshipNote = stripText(scholarshipsData.note);
+  const scholarshipPolicy: string[] = Array.isArray(scholarshipsData.policy)
+    ? scholarshipsData.policy.map((p: any) => stripText(p)).filter(Boolean)
+    : [];
+  const filteredScholarships = scholarshipCat === "All"
+    ? scholarships
+    : scholarships.filter((s: any) => s.category === scholarshipCat);
 
   // Faculty from DB or fallback
   const facultyList = facultyData.faculty?.length > 0
@@ -843,6 +879,7 @@ const CollegeDetailPage = () => {
                   college={college}
                   topRecruiters={topRecruiters}
                   onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
+                  reportUrl={placementReportUrl}
                 />
               )}
               <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} quickItems={quickInfoItems} />
@@ -1105,6 +1142,35 @@ const CollegeDetailPage = () => {
                       </div>
                     ))}
                   </div>
+                  {placementStats && (
+                    <div className="mb-6">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {[
+                          placementStats.companies && { label: "Companies Visited", value: String(placementStats.companies) },
+                          placementStats.offers && { label: "Offers Made", value: String(placementStats.offers) },
+                          placementStats.distinct_recruiters && { label: "Distinct Recruiters", value: String(placementStats.distinct_recruiters) },
+                          placementStats.internships && { label: "Internships Completed", value: String(placementStats.internships) },
+                          placementStats.internship_conversion && { label: "Converted to Offers", value: String(placementStats.internship_conversion) },
+                          placementStats.top10_mean && { label: "Top 10% Average", value: String(placementStats.top10_mean) },
+                        ].filter(Boolean).map((s: any) => (
+                          <div key={s.label} className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-3.5 py-2">
+                            <span className="font-heading font-extrabold text-foreground text-sm">{s.value}</span>
+                            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{s.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {placementReportUrl && (
+                        <a
+                          href={placementReportUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md transition-all"
+                        >
+                          <Download className="w-4 h-4" /> Download Official Placement Report{placementData.batch ? ` — ${stripText(placementData.batch)}` : ""} (PDF)
+                        </a>
+                      )}
+                    </div>
+                  )}
                   {Array.isArray(placementData.yearly) && placementData.yearly.length > 0 && (
                     <div className="mb-6">
                       <h3 className="font-heading font-semibold text-foreground mb-3">Year-wise Placement Trends</h3>
@@ -1137,6 +1203,50 @@ const CollegeDetailPage = () => {
                   <div className="mb-6">
                     <SectorDonut sectors={placementSectors} />
                   </div>
+                  {salaryBands.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="font-heading font-semibold text-foreground mb-3">Salary Break-up Bands</h3>
+                      <div className="space-y-3">
+                        {salaryBands.map((b: any) => (
+                          <div key={b.band}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium text-foreground">{b.band}</span>
+                              <span className="font-heading font-bold text-primary text-sm">{b.pct}%</span>
+                            </div>
+                            <div className="h-2.5 rounded-full bg-muted overflow-hidden">
+                              <div className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary" style={{ width: `${b.pct}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {topOffers.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="font-heading font-semibold text-foreground mb-1">Top Offers by CTC</h3>
+                      {placementStats?.top10_mean && (
+                        <p className="text-xs text-muted-foreground mb-3">Top 10% of offers: mean {stripText(placementStats.top10_mean)}{placementStats.top10_median ? `, median ${stripText(placementStats.top10_median)}` : ""}.</p>
+                      )}
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-sm border-collapse min-w-[320px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-2.5 px-3 font-heading font-semibold text-foreground border-b border-border">Company</th>
+                              <th className="text-right py-2.5 px-3 font-heading font-semibold text-foreground border-b border-border">CTC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {topOffers.map((o: any, i: number) => (
+                              <tr key={o.company} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-2.5 px-3 font-medium text-foreground">{o.company}</td>
+                                <td className={`py-2.5 px-3 text-right font-heading font-bold ${i < 3 ? "text-amber-600" : "text-primary"}`}>{o.ctc}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                   {placementRecruiters.length > 0 && (
                     <div>
                       <h3 className="font-heading font-semibold text-foreground mb-3">Top Recruiters</h3>
@@ -1178,9 +1288,11 @@ const CollegeDetailPage = () => {
                         items={intlPartners}
                         speed={35}
                         render={(p: any) => (
-                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
+                          <div className="w-52 rounded-2xl border border-border/60 bg-gradient-to-b from-card to-sky-500/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-sky-500/40 transition-all duration-300">
                             {p.logo ? (
-                              <img src={p.logo} alt={`${p.name} logo`} className="h-14 w-full object-contain" loading="lazy" decoding="async" />
+                              <div className="h-16 w-full flex items-center justify-center rounded-xl bg-background/80 border border-border/40 px-3 py-2">
+                                <img src={p.logo} alt={`${p.name} logo`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                              </div>
                             ) : (
                               <div className="h-14 w-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-sky-500/30">{p.name.charAt(0)}</div>
                             )}
@@ -1219,11 +1331,13 @@ const CollegeDetailPage = () => {
                         items={knowledgePartners}
                         speed={40}
                         render={(p: any) => (
-                          <div className="w-48 rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center gap-3 hover:shadow-md transition-all">
+                          <div className="w-52 rounded-2xl border border-border/60 bg-gradient-to-b from-card to-violet-500/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-violet-500/40 transition-all duration-300">
                             {p.logo ? (
-                              <img src={p.logo} alt={`${p.name} logo`} className="h-12 w-full object-contain" loading="lazy" decoding="async" />
+                              <div className="h-16 w-full flex items-center justify-center rounded-xl bg-background/80 border border-border/40 px-3 py-2">
+                                <img src={p.logo} alt={`${p.name} logo`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                              </div>
                             ) : (
-                              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-violet-500/30">{p.name.charAt(0)}</div>
+                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-violet-500/30">{p.name.charAt(0)}</div>
                             )}
                             <div>
                               <div className="text-xs font-bold text-foreground leading-snug">{p.name}</div>
@@ -1345,8 +1459,10 @@ const CollegeDetailPage = () => {
                         items={rankCertificates}
                         speed={45}
                         render={(c: any, i: number) => (
-                          <figure className="group w-60 rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all">
-                            <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.02] transition-transform" loading="lazy" decoding="async" />
+                          <figure className="group w-64 rounded-2xl overflow-hidden border border-border/60 bg-card shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-amber-500/40 transition-all duration-300">
+                            <div className="overflow-hidden">
+                              <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.04] transition-transform duration-500" loading="lazy" decoding="async" />
+                            </div>
                             {(c.title || c.issuer) && (
                               <figcaption className="p-2.5">
                                 {c.title && <div className="text-xs font-bold text-foreground leading-snug">{c.title}</div>}
@@ -1436,27 +1552,109 @@ const CollegeDetailPage = () => {
               </Card>
             </div>
 
-            {/* Scholarships */}
+            {/* Scholarships — filter-wise slider */}
             <div id="scholarships" ref={el => { sectionRefs.current["scholarships"] = el; }} className="scroll-mt-32">
-              <Card>
-                <CardHeader><CardTitle className="font-heading flex items-center gap-2"><Banknote className="w-5 h-5 text-primary" /> Scholarships</CardTitle></CardHeader>
+              <Card className="overflow-hidden border-border/60 shadow-md">
+                <div className="h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-transparent" />
+                <CardHeader>
+                  <CardTitle className="font-heading flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center">
+                      <Banknote className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    Scholarships 2026-27
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {scholarships.map((s: any, i: number) => (
-                      <div key={i} className="border border-border rounded-lg p-4 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                          <h4 className="font-heading font-semibold text-foreground text-base leading-snug break-words">{s.name}</h4>
-                          {s.amount && (
-                            <span className="inline-flex max-w-full bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-md break-words whitespace-normal text-left sm:text-right sm:shrink-0 sm:max-w-[55%] leading-snug">
-                              {s.amount}
+                  {scholarshipNote && (
+                    <div className="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-800 dark:text-amber-300">
+                      {scholarshipNote}
+                    </div>
+                  )}
+                  {scholarshipCategories.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-2 mb-5 -mx-1 px-1 scrollbar-thin" role="tablist" aria-label="Scholarship categories">
+                      {["All", ...scholarshipCategories].map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          role="tab"
+                          aria-selected={scholarshipCat === cat}
+                          onClick={() => {
+                            setScholarshipCat(cat);
+                            scholarshipSliderRef.current?.scrollTo({ left: 0 });
+                          }}
+                          className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-all ${
+                            scholarshipCat === cat
+                              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                              : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="relative">
+                    {filteredScholarships.length > 3 && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Scroll scholarships left"
+                          onClick={() => scholarshipSliderRef.current?.scrollBy({ left: -280, behavior: "smooth" })}
+                          className="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-muted transition-colors"
+                        >
+                          <ChevronDown className="w-4 h-4 rotate-90" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Scroll scholarships right"
+                          onClick={() => scholarshipSliderRef.current?.scrollBy({ left: 280, behavior: "smooth" })}
+                          className="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-muted transition-colors"
+                        >
+                          <ChevronDown className="w-4 h-4 -rotate-90" />
+                        </button>
+                      </>
+                    )}
+                    <div
+                      ref={scholarshipSliderRef}
+                      className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-thin"
+                    >
+                      {filteredScholarships.map((s: any, i: number) => (
+                        <div
+                          key={`${s.category}-${s.level}-${i}`}
+                          className="snap-start shrink-0 w-[240px] sm:w-[260px] rounded-2xl border border-border/60 bg-gradient-to-br from-muted/40 to-transparent p-5 flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-all"
+                        >
+                          {s.category && (
+                            <span className="self-start text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-1 mb-3">
+                              {s.category}
                             </span>
                           )}
+                          {s.name && <h4 className="font-heading font-semibold text-foreground text-base leading-snug break-words mb-1">{s.name}</h4>}
+                          {s.level && <div className="font-heading font-bold text-foreground text-sm">{s.level}</div>}
+                          {s.criteria && <p className="text-xs text-muted-foreground mt-1 break-words flex-1">{s.criteria}</p>}
+                          {s.description && <p className="text-xs text-muted-foreground mt-1 break-words flex-1">{s.description}</p>}
+                          {s.amount && (
+                            <div className="mt-4 rounded-xl bg-primary/10 border border-primary/15 px-3 py-2.5 text-center">
+                              <div className="font-heading font-extrabold text-primary text-lg leading-tight">{s.amount}</div>
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Scholarship</div>
+                            </div>
+                          )}
                         </div>
-                        {s.description && <p className="text-sm text-muted-foreground mb-1 break-words">{s.description}</p>}
-                        {s.criteria && <p className="text-xs text-primary font-medium break-words">Criteria: {s.criteria}</p>}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
+                  {scholarshipPolicy.length > 0 && (
+                    <div className="mt-6 rounded-xl border border-border/60 bg-muted/30 p-5">
+                      <h4 className="font-heading font-semibold text-foreground mb-3">Scholarship Policy</h4>
+                      <ul className="space-y-2">
+                        {scholarshipPolicy.map((p, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                            <span>{p}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <AIExtensionBlock section={getAIExtension("scholarships")} extensionLabel="Scholarship Eligibility Guide" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </Card>
@@ -1674,6 +1872,7 @@ const CollegeDetailPage = () => {
                       college={college}
                       topRecruiters={topRecruiters}
                       onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
+                      reportUrl={placementReportUrl}
                     />
                   </motion.div>
                 )}
