@@ -877,16 +877,8 @@ const CollegeDetailPage = () => {
                     </div>
                   )}
                   <h3 className="font-heading font-semibold text-foreground mb-3">Sector-wise Placements</h3>
-                  <div className="space-y-3 mb-6">
-                    {placementSectors.map((s: any) => (
-                      <div key={s.sector}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-sm text-foreground font-medium truncate pr-2">{s.sector}</span>
-                          <span className="text-sm font-bold text-primary shrink-0">{s.pct}%</span>
-                        </div>
-                        <Progress value={s.pct} className="h-2.5" />
-                      </div>
-                    ))}
+                  <div className="mb-6">
+                    <SectorDonut sectors={placementSectors} />
                   </div>
                   {placementRecruiters.length > 0 && (
                     <div>
