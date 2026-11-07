@@ -3,7 +3,8 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("react", async () => {
   const { createRequire } = await import("node:module");
-  return createRequire(import.meta.url)("react");
+  const react = createRequire(import.meta.url)("react");
+  return { ...react, default: react };
 });
 
 const mocks = vi.hoisted(() => ({
