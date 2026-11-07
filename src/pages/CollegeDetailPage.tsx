@@ -497,6 +497,29 @@ const CollegeDetailPage = () => {
         .filter((p: any) => p.name)
     : [];
 
+  // Quick info items (admin-managed; falls back to college fields)
+  const quickInfoData = getSectionData("quick_info");
+  const quickInfoItems = Array.isArray(quickInfoData.items)
+    ? quickInfoData.items
+        .map((i: any) => ({ label: stripText(i?.label), value: stripText(i?.value) }))
+        .filter((i: any) => i.label && i.value)
+    : [];
+
+  // Term-wise curriculum (tabbed academic experience)
+  const curriculumData = getSectionData("curriculum");
+  const curriculumTerms = Array.isArray(curriculumData.terms)
+    ? curriculumData.terms
+        .map((t: any) => ({
+          term: stripText(t?.term),
+          total: stripText(t?.total),
+          note: stripText(t?.note),
+          subjects: Array.isArray(t?.subjects)
+            ? t.subjects.map((s: any) => ({ code: stripText(s?.code), name: stripText(s?.name), credits: stripText(s?.credits) })).filter((s: any) => s.name)
+            : [],
+        }))
+        .filter((t: any) => t.term && t.subjects.length > 0)
+    : [];
+
   // Knowledge partners (industry/academic partners with logos)
   const knowledgePartnersData = getSectionData("knowledge_partners");
   const knowledgePartners = Array.isArray(knowledgePartnersData.partners)
@@ -809,7 +832,7 @@ const CollegeDetailPage = () => {
                   onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
                 />
               )}
-              <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} />
+              <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} quickItems={quickInfoItems} />
             </div>
 
 
@@ -1626,7 +1649,7 @@ const CollegeDetailPage = () => {
 
                 {/* Quick Info Card */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.35 }}>
-                  <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} />
+                  <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} quickItems={quickInfoItems} />
                 </motion.div>
               </div>
             </div>
