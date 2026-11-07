@@ -99,6 +99,107 @@ const SidebarApplyStrip = ({ collegeName, applyUrl, applyLabel }: { collegeName:
   </motion.a>
 );
 
+// Placement outcomes at a glance — shared between the desktop sidebar and the mobile stack.
+const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements }: { college: any; topRecruiters: string[]; onViewPlacements: () => void }) => (
+  <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
+    <CardContent className="pt-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+          <TrendingUp className="w-4 h-4 text-emerald-600" />
+        </div>
+        <h4 className="font-heading font-bold text-foreground">Placement Snapshot</h4>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        {college.placement_avg && (
+          <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 text-center">
+            <div className="font-heading font-extrabold text-primary text-lg leading-tight">{numericStat(college.placement_avg)}</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Average Package</div>
+          </div>
+        )}
+        {college.placement_highest && (
+          <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+            <div className="font-heading font-extrabold text-amber-700 text-lg leading-tight">{numericStat(college.placement_highest)}</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Highest Package</div>
+          </div>
+        )}
+      </div>
+      {topRecruiters.length > 0 && (
+        <p className="text-xs text-muted-foreground mt-3">
+          Recruiters include <span className="font-semibold text-foreground">{topRecruiters.slice(0, 3).join(", ")}</span>{topRecruiters.length > 3 ? ` & ${topRecruiters.length - 3} more` : ""}.
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={onViewPlacements}
+        className="mt-3 w-full text-center text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+      >
+        View full placement report ↓
+      </button>
+    </CardContent>
+  </Card>
+);
+
+// Key facts, accreditations and actions — shared between the desktop sidebar and the mobile stack.
+const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel }: { college: any; accreditations: string[]; applyUrl: string; applyLabel: string }) => (
+  <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
+    <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
+    <CardContent className="pt-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Building className="w-4 h-4 text-primary" />
+        </div>
+        <h3 className="font-heading font-bold text-foreground">Quick Info</h3>
+      </div>
+      <div className="space-y-2.5">
+        {[
+          { icon: MapPin, label: "Location", value: `${college.city}, ${college.state}` },
+          { icon: Award, label: "Ranking", value: Number(college.ranking) > 0 ? `#${college.ranking}` : "—" },
+          { icon: BookOpen, label: "Type", value: college.type || "N/A" },
+          { icon: Users, label: "Students", value: college.total_students ? `${college.total_students}+` : "N/A" },
+          { icon: Building, label: "Campus", value: college.campus_size || "N/A" },
+          { icon: Calendar, label: "Established", value: college.established ? String(college.established) : "N/A" },
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/40 transition-colors">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0">
+              <item.icon className="w-4 h-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{item.label}</div>
+              <div className="font-bold text-foreground text-sm truncate">{item.value}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {accreditations.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-border/60">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">Accreditations</div>
+          <div className="flex flex-wrap gap-1.5">
+            {accreditations.slice(0, 6).map((acc: string, i: number) => (
+              <span key={i} className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <CheckCircle className="w-3 h-3" /> {acc}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {applyUrl && (
+        <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" aria-label={`${applyLabel} — official application form for ${college.name}`} className="block mt-4">
+          <Button className="w-full gap-1.5 font-bold bg-amber-400 text-amber-950 hover:bg-amber-300 shadow-md">
+            <GraduationCap className="w-4 h-4" /> {applyLabel}
+          </Button>
+        </a>
+      )}
+      {college.website && (
+        <a href={college.website} target="_blank" rel="noopener noreferrer" aria-label={`Visit the official website of ${college.name}`}>
+          <Button variant="outline" className="w-full mt-2 gap-1.5 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50">
+            <Globe className="w-4 h-4" /> Visit Official Site
+          </Button>
+        </a>
+      )}
+    </CardContent>
+  </Card>
+);
+
 // Highlighted application CTA shown on colleges with an admin-managed external application link.
 const ApplyBanner = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
   <Card className="overflow-hidden border-0 shadow-xl shadow-primary/15 bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-primary-foreground relative">
