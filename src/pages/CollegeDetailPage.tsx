@@ -538,9 +538,9 @@ const CollegeDetailPage = () => {
         {/* Layered background */}
         <div className="absolute inset-0 pointer-events-none">
           {college.banner_url && (
-            <img src={cdnImage(college.banner_url, { width: 1280 })} alt="" width={1920} height={600} className="absolute inset-0 w-full h-full object-cover opacity-40 md:scale-105" loading="eager" fetchPriority="high" decoding="async" />
+            <img src={cdnImage(college.banner_url, { width: 1280 })} alt="" width={1920} height={600} className="absolute inset-0 w-full h-full object-cover opacity-55 md:scale-105" loading="eager" fetchPriority="high" decoding="async" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/70 to-primary/90" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/65 to-primary/85" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(0_0%_100%/0.18),transparent_55%)]" />
           <div className="absolute -top-20 -left-20 hidden w-[480px] h-[480px] bg-white/8 rounded-full blur-3xl md:block" />
           <div className="absolute -bottom-32 right-0 hidden w-[420px] h-[420px] bg-white/5 rounded-full blur-3xl md:block" />
