@@ -812,6 +812,7 @@ export default function AdminMerittoLogs() {
               {bulkBusy && (
                 <div className="rounded-md border p-3 text-xs space-y-1">
                   <div>Pushing… {bulkProgress.done}/{bulkProgress.total}</div>
+                  {submissionNotice && <p role="status" className="text-sm text-muted-foreground">{submissionNotice}</p>}
                   <div className="h-1.5 bg-muted rounded-[0.25rem] overflow-hidden">
                     <div className="h-full bg-primary transition-all" style={{ width: `${bulkProgress.total ? (bulkProgress.done / bulkProgress.total) * 100 : 0}%` }} />
                   </div>
