@@ -556,6 +556,21 @@ const CollegeDetailPage = () => {
         .filter((p: any) => p.name)
     : [];
 
+  // Tab nav / TOC — only include sections that actually render for this college
+  const hasInternational = intlPartners.length > 0 || !!getSectionContent("international");
+  const hasKnowledgePartners = knowledgePartners.length > 0 || !!getSectionContent("knowledge_partners");
+  const tabItems = [
+    { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
+    { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
+    ...(hasInternational ? [{ value: "international", label: "Global Exposure" }] : []),
+    ...(hasKnowledgePartners ? [{ value: "knowledge_partners", label: "Knowledge Partners" }] : []),
+    { value: "cutoff", label: "Cut-off" }, { value: "rankings", label: "Rankings" },
+    { value: "reviews", label: "Reviews" }, { value: "gallery", label: "Gallery" },
+    { value: "scholarships", label: "Scholarships" }, { value: "faculty", label: "Faculty" },
+    { value: "hostel", label: "Hostel & Campus" }, { value: "qa", label: "Q&A" },
+    { value: "news", label: "News" },
+  ];
+
   // Award/ranking certificates uploaded by admin (image + caption)
   const rankCertificates = Array.isArray(rankingsData.certificates)
     ? rankingsData.certificates
