@@ -243,6 +243,7 @@ const CollegeDetailPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [galleryIdx, setGalleryIdx] = useState(0);
+  const [curriculumTerm, setCurriculumTerm] = useState(0);
   const [qaOpen, setQaOpen] = useState<number | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const galleryRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -953,6 +954,72 @@ const CollegeDetailPage = () => {
                 </Card>
               )}
             </div>
+
+            {/* Term-wise Curriculum */}
+            {curriculumTerms.length > 0 && (
+              <div id="curriculum" ref={el => { sectionRefs.current["curriculum"] = el; }} className="scroll-mt-32">
+                <Card className="overflow-hidden border-border/60 shadow-md">
+                  <div className="h-1 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
+                  <CardHeader>
+                    <CardTitle className="font-heading flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                      </div>
+                      Our Academic Experience
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">Six structured terms across two years — each progressively building deeper expertise in business management.</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2 mb-5" role="tablist" aria-label="Curriculum terms">
+                      {curriculumTerms.map((t: any, i: number) => (
+                        <button
+                          key={i}
+                          role="tab"
+                          aria-selected={curriculumTerm === i}
+                          onClick={() => setCurriculumTerm(i)}
+                          className={`px-4 py-2 rounded-t-xl rounded-b-md text-sm font-bold transition-all ${curriculumTerm === i
+                            ? "bg-amber-400 text-amber-950 shadow-md"
+                            : "bg-primary/90 text-primary-foreground hover:bg-primary"}`}
+                        >
+                          {t.term}
+                        </button>
+                      ))}
+                    </div>
+                    {curriculumTerms[curriculumTerm] && (
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-sm border-collapse min-w-[420px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">{curriculumTerms[curriculumTerm].term}</th>
+                              <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Subject</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Credits</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {curriculumTerms[curriculumTerm].subjects.map((s: any, i: number) => (
+                              <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-3 px-3 text-muted-foreground whitespace-nowrap">{s.code}</td>
+                                <td className="py-3 px-3 font-medium text-foreground">{s.name}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-primary">{s.credits}</td>
+                              </tr>
+                            ))}
+                            {curriculumTerms[curriculumTerm].total && (
+                              <tr className="bg-primary/5">
+                                <td className="py-3 px-3 font-heading font-bold text-foreground" colSpan={2}>Total Credits</td>
+                                <td className="py-3 px-3 text-right font-heading font-extrabold text-primary">{curriculumTerms[curriculumTerm].total}</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {curriculumTerms[curriculumTerm]?.note && (
+                      <p className="text-xs text-muted-foreground mt-3">{curriculumTerms[curriculumTerm].note}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Admissions */}
             <div id="admission" ref={el => { sectionRefs.current["admission"] = el; }} className="scroll-mt-32">
