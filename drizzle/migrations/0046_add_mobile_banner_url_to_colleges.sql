@@ -1,0 +1,2 @@
+ALTER TABLE public.colleges ADD COLUMN IF NOT EXISTS mobile_banner_url text;
+COMMENT ON COLUMN public.colleges.mobile_banner_url IS 'Mobile-optimised banner image (600x300, 2:1), editable via magic edit links.';

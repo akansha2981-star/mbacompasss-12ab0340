@@ -2455,6 +2455,7 @@ export type Database = {
           logo_url: string | null
           meta_description: string | null
           meta_title: string | null
+          mobile_banner_url: string | null
           name: string
           placement_avg: string | null
           placement_highest: string | null
@@ -2504,6 +2505,7 @@ export type Database = {
           logo_url?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          mobile_banner_url?: string | null
           name: string
           placement_avg?: string | null
           placement_highest?: string | null
@@ -2553,6 +2555,7 @@ export type Database = {
           logo_url?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          mobile_banner_url?: string | null
           name?: string
           placement_avg?: string | null
           placement_highest?: string | null
