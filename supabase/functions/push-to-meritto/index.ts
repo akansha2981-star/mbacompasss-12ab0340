@@ -170,17 +170,25 @@ Deno.serve(async (req) => {
     req.headers.get("x-real-ip") ||
     "unknown";
   if (!rateLimit(ip)) {
-    return new Response(JSON.stringify({ error: "Too many requests" }), {
+    const retryAfterSeconds = Math.max(1, Math.ceil(((RL.get(ip)?.reset ?? Date.now() + 60_000) - Date.now()) / 1000) + 1);
+    console.warn("[meritto] request rejected before dispatch: rate limit", { retry_after_seconds: retryAfterSeconds });
+    return new Response(JSON.stringify({ error: "Submission limit reached. Please wait before continuing.", retry_after_seconds: retryAfterSeconds }), {
       status: 429,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(retryAfterSeconds), "Access-Control-Expose-Headers": "Retry-After" },
     });
   }
 
 
 
   const secret = Deno.env.get("MERITTO_SECRET_KEY");
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!SUPABASE_URL || !SERVICE_ROLE) {
+    return new Response(JSON.stringify({ error: "Lead submission service is not configured" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   if (!secret) {
     return new Response(JSON.stringify({ error: "MERITTO_SECRET_KEY missing" }), {
