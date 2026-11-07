@@ -39,6 +39,7 @@ import { numericStat, rankOnly, stripTBA } from "@/lib/textClip";
 import MobileActionBar from "@/components/mobile/MobileActionBar";
 import FloatingTOC from "@/components/mobile/FloatingTOC";
 import ProgrammePortfolioTable from "@/components/college/ProgrammePortfolioTable";
+import { PlacementTrendChart, SectorDonut } from "@/components/college/PlacementCharts";
 import { collegeTitle, collegeDescription } from "@/lib/collegeSeo";
 import { normalizeCollegeSectionData } from "@/lib/collegeSectionData";
 import { cdnImage } from "@/lib/imageTransform";
@@ -850,7 +851,8 @@ const CollegeDetailPage = () => {
                   {Array.isArray(placementData.yearly) && placementData.yearly.length > 0 && (
                     <div className="mb-6">
                       <h3 className="font-heading font-semibold text-foreground mb-3">Year-wise Placement Trends</h3>
-                      <div className="overflow-x-auto rounded-lg border border-border">
+                      <PlacementTrendChart yearly={placementData.yearly} />
+                      <div className="overflow-x-auto rounded-lg border border-border mt-4">
                         <table className="w-full text-sm border-collapse min-w-[420px]">
                           <thead>
                             <tr className="bg-muted/50">
