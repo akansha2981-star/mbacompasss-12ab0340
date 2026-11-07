@@ -39,6 +39,7 @@ import { numericStat, rankOnly, stripTBA } from "@/lib/textClip";
 import MobileActionBar from "@/components/mobile/MobileActionBar";
 import FloatingTOC from "@/components/mobile/FloatingTOC";
 import ProgrammePortfolioTable from "@/components/college/ProgrammePortfolioTable";
+import { PlacementTrendChart, SectorDonut } from "@/components/college/PlacementCharts";
 import { collegeTitle, collegeDescription } from "@/lib/collegeSeo";
 import { normalizeCollegeSectionData } from "@/lib/collegeSectionData";
 import { cdnImage } from "@/lib/imageTransform";
@@ -61,6 +62,42 @@ const fallbackGallery = [
   "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600",
   "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=600",
 ];
+
+// Pulsing "live" dot used on application CTAs.
+const LiveDot = () => (
+  <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
+    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+  </span>
+);
+
+// Slim animated application strip for the sidebar — another entry point to the official form.
+const SidebarApplyStrip = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
+  <motion.a
+    href={applyUrl}
+    target="_blank"
+    rel="noopener noreferrer sponsored"
+    aria-label={`${applyLabel} — official application form for ${collegeName}`}
+    className="block group"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, delay: 0.15 }}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <div className="relative overflow-hidden rounded-xl border border-amber-300/70 bg-gradient-to-r from-amber-50 via-amber-100/70 to-amber-50 px-4 py-3.5 shadow-sm">
+      <div className="absolute -top-8 -right-8 w-24 h-24 bg-amber-200/40 rounded-full blur-2xl pointer-events-none" />
+      <div className="relative z-10 flex items-center gap-3">
+        <LiveDot />
+        <div className="min-w-0 flex-1">
+          <div className="text-xs font-extrabold uppercase tracking-wider text-amber-700">Applications Open · 2027-29</div>
+          <div className="font-bold text-foreground text-sm truncate">{applyLabel}</div>
+        </div>
+        <ChevronUp className="w-4 h-4 rotate-90 text-amber-700 shrink-0 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+      </div>
+    </div>
+  </motion.a>
+);
 
 // Highlighted application CTA shown on colleges with an admin-managed external application link.
 const ApplyBanner = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
@@ -814,7 +851,8 @@ const CollegeDetailPage = () => {
                   {Array.isArray(placementData.yearly) && placementData.yearly.length > 0 && (
                     <div className="mb-6">
                       <h3 className="font-heading font-semibold text-foreground mb-3">Year-wise Placement Trends</h3>
-                      <div className="overflow-x-auto rounded-lg border border-border">
+                      <PlacementTrendChart yearly={placementData.yearly} />
+                      <div className="overflow-x-auto rounded-lg border border-border mt-4">
                         <table className="w-full text-sm border-collapse min-w-[420px]">
                           <thead>
                             <tr className="bg-muted/50">
@@ -839,16 +877,8 @@ const CollegeDetailPage = () => {
                     </div>
                   )}
                   <h3 className="font-heading font-semibold text-foreground mb-3">Sector-wise Placements</h3>
-                  <div className="space-y-3 mb-6">
-                    {placementSectors.map((s: any) => (
-                      <div key={s.sector}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-sm text-foreground font-medium truncate pr-2">{s.sector}</span>
-                          <span className="text-sm font-bold text-primary shrink-0">{s.pct}%</span>
-                        </div>
-                        <Progress value={s.pct} className="h-2.5" />
-                      </div>
-                    ))}
+                  <div className="mb-6">
+                    <SectorDonut sectors={placementSectors} />
                   </div>
                   {placementRecruiters.length > 0 && (
                     <div>
@@ -1184,7 +1214,7 @@ const CollegeDetailPage = () => {
           </div>
 
           {/* ===== Premium Sidebar ===== */}
-          <aside className="hidden lg:block min-w-0 w-full self-start">
+          <aside className="hidden lg:block min-w-0 w-full self-start" aria-label={`${college.name} quick actions and summary`}>
             <div className="sticky top-32 max-h-[calc(100vh-9rem)] overflow-y-auto flex flex-col gap-4 z-10">
               <div data-ad-sidebar className="order-last shrink-0" />
               {/* Premium Fees + Brochure Card — pinned at top of sticky sidebar */}
@@ -1194,9 +1224,16 @@ const CollegeDetailPage = () => {
                 <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{ backgroundImage: 'radial-gradient(hsl(0 0% 100%) 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
                 <CardContent className="px-5 py-5 relative z-10">
                   <div className="flex flex-col gap-2 mb-3.5">
-                    <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md self-start">
-                      ★ Featured
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md">
+                        ★ Featured
+                      </span>
+                      {applyUrl && (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider bg-white/15 border border-white/25 text-primary-foreground px-2 py-0.5 rounded-md">
+                          <LiveDot /> Applications Open
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs uppercase tracking-wider text-primary-foreground/70 font-semibold">Total Program Fees</span>
                   </div>
                   <p className="font-heading text-2xl xl:text-3xl font-extrabold leading-tight mb-1 break-words [text-shadow:_0_2px_8px_rgb(0_0_0_/_0.15)]">
@@ -1209,11 +1246,19 @@ const CollegeDetailPage = () => {
                     <Download className="w-4 h-4" /> Download Brochure
                   </Button>
                   {applyUrl ? (
-                    <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="block">
+                    <motion.a
+                      href={applyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer sponsored"
+                      aria-label={`${applyLabel} — official application form for ${college.name}`}
+                      className="block"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <Button variant="outline" className="w-full bg-amber-400 border-amber-400 text-amber-950 hover:bg-amber-300 hover:border-amber-300 hover:text-amber-950 font-bold gap-2 shadow-lg">
-                        <GraduationCap className="w-4 h-4" /> Apply Now
+                        <GraduationCap className="w-4 h-4" /> {applyLabel}
                       </Button>
-                    </a>
+                    </motion.a>
                   ) : (
                     <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-white/10 backdrop-blur-sm border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground hover:border-white/50 font-semibold gap-2">
                       <GraduationCap className="w-4 h-4" /> Apply Now
@@ -1258,8 +1303,54 @@ const CollegeDetailPage = () => {
                   ]}
                 />
 
+                {/* Animated application strip — quick entry to the official form */}
+                {applyUrl && <SidebarApplyStrip collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} />}
+
+                {/* Placement Snapshot — key outcomes at a glance */}
+                {(college.placement_avg || college.placement_highest) && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 }}>
+                    <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                            <TrendingUp className="w-4 h-4 text-emerald-600" />
+                          </div>
+                          <h4 className="font-heading font-bold text-foreground">Placement Snapshot</h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {college.placement_avg && (
+                            <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 text-center">
+                              <div className="font-heading font-extrabold text-primary text-lg leading-tight">{numericStat(college.placement_avg)}</div>
+                              <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Average Package</div>
+                            </div>
+                          )}
+                          {college.placement_highest && (
+                            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+                              <div className="font-heading font-extrabold text-amber-700 text-lg leading-tight">{numericStat(college.placement_highest)}</div>
+                              <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Highest Package</div>
+                            </div>
+                          )}
+                        </div>
+                        {topRecruiters.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-3">
+                            Recruiters include <span className="font-semibold text-foreground">{topRecruiters.slice(0, 3).join(", ")}</span>{topRecruiters.length > 3 ? ` & ${topRecruiters.length - 3} more` : ""}.
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
+                          className="mt-3 w-full text-center text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                        >
+                          View full placement report ↓
+                        </button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
                 {/* You May Also Like */}
                 {suggestedColleges.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }}>
                   <Card className="overflow-hidden border-border/60">
                     <CardContent className="pt-6">
                       <div className="flex items-center gap-2 mb-4">
@@ -1286,9 +1377,11 @@ const CollegeDetailPage = () => {
                       </div>
                     </CardContent>
                   </Card>
+                  </motion.div>
                 )}
 
                 {/* Compare Card */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.4 }}>
                 <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors group">
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3 mb-3">
@@ -1300,15 +1393,17 @@ const CollegeDetailPage = () => {
                         <p className="text-xs text-muted-foreground">Side-by-side analysis of fees, placements & more.</p>
                       </div>
                     </div>
-                    <Link to="/compare">
+                    <Link to="/compare" aria-label={`Compare ${college.name} with other MBA colleges`}>
                       <Button variant="outline" className="w-full font-semibold border-primary/30 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all">
                         Open Compare Tool
                       </Button>
                     </Link>
                   </CardContent>
                 </Card>
+                </motion.div>
 
                 {/* Quick Info Card */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.35 }}>
                 <Card className="overflow-hidden border-border/60 shadow-lg shadow-primary/5">
                   <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
                   <CardContent className="pt-6">
@@ -1338,15 +1433,35 @@ const CollegeDetailPage = () => {
                         </div>
                       ))}
                     </div>
+                    {accreditations.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-border/60">
+                        <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">Accreditations</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {accreditations.slice(0, 6).map((acc: string, i: number) => (
+                            <span key={i} className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                              <CheckCircle className="w-3 h-3" /> {acc}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {applyUrl && (
+                      <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" aria-label={`${applyLabel} — official application form for ${college.name}`} className="block mt-4">
+                        <Button className="w-full gap-1.5 font-bold bg-amber-400 text-amber-950 hover:bg-amber-300 shadow-md">
+                          <GraduationCap className="w-4 h-4" /> {applyLabel}
+                        </Button>
+                      </a>
+                    )}
                     {college.website && (
-                      <a href={college.website} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" className="w-full mt-4 gap-1.5 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50">
+                      <a href={college.website} target="_blank" rel="noopener noreferrer" aria-label={`Visit the official website of ${college.name}`}>
+                        <Button variant="outline" className="w-full mt-2 gap-1.5 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50">
                           <Globe className="w-4 h-4" /> Visit Official Site
                         </Button>
                       </a>
                     )}
                   </CardContent>
                 </Card>
+                </motion.div>
               </div>
             </div>
           </aside>
