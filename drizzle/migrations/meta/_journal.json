@@ -337,6 +337,13 @@
       "when": 1794485913421,
       "tag": "0047_harden_selected_security_findings",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1794487116934,
+      "tag": "0048_scope_daily_tests_and_xat_settings_reads",
+      "breakpoints": true
     }
   ]
 }
