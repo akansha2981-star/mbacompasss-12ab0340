@@ -148,6 +148,19 @@ const AdminColleges = () => {
     setLoadingMore(false);
   }, [buildListQuery, colleges.length]);
 
+  /** Fetches EVERY college matching the current filters, paged past the 300-row screen limit, for the Excel export. */
+  const fetchAllColleges = useCallback(async (): Promise<any[]> => {
+    const all: any[] = [];
+    const BATCH = 1000;
+    for (let from = 0; ; from += BATCH) {
+      const { data, error } = await buildListQuery().range(from, from + BATCH - 1);
+      if (error) throw new Error(error.message);
+      all.push(...(data ?? []));
+      if (!data || data.length < BATCH) break;
+    }
+    return all;
+  }, [buildListQuery]);
+
   // Debounced so typing in the search box doesn't fire a query per keystroke.
   useEffect(() => {
     const timer = window.setTimeout(() => { void fetchColleges(); }, 250);
@@ -584,8 +597,10 @@ const AdminColleges = () => {
         <div className="flex gap-2 flex-wrap">
           <ExportExcelButton
             rows={sortedColleges}
+            fetchAllRows={fetchAllColleges}
             fileName="colleges"
             sheetName="Colleges"
+            label="Download All Colleges"
             className="border-teal-500/40 text-teal-700 hover:bg-teal-50"
           />
           <BulkSortOrderDialog table="colleges" entityLabel="colleges" filePrefix="colleges" onApplied={fetchColleges} />

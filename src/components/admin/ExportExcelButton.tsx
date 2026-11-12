@@ -6,6 +6,12 @@ import { toast } from "sonner";
 type Props = {
   /** Rows exactly as shown in the list (already filtered/sorted). */
   rows: any[];
+  /**
+   * Optional loader that fetches EVERY matching row from the database
+   * (paged past the on-screen limit). When provided, the export always
+   * downloads the full list, not just the rows currently loaded.
+   */
+  fetchAllRows?: () => Promise<any[]>;
   /** File name without extension. */
   fileName: string;
   /** Sheet tab name (max 31 chars, Excel limit). */
@@ -40,6 +46,7 @@ const stringify = (v: any): string | number | boolean => {
  */
 const ExportExcelButton = ({
   rows,
+  fetchAllRows,
   fileName,
   sheetName = "Data",
   columns,
@@ -48,14 +55,21 @@ const ExportExcelButton = ({
   variant = "outline",
 }: Props) => {
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
 
   const handleExport = async () => {
-    if (!rows || rows.length === 0) {
-      toast.error("Nothing to export — the list is empty.");
-      return;
-    }
     setBusy(true);
     try {
+      let exportRows = rows;
+      if (fetchAllRows) {
+        setProgress("Fetching all rows…");
+        exportRows = await fetchAllRows();
+        setProgress(null);
+      }
+      if (!exportRows || exportRows.length === 0) {
+        toast.error("Nothing to export — the list is empty.");
+        return;
+      }
       const XLSX = await import("xlsx");
 
       let cols: [string, string][];
@@ -63,7 +77,7 @@ const ExportExcelButton = ({
         cols = columns;
       } else {
         const keys = new Set<string>();
-        rows.forEach((r: any) => Object.keys(r || {}).forEach((k) => keys.add(k)));
+        exportRows.forEach((r: any) => Object.keys(r || {}).forEach((k) => keys.add(k)));
         cols = Array.from(keys).map((k: string) => [
           k,
           k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -73,7 +87,7 @@ const ExportExcelButton = ({
 
       const aoa: any[][] = [
         ["S.No", ...cols.map(([, header]) => header)],
-        ...rows.map((r, i) => [i + 1, ...cols.map(([key]) => stringify(r?.[key]))]),
+        ...exportRows.map((r, i) => [i + 1, ...cols.map(([key]) => stringify(r?.[key]))]),
       ];
 
       const sheet = XLSX.utils.aoa_to_sheet(aoa);
@@ -88,18 +102,19 @@ const ExportExcelButton = ({
 
       const stamp = new Date().toISOString().slice(0, 10);
       XLSX.writeFile(book, `${fileName}-${stamp}.xlsx`);
-      toast.success(`Exported ${rows.length} row${rows.length === 1 ? "" : "s"} to Excel`);
+      toast.success(`Exported ${exportRows.length} row${exportRows.length === 1 ? "" : "s"} to Excel`);
     } catch (err: any) {
       toast.error(err?.message || "Export failed");
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   };
 
   return (
-    <Button variant={variant} onClick={handleExport} disabled={busy} className={className} title="Download the list currently shown as an Excel file">
+    <Button variant={variant} onClick={handleExport} disabled={busy} className={className} title="Download the complete list as an Excel file">
       {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-      {label} {rows?.length ? `(${rows.length})` : ""}
+      {busy && progress ? progress : <>{label} {!fetchAllRows && rows?.length ? `(${rows.length})` : ""}</>}
     </Button>
   );
 };

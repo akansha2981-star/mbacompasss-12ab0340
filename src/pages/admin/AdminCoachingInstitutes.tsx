@@ -49,6 +49,26 @@ const AdminCoachingInstitutes = () => {
     setLoading(false);
   };
 
+  /** Fetches EVERY institute, paged past the 1,000-row database cap, for the Excel export. */
+  const fetchAllInstitutes = async (): Promise<any[]> => {
+    const all: any[] = [];
+    const BATCH = 1000;
+    for (let from = 0; ; from += BATCH) {
+      const { data, error } = await supabase
+        .from("institutes")
+        .select("id, name, slug, city, institute_type, featured, created_at")
+        .order("created_at", { ascending: false })
+        .range(from, from + BATCH - 1);
+      if (error) throw new Error(error.message);
+      all.push(...(data ?? []));
+      if (!data || data.length < BATCH) break;
+    }
+    // Keep the same tab/search filtering the admin sees on screen.
+    return all.filter(
+      (i) => i.institute_type === tab && (!search || i.name.toLowerCase().includes(search.toLowerCase()))
+    );
+  };
+
   useEffect(() => {
     load();
   }, []);
@@ -95,9 +115,10 @@ const AdminCoachingInstitutes = () => {
         <div className="flex items-center gap-2 flex-wrap">
           <ExportExcelButton
             rows={filtered}
+            fetchAllRows={fetchAllInstitutes}
             fileName="coaching-institutes"
             sheetName="Coaching"
-            label="Download Excel"
+            label="Download All"
             className="border-teal-500/40 text-teal-700 hover:bg-teal-50"
           />
           <BulkSortOrderDialog table="institutes" entityLabel="coaching institutes" filePrefix="coaching-institutes" onApplied={load} />
