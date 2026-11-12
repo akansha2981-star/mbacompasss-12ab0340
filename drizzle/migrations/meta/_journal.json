@@ -330,6 +330,13 @@
       "when": 1794083358124,
       "tag": "0046_add_mobile_banner_url_to_colleges",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1794485913421,
+      "tag": "0047_harden_selected_security_findings",
+      "breakpoints": true
     }
   ]
 }
