@@ -169,7 +169,23 @@ Deno.serve(async (req) => {
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "unknown";
-  if (!rateLimit(ip)) {
+  // Admins pushing leads from the admin panel are exempt; the limit only guards public forms.
+  let isAdminCaller = false;
+  try {
+    const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (token && url && key) {
+      const sb = createClient(url, key);
+      const { data: u } = await sb.auth.getUser(token);
+      if (u?.user) {
+        const { data: role } = await sb.from("user_roles").select("role").eq("user_id", u.user.id).eq("role", "admin").maybeSingle();
+        isAdminCaller = !!role;
+      }
+    }
+  } catch { /* treat as public caller */ }
+  if (!isAdminCaller && !rateLimit(ip)) {
+
     const retryAfterSeconds = Math.max(1, Math.ceil(((RL.get(ip)?.reset ?? Date.now() + 60_000) - Date.now()) / 1000) + 1);
     console.warn("[meritto] request rejected before dispatch: rate limit", { retry_after_seconds: retryAfterSeconds });
     return new Response(JSON.stringify({ error: "Submission limit reached. Please wait before continuing.", retry_after_seconds: retryAfterSeconds }), {
