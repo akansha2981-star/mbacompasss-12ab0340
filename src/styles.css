@@ -2121,7 +2121,7 @@ html, body, #root {
   background: linear-gradient(90deg, hsl(var(--background) / .98), hsl(var(--background) / .88) 65%, hsl(var(--background) / .65));
 }
 .college-profile-logo { width: 96px; height: 96px; }
-.college-header-facts > div { padding-right: 1rem; }
+.college-header-facts > div { padding: 1rem; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: .5rem; }
 .college-content-section {
   padding-block: 1.5rem;
   border-top: 1px solid hsl(var(--border));
@@ -2133,6 +2133,15 @@ html, body, #root {
 .college-content-section > :last-child { padding-bottom: 0; }
 .college-content-section > div { padding-inline: 0; }
 .college-content-section :is(h3, h4) { overflow-wrap: anywhere; }
+.college-content-section > div:has(> h3) { border-left: 3px solid hsl(var(--primary)); padding-left: 1rem; margin-bottom: 1.25rem; }
+.college-content-section > div:first-of-type:not(.h-1) { padding-bottom: 1.25rem; }
+.college-student-review { border-top: 3px solid hsl(var(--primary) / .3); }
+.college-review-copy p { margin: 0; }
+.college-review-copy a { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 3px; }
+.college-cutoff-card { border-bottom: 3px solid hsl(var(--primary) / .4); }
+.college-gallery-slider .college-slide { flex-basis: min(88%, 560px); }
+.college-campus-photo img { display: block; aspect-ratio: 3 / 2; width: 100%; object-fit: cover; }
+.college-gallery-slider .college-slider-track { padding-bottom: 1rem; }
 .college-dossier { border-top: 3px solid hsl(var(--primary) / .5); }
 .college-dossier:hover { border-color: hsl(var(--primary) / .5); }
 .college-slider-track {
@@ -2155,7 +2164,7 @@ html, body, #root {
 @media (max-width: 640px) {
   .college-profile-logo { width: 64px; height: 64px; }
   .college-detail h1 { font-size: var(--fs-subhead); }
-  .college-header-facts dd { font-size: var(--fs-body); }
+  .college-header-facts dd { font-size: var(--fs-subhead); }
   .college-content-section { padding-block: 1.25rem; }
   .college-profile-header .container { padding-bottom: 1.5rem; }
 }

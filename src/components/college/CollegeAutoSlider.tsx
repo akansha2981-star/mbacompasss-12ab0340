@@ -6,10 +6,11 @@ interface Props<T> {
   items: T[];
   render: (item: T, index: number) => ReactNode;
   label?: string;
+  variant?: "default" | "gallery";
 }
 
 /** One visible-only timer; original items remain scrollable without JS or motion. */
-export default function CollegeAutoSlider<T>({ items, render, label = "College highlights" }: Props<T>) {
+export default function CollegeAutoSlider<T>({ items, render, label = "College highlights", variant = "default" }: Props<T>) {
   const track = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -53,7 +54,7 @@ export default function CollegeAutoSlider<T>({ items, render, label = "College h
   if (!items.length) return null;
 
   return (
-    <div className="college-slider min-w-0" role="region" aria-label={label} aria-roledescription="carousel"
+    <div className={`college-slider min-w-0 ${variant === "gallery" ? "college-gallery-slider" : ""}`} role="region" aria-label={label} aria-roledescription="carousel"
       onMouseEnter={() => setInteracting(true)} onMouseLeave={() => setInteracting(false)}
       onFocusCapture={() => setInteracting(true)}
       onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setInteracting(false); }}>
