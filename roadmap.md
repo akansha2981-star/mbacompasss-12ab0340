@@ -20,9 +20,3 @@
 - [x] Share accessible, visible-only auto-sliders across highlights, recruiters, partners, awards and scholarships
 - [x] Replace cramped structured tables with readable dossiers and optional comparison views
 - [x] Verify representative colleges on desktop and mobile, interactions and reduced motion
-
-## College-page presentation refinement
-- [x] Add larger campus auto-slider and photo enlargement using saved images
-- [x] Replace unreadable review colour blocks with legible editorial review cards
-- [x] Emphasize cutoff percentiles and add exam filters where applicable
-- [x] Strengthen shared section hierarchy and verify desktop/mobile views

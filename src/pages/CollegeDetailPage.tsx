@@ -50,8 +50,6 @@ import CollegeSectionNav from "@/components/college/CollegeSectionNav";
 import CollegeAutoSlider from "@/components/college/CollegeAutoSlider";
 import CollegeDataDossiers from "@/components/college/CollegeDataDossiers";
 import CollegeContentSection from "@/components/college/CollegeContentSection";
-import CollegeCampusGallery from "@/components/college/CollegeCampusGallery";
-import CollegeCutoffCards from "@/components/college/CollegeCutoffCards";
 
 // ── Fallback data used when no DB sections exist ──
 const fallbackRatingAspects = [
@@ -313,7 +311,7 @@ const CollegeDetailPage = () => {
 
   const galleryData = getSectionData("gallery");
   const galleryImages = Array.isArray(galleryData.images)
-    ? galleryData.images.map((i: any) => typeof i === "string" ? i : i?.url || i?.image_url || i?.image).filter((url: any) => typeof url === "string" && url.trim()) : [];
+    ? galleryData.images.map((i: any) => i.url).filter((url: any) => typeof url === "string" && url.trim()) : [];
 
   // Must call all hooks before any early returns to obey hooks rules
   const { gate: gateBrochure } = useCtaGate("college_download_brochure");
@@ -1163,10 +1161,13 @@ const CollegeDetailPage = () => {
             {/* Cutoff */}
             <div id="cutoff" ref={el => { sectionRefs.current["cutoff"] = el; }} className="scroll-mt-32">
               <CollegeContentSection>
-                <CardHeader><CardTitle className="font-heading flex items-center gap-2"><GraduationCap className="h-5 w-5 text-primary" />Cutoff Details</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="font-heading">Cutoff Details</CardTitle></CardHeader>
                 <CardContent>
                   {Array.isArray(cutoffData.cutoffs) && cutoffData.cutoffs.length > 0 ? (
-                    <CollegeCutoffCards rows={cutoffData.cutoffs} />
+                    <CollegeDataDossiers rows={cutoffData.cutoffs} label="Cutoffs" columns={[
+                      { label: "Category", value: (c: any) => c.category }, { label: "Exam", value: (c: any) => c.exam },
+                      { label: "Year", value: (c: any) => c.year }, { label: "Percentile", value: (c: any) => numericStat(c.percentile, stripTBA(c.percentile) || "—") },
+                    ]} />
                   ) : cutoffInfo ? (
                     <CollegeDataDossiers rows={Object.entries(cutoffInfo)} label="Cutoffs" columns={[
                       { label: "Category", value: (c: any) => c[0] }, { label: "Cutoff", value: (c: any) => String(c[1]) },
@@ -1276,29 +1277,26 @@ const CollegeDetailPage = () => {
                       ))}
                     </div>
                   </div>
-                  <div className="grid gap-4">
-                    {reviewsList.map((review: any, i: number) => (
-                      <article key={i} className="college-student-review rounded-lg border border-border bg-card p-4 sm:p-6">
-                        <header className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-base font-bold text-primary">{String(review.name || "Student").charAt(0)}</span>
-                            <div className="min-w-0"><h3 className="text-base font-bold text-foreground break-words">{review.name}</h3>{review.year && <p className="mt-0.5 text-sm text-muted-foreground">{review.year}</p>}</div>
-                          </div>
-                          <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-secondary px-2 py-1 text-sm font-semibold text-foreground"><Star className="h-4 w-4 fill-accent text-accent" />{review.rating}/5</span>
-                        </header>
-                        <div className="space-y-5">
-                          {review.positives && <div className="border-l-2 border-primary/50 pl-4">
-                            <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground"><ThumbsUp className="h-4 w-4 text-primary" />What students appreciate</h4>
-                            <div className="college-review-copy text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: enhanceAIContent(String(review.positives), { entityName: college.name, entityWebsite: college.website || undefined }) }} />
-                          </div>}
-                          {review.negatives && <div className="border-l-2 border-accent pl-4">
-                            <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground"><ThumbsDown className="h-4 w-4 text-muted-foreground" />Points to consider</h4>
-                            <div className="college-review-copy text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: enhanceAIContent(String(review.negatives), { entityName: college.name, entityWebsite: college.website || undefined }) }} />
-                          </div>}
+                  {reviewsList.map((review: any, i: number) => (
+                    <div key={i} className="border border-border rounded-xl p-5 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div><span className="font-semibold text-foreground">{review.name}</span><span className="text-xs text-muted-foreground ml-2">{review.year}</span></div>
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, j) => <Star key={j} className={`w-3.5 h-3.5 ${j < Number(review.rating) ? "fill-accent text-accent" : "text-muted-foreground"}`} />)}
                         </div>
-                      </article>
-                    ))}
-                  </div>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <div className="bg-primary dark:bg-primary/30 border border-primary dark:border-primary rounded-lg p-3">
+                          <div className="flex items-center gap-1 mb-1.5 text-primary dark:text-primary text-sm font-semibold"><ThumbsUp className="w-3.5 h-3.5" /> Positives</div>
+                          <p className="text-xs text-primary dark:text-primary leading-relaxed">{review.positives}</p>
+                        </div>
+                        <div className="bg-destructive dark:bg-destructive/30 border border-destructive dark:border-destructive rounded-lg p-3">
+                          <div className="flex items-center gap-1 mb-1.5 text-destructive dark:text-destructive text-sm font-semibold"><ThumbsDown className="w-3.5 h-3.5" /> Negatives</div>
+                          <p className="text-xs text-destructive dark:text-destructive leading-relaxed">{review.negatives}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                   <AIExtensionBlock section={getAIExtension("reviews")} extensionLabel="Aggregated Student Sentiment" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
               </CollegeContentSection>
@@ -1309,7 +1307,12 @@ const CollegeDetailPage = () => {
               <CollegeContentSection>
                 <CardHeader><CardTitle className="font-heading flex items-center gap-2"><Image className="w-5 h-5 text-primary" /> Campus Gallery</CardTitle></CardHeader>
                 <CardContent>
-                  <CollegeCampusGallery images={galleryImages} name={college.name} />
+                  {galleryImages.length > 0 ? <CollegeAutoSlider items={galleryImages} label="Campus photos" render={(image: string, i: number) => (
+                    <figure className="overflow-hidden rounded-lg border border-border bg-card">
+                      <img src={cdnImage(image, { width: 640 })} alt={`${college.name} campus photo ${i + 1}`} width={640} height={426} className="w-full aspect-[3/2] object-cover" loading="lazy" decoding="async" />
+                      <figcaption className="px-4 py-3 text-sm text-muted-foreground">{college.name} · {i + 1} / {galleryImages.length}</figcaption>
+                    </figure>
+                  )} /> : <p className="text-muted-foreground">Campus photos have not been published.</p>}
                 </CardContent>
               </CollegeContentSection>
             </div>
