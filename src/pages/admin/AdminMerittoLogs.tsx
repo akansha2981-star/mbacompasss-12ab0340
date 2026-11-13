@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import ExportExcelButton from "@/components/admin/ExportExcelButton";
 import { submitMerittoWithWait } from "@/lib/merittoSubmission";
+import MerittoBulkJobPanel from "@/components/admin/MerittoBulkJobPanel";
 
 const MERITTO_FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "name", label: "Name", required: true },
@@ -137,6 +138,10 @@ export default function AdminMerittoLogs() {
   const [originDomain, setOriginDomain] = useState<string>("bschoolbuzz.in");
   const [integrationEnabled, setIntegrationEnabled] = useState<boolean>(false);
   const [switchBusy, setSwitchBusy] = useState<boolean>(false);
+  const [bulkFileName, setBulkFileName] = useState("");
+  const [jobRefresh, setJobRefresh] = useState(0);
+  const [jobActive, setJobActive] = useState(false);
+  const onJobActive = useCallback((a: boolean) => setJobActive(a), []);
 
   const loadIntegrationSwitch = async () => {
     const { data } = await supabase
@@ -221,6 +226,7 @@ export default function AdminMerittoLogs() {
   };
 
   const onBulkFile = async (file: File) => {
+    setBulkFileName(file.name);
     const text = await file.text();
     const { headers, rows } = parseCSV(text);
     if (!rows.length) { toast.error("CSV appears empty"); return; }
@@ -273,35 +279,36 @@ export default function AdminMerittoLogs() {
 
   const runBulk = async () => {
     if (!guardEnabled()) return;
+    if (jobActive) { toast.error("Finish the current upload (100%) before adding another file."); return; }
     const prepared = buildMapped();
-    const initial: BulkResult[] = prepared.map((p, i) => ({
-      row: i + 2,
-      mapped: p.mapped,
-      status: p.error ? "invalid" : "pending",
-      error: p.error ?? undefined,
-    }));
-    setBulkResults(initial);
-    setBulkStep("review");
-    const toSend = initial.map((r, idx) => ({ r, idx })).filter(({ r }) => r.status === "pending");
-    if (!toSend.length) { toast.error("No valid rows to send — fix errors and retry"); return; }
+    if (!prepared.some((p) => !p.error)) { toast.error("No valid rows to send — fix errors and retry"); return; }
     setBulkBusy(true);
-    setBulkProgress({ done: 0, total: toSend.length });
-    let done = 0;
-    const next = [...initial];
-    for (const { r, idx } of toSend) {
-      const res = await pushOne(r.mapped);
-      next[idx] = { ...r, status: res.outcome, error: res.error, http: res.http };
-      done++;
-      setBulkResults([...next]);
-      setBulkProgress({ done, total: toSend.length });
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const { data: job, error } = await supabase.from("meritto_bulk_jobs")
+        .insert({ file_name: bulkFileName || null, origin_domain: originDomain, total: prepared.length, created_by: auth.user?.id ?? null })
+        .select("id").single();
+      if (error || !job) throw error ?? new Error("Could not create upload");
+      const items = prepared.map((p, i) => {
+        const lead: Record<string, string> = { source: p.mapped.source || "bulk_upload", medium: p.mapped.medium || "website", campaign: p.mapped.campaign || "bulk_upload" };
+        for (const k of ["name", "email", "mobile", "state", "city", "campus", "course"]) if (p.mapped[k]) lead[k] = p.mapped[k];
+        return { job_id: job.id, row_no: i + 2, lead, status: p.error ? "invalid" : "pending", error: p.error, processed_at: p.error ? new Date().toISOString() : null };
+      });
+      for (let i = 0; i < items.length; i += 500) {
+        const { error: e } = await supabase.from("meritto_bulk_items").insert(items.slice(i, i + 500));
+        if (e) throw e;
+      }
+      const { error: armErr } = await supabase.rpc("meritto_bulk_arm");
+      if (armErr) throw armErr;
+      toast.success(`${items.length} leads queued. Sending continues in the background — you can close this page.`);
+      setBulkOpen(false);
+      resetBulk();
+      setJobRefresh((k) => k + 1);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not start the upload");
+    } finally {
+      setBulkBusy(false);
     }
-    setBulkBusy(false);
-    const s = next.filter((x) => x.status === "success").length;
-    const d = next.filter((x) => x.status === "duplicate").length;
-    const inv = next.filter((x) => x.status === "invalid").length;
-    const f = next.filter((x) => x.status === "failed").length;
-    toast.success(`Bulk push complete — ${s} delivered · ${d} duplicate · ${inv} invalid · ${f} failed`);
-    await load();
   };
 
   const retryFailed = async () => {
@@ -491,7 +498,7 @@ export default function AdminMerittoLogs() {
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setManualOpen(true)} disabled={!integrationEnabled}><Plus className="h-4 w-4 mr-2" />Push Manually</Button>
-          <Button onClick={() => setBulkOpen(true)} variant="secondary" disabled={!integrationEnabled}><Upload className="h-4 w-4 mr-2" />Bulk Upload</Button>
+          <Button onClick={() => setBulkOpen(true)} variant="secondary" disabled={!integrationEnabled || jobActive} title={jobActive ? "Wait until the current upload reaches 100%" : undefined}><Upload className="h-4 w-4 mr-2" />Bulk Upload</Button>
           <Button onClick={load} variant="outline"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
         </div>
       </div>
@@ -515,6 +522,8 @@ export default function AdminMerittoLogs() {
         </CardContent>
       </Card>
 
+
+      <MerittoBulkJobPanel refreshKey={jobRefresh} onActiveChange={onJobActive} />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatCard icon={<Users className="h-4 w-4" />} label="Total leads" value={stats.total} />
@@ -870,7 +879,7 @@ export default function AdminMerittoLogs() {
               <>
                 <Button variant="outline" onClick={resetBulk} disabled={bulkBusy}>Back</Button>
                 <Button onClick={runBulk} disabled={bulkBusy || !bulkMapping.name}>
-                  <Upload className="h-4 w-4 mr-2" />Start Bulk Push
+                  <Upload className="h-4 w-4 mr-2" />{bulkBusy ? "Queuing…" : "Start Background Upload"}
                 </Button>
               </>
             )}

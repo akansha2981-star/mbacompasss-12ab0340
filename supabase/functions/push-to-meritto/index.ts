@@ -161,8 +161,78 @@ function rateLimit(ip: string, max = 5, windowMs = 60_000): boolean {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Next 00:00 in India (UTC+5:30), when Meritto's daily allowance resets.
+function nextIstMidnight(now = new Date()): string {
+  const ist = new Date(now.getTime() + 330 * 60_000);
+  const midnightUtc = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate() + 1) - 330 * 60_000;
+  return new Date(midnightUtc + 60_000).toISOString();
+}
+
+function isDailyLimit(status: number, json: any): boolean {
+  if (status === 429) return true;
+  const msg = `${json?.message ?? ""} ${json?.status ?? ""} ${json?.raw ?? ""}`.toLowerCase();
+  return /limit|quota|exceed/.test(msg) && !/character|length/.test(msg);
+}
+
+async function runBulkTick(token: string): Promise<Response> {
+  const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); const secret = Deno.env.get("MERITTO_SECRET_KEY");
+  if (!url || !key || !secret) return json({ error: "not configured" }, 500);
+  const admin = createClient(url, key);
+  const { data: w } = await admin.from("meritto_bulk_worker").select("token").eq("id", true).maybeSingle();
+  if (!token || !w?.token || w.token !== token) return json({ error: "forbidden" }, 403);
+
+  const { data: sw } = await admin.from("site_settings").select("value").eq("key", "meritto_integration").maybeSingle();
+  if (!(sw?.value as { enabled?: boolean } | null)?.enabled) return json({ ok: true, skipped: "integration off" });
+
+  const { data: job } = await admin.from("meritto_bulk_jobs").select("*").eq("status", "running").order("created_at").limit(1).maybeSingle();
+  if (!job) return json({ ok: true, idle: true });
+
+  const started = Date.now();
+  let processed = 0;
+  while (Date.now() - started < 40_000) {
+    const { data: batch } = await admin.rpc("meritto_bulk_claim", { p_job: job.id, p_limit: 5 });
+    const items = (batch ?? []) as { id: string; lead: LeadInput }[];
+    if (!items.length) break;
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      const lead: LeadInput = { ...it.lead, origin_domain: it.lead.origin_domain ?? job.origin_domain ?? undefined };
+      let res: Awaited<ReturnType<typeof callMeritto>> | null = null;
+      try { res = await callMeritto(secret, lead, `bulk-${it.id.slice(0, 6)}`); } catch (e) {
+        await admin.from("meritto_bulk_items").update({ status: "failed", error: `Network: ${String(e)}`, processed_at: new Date().toISOString(), locked_at: null }).eq("id", it.id);
+        processed++; continue;
+      }
+      if (isDailyLimit(res.status, res.json)) {
+        // Return this and the rest of the claimed rows to the queue; resume after midnight IST.
+        await admin.from("meritto_bulk_items").update({ status: "pending", locked_at: null }).in("id", items.slice(i).map((x) => x.id));
+        await admin.from("meritto_bulk_jobs").update({ status: "paused_limit", resume_at: nextIstMidnight(), last_error: res.json?.message ? `Meritto: ${res.json.message}` : `HTTP ${res.status}` }).eq("id", job.id);
+        return json({ ok: true, paused: true, processed });
+      }
+      const errMsg = res.outcome === "success" ? null : (res.json?.message ? `Meritto: ${res.json.message}` : `HTTP ${res.status}`);
+      const { data: log } = await admin.from("meritto_lead_logs").insert({
+        source: lead.source ?? "bulk_upload", name: lead.name, email: lead.email, mobile: lead.mobile, state: lead.state, city: lead.city,
+        campus: lead.campus, course: lead.course, medium: lead.medium, campaign: lead.campaign,
+        payload: redact(res.body), response: res.json, http_status: res.status, status: res.outcome, error: errMsg, last_attempt_at: new Date().toISOString(),
+      }).select("id").single();
+      await admin.from("meritto_bulk_items").update({ status: res.outcome, error: errMsg, http_status: res.status, log_id: log?.id ?? null, processed_at: new Date().toISOString(), locked_at: null }).eq("id", it.id);
+      processed++;
+    }
+  }
+  const { count } = await admin.from("meritto_bulk_items").select("id", { count: "exact", head: true }).eq("job_id", job.id).in("status", ["pending", "processing"]);
+  if (!count) await admin.from("meritto_bulk_jobs").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", job.id).eq("status", "running");
+  return json({ ok: true, processed, remaining: count ?? 0 });
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  // Background bulk-upload worker, woken each minute by the database while a job is active.
+  if (req.method === "POST" && req.headers.get("content-type")?.includes("application/json")) {
+    const peek = await req.clone().json().catch(() => null) as { bulk_tick?: boolean; token?: string } | null;
+    if (peek?.bulk_tick) return await runBulkTick(String(peek.token ?? ""));
+  }
+
 
   const ip =
     req.headers.get("cf-connecting-ip") ||

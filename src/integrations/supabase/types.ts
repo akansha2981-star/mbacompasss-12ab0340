@@ -7211,6 +7211,110 @@ export type Database = {
         }
         Relationships: []
       }
+      meritto_bulk_items: {
+        Row: {
+          error: string | null
+          http_status: number | null
+          id: string
+          job_id: string
+          lead: Json
+          locked_at: string | null
+          log_id: string | null
+          processed_at: string | null
+          row_no: number
+          status: string
+        }
+        Insert: {
+          error?: string | null
+          http_status?: number | null
+          id?: string
+          job_id: string
+          lead: Json
+          locked_at?: string | null
+          log_id?: string | null
+          processed_at?: string | null
+          row_no: number
+          status?: string
+        }
+        Update: {
+          error?: string | null
+          http_status?: number | null
+          id?: string
+          job_id?: string
+          lead?: Json
+          locked_at?: string | null
+          log_id?: string | null
+          processed_at?: string | null
+          row_no?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meritto_bulk_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "meritto_bulk_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meritto_bulk_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          file_name: string | null
+          id: string
+          last_error: string | null
+          origin_domain: string | null
+          resume_at: string | null
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name?: string | null
+          id?: string
+          last_error?: string | null
+          origin_domain?: string | null
+          resume_at?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name?: string | null
+          id?: string
+          last_error?: string | null
+          origin_domain?: string | null
+          resume_at?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      meritto_bulk_worker: {
+        Row: {
+          id: boolean
+          token: string
+        }
+        Insert: {
+          id?: boolean
+          token?: string
+        }
+        Update: {
+          id?: boolean
+          token?: string
+        }
+        Relationships: []
+      }
       meritto_lead_logs: {
         Row: {
           campaign: string | null
@@ -17761,6 +17865,30 @@ export type Database = {
         Args: { _through?: string; _user_id: string }
         Returns: number
       }
+      meritto_bulk_arm: { Args: never; Returns: undefined }
+      meritto_bulk_claim: {
+        Args: { p_job: string; p_limit: number }
+        Returns: {
+          error: string | null
+          http_status: number | null
+          id: string
+          job_id: string
+          lead: Json
+          locked_at: string | null
+          log_id: string | null
+          processed_at: string | null
+          row_no: number
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "meritto_bulk_items"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      meritto_bulk_job_counts: { Args: { p_job: string }; Returns: Json }
+      meritto_bulk_tick: { Args: never; Returns: undefined }
       mirror_mock_question_to_personalized: {
         Args: { _question_id: string }
         Returns: undefined
