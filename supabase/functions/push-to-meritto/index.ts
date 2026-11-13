@@ -2,6 +2,7 @@
 // Called directly (client/edge/DB trigger). Idempotent by log id if provided.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { isDailyLimit, nextIstMidnight } from "../_shared/merittoBulk.ts";
 
 const MERITTO_URL = "https://api.in4.nopaperforms.com/dataporting/7080/bschoolbuzz";
 const SOURCE = "bschoolbuzz";
@@ -161,18 +162,6 @@ function rateLimit(ip: string, max = 5, windowMs = 60_000): boolean {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Next 00:00 in India (UTC+5:30), when Meritto's daily allowance resets.
-function nextIstMidnight(now = new Date()): string {
-  const ist = new Date(now.getTime() + 330 * 60_000);
-  const midnightUtc = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate() + 1) - 330 * 60_000;
-  return new Date(midnightUtc + 60_000).toISOString();
-}
-
-function isDailyLimit(status: number, json: any): boolean {
-  if (status === 429) return true;
-  const msg = `${json?.message ?? ""} ${json?.status ?? ""} ${json?.raw ?? ""}`.toLowerCase();
-  return /limit|quota|exceed/.test(msg) && !/character|length/.test(msg);
-}
 
 async function runBulkTick(token: string): Promise<Response> {
   const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
