@@ -1,7 +1,7 @@
-import { GraduationCap } from "lucide-react";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import CollegeDataDossiers from "./CollegeDataDossiers";
-import CollegeContentSection from "./CollegeContentSection";
+import { motion } from "framer-motion";
+import { ShieldCheck, Clock, GraduationCap } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import type { ProgrammeCourse } from "@/hooks/useProgrammeCourses";
 
 interface Props {
@@ -45,23 +45,190 @@ const eligibilitySummary = (p: ProgrammeCourse) => {
 };
 
 const ProgrammePortfolioTable = ({ programmes, fallbackCourses }: Props) => {
-  return <CollegeContentSection>
-    <CardHeader><CardTitle className="font-heading flex items-center gap-2"><GraduationCap className="h-5 w-5 text-primary" />Programmes & Fees</CardTitle></CardHeader>
-    <CardContent>
-      {programmes.length > 0 ? <CollegeDataDossiers rows={programmes} label="Programmes" columns={[
-        { label: "Programme", value: (p) => <span>{p.name}<span className="mt-1 block text-sm font-normal text-muted-foreground">{[p.programme_type, p.mode].filter(Boolean).join(" · ")}</span></span> },
-        { label: "Duration", value: (p) => clean(p.duration) },
-        { label: "Total fees", value: (p) => <span className="text-primary">{p.fees_total_lakhs ? `₹${p.fees_total_lakhs} L` : "—"}{p.fees_year && <span className="block text-sm font-normal text-muted-foreground">{p.fees_year}</span>}</span> },
-        { label: "Accepted exams", value: (p) => acceptedExamLabels(p).join(" · ") || "—" },
-        { label: "Specialisations", value: (p) => (p.specializations || []).join(" · ") },
-        { label: "Eligibility", value: (p) => eligibilitySummary(p) },
-        { label: "Seats", value: (p) => p.intake_seats },
-      ]} /> : fallbackCourses?.length ? <CollegeDataDossiers rows={fallbackCourses} label="Programmes" columns={[
-        { label: "Programme", value: (p) => p.name }, { label: "Duration", value: (p) => p.duration },
-        { label: "Eligibility", value: (p) => p.eligibility }, { label: "Fees", value: (p) => p.fees },
-      ]} /> : <p className="text-muted-foreground">Programme portfolio coming soon.</p>}
-    </CardContent>
-  </CollegeContentSection>;
+  const hasVerified = programmes && programmes.length > 0;
+
+  if (!hasVerified) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-heading flex items-center gap-2">
+            <GraduationCap className="w-5 h-5 text-primary" /> Programme Portfolio
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {fallbackCourses && fallbackCourses.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-muted/50">
+                    <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Programme</th>
+                    <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Duration</th>
+                    <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Eligibility</th>
+                    <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Fees</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fallbackCourses.map((c, i) => (
+                    <tr key={i} className="border-b border-border hover:bg-muted/30">
+                      <td className="py-3 px-3 font-medium text-foreground">{c.name}</td>
+                      <td className="py-3 px-3 text-muted-foreground">{c.duration || "—"}</td>
+                      <td className="py-3 px-3 text-muted-foreground">{c.eligibility || "—"}</td>
+                      <td className="py-3 px-3 text-right font-heading font-bold text-primary">{c.fees || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">Programme portfolio coming soon.</p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="overflow-hidden border-border/60 shadow-md">
+      <div className="h-1 bg-gradient-to-r from-primary via-primary/60 to-transparent" />
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle className="font-heading flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <GraduationCap className="w-5 h-5 text-primary" />
+            </div>
+            Programme Portfolio
+            <Badge variant="secondary" className="ml-1 text-xs uppercase tracking-wider">
+              {programmes.length} programmes
+            </Badge>
+          </CardTitle>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Source-verified
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="px-0 sm:px-6">
+        {/* Mobile: stacked cards (no squeezing). md+: full table with horizontal scroll. */}
+        <div className="sm:hidden divide-y divide-border">
+          {programmes.map((p) => {
+            const exams = acceptedExamLabels(p);
+            const specs = p.specializations || [];
+            return (
+              <div key={p.id} className="px-4 py-4 space-y-2">
+                <div>
+                  <div className="font-semibold text-foreground leading-snug">{p.name}</div>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    <Badge variant="outline" className="text-xs py-0 px-1.5">{p.programme_type}</Badge>
+                    {p.mode && <span className="text-xs text-muted-foreground">{p.mode}</span>}
+                    {clean(p.duration) && (
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" /> {clean(p.duration)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {exams.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {exams.slice(0, 6).map((e) => (
+                      <Badge key={e} variant="secondary" className="text-xs py-0 px-1.5">{e}</Badge>
+                    ))}
+                  </div>
+                )}
+                {specs.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {specs.slice(0, 4).map((s) => (
+                      <span key={s} className="text-xs px-1.5 py-0.5 rounded-[0.25rem] bg-primary/10 text-primary font-medium">{s}</span>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-end justify-between gap-3 pt-1">
+                  <div className="text-xs text-muted-foreground leading-snug">{eligibilitySummary(p)}</div>
+                  <div className="text-right shrink-0">
+                    <div className="font-heading font-bold text-primary text-sm">
+                      {p.fees_total_lakhs ? `₹${p.fees_total_lakhs} L` : "—"}
+                    </div>
+                    {p.intake_seats && <div className="text-xs text-muted-foreground">{p.intake_seats} seats</div>}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-sm border-collapse" style={{ minWidth: 900 }}>
+            <thead>
+              <tr className="bg-muted/50">
+                <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border min-w-[200px]">Programme</th>
+                <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">Duration</th>
+                <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border min-w-[140px]">Exams</th>
+                <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border min-w-[180px]">Specialisations</th>
+                <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border min-w-[200px]">Eligibility</th>
+                <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">Seats</th>
+                <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap min-w-[110px]">Fees</th>
+              </tr>
+            </thead>
+            <tbody>
+              {programmes.map((p, i) => {
+                const exams = acceptedExamLabels(p);
+                const specs = p.specializations || [];
+                return (
+                  <motion.tr
+                    key={p.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: i * 0.04 }}
+                    className="border-b border-border hover:bg-muted/30"
+                  >
+                    <td className="py-3 px-3">
+                      <div className="font-semibold text-foreground">{p.name}</div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Badge variant="outline" className="text-xs py-0 px-1.5">{p.programme_type}</Badge>
+                        {p.mode && <span className="text-xs text-muted-foreground">{p.mode}</span>}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-muted-foreground whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
+                        {clean(p.duration) || "—"}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="flex flex-wrap gap-1">
+                        {exams.length === 0 && <span className="text-xs text-muted-foreground">Profile-based</span>}
+                        {exams.slice(0, 4).map((e) => (
+                          <Badge key={e} variant="secondary" className="text-xs py-0 px-1.5">{e}</Badge>
+                        ))}
+                        {exams.length > 4 && <span className="text-xs text-muted-foreground">+{exams.length - 4}</span>}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="flex flex-wrap gap-1">
+                        {specs.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+                        {specs.slice(0, 3).map((s) => (
+                          <span key={s} className="text-xs px-1.5 py-0.5 rounded-[0.25rem] bg-primary/10 text-primary font-medium">{s}</span>
+                        ))}
+                        {specs.length > 3 && <span className="text-xs text-muted-foreground self-center">+{specs.length - 3}</span>}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-xs text-muted-foreground">{eligibilitySummary(p)}</td>
+                    <td className="py-3 px-3 text-muted-foreground whitespace-nowrap">{p.intake_seats || "—"}</td>
+                    <td className="py-3 px-3 text-right whitespace-nowrap">
+                      <div className="font-heading font-bold text-primary">
+                        {p.fees_total_lakhs ? `₹${p.fees_total_lakhs} L` : "—"}
+                      </div>
+                      {p.fees_year && <div className="text-xs text-muted-foreground">{p.fees_year}</div>}
+                    </td>
+                  </motion.tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+      </CardContent>
+    </Card>
+  );
 };
 
 export default ProgrammePortfolioTable;

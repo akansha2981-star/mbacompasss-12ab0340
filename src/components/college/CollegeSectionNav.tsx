@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface NavItem {
@@ -78,7 +77,7 @@ const CollegeSectionNav = ({ items, topOffset = 96, className }: CollegeSectionN
             const isActive = active === item.id;
             return (
               <li key={item.id}>
-                <Button variant="ghost"
+                <button
                   type="button"
                   onClick={() => scrollTo(item.id)}
                   className={cn(
@@ -103,7 +102,7 @@ const CollegeSectionNav = ({ items, topOffset = 96, className }: CollegeSectionN
                       AI+
                     </span>
                   )}
-                </Button>
+                </button>
               </li>
             );
           })}

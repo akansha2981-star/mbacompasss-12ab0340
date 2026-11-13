@@ -46,10 +46,7 @@ import { cdnImage } from "@/lib/imageTransform";
 import { useProgrammeCourses } from "@/hooks/useProgrammeCourses";
 import { Share2, Phone, Sparkles } from "lucide-react";
 import AIExtensionBlock from "@/components/college/AIExtensionBlock";
-import CollegeSectionNav from "@/components/college/CollegeSectionNav";
-import CollegeAutoSlider from "@/components/college/CollegeAutoSlider";
-import CollegeDataDossiers from "@/components/college/CollegeDataDossiers";
-import CollegeContentSection from "@/components/college/CollegeContentSection";
+import CollegeSectionNav, { type NavItem } from "@/components/college/CollegeSectionNav";
 
 // ── Fallback data used when no DB sections exist ──
 const fallbackRatingAspects = [
@@ -57,11 +54,20 @@ const fallbackRatingAspects = [
   { label: "Accommodation", score: 3.8 }, { label: "Social Life", score: 4.3 }, { label: "Placements", score: 4.6 },
   { label: "Value for Money", score: 3.9 },
 ];
+const fallbackGallery = [
+  "https://images.unsplash.com/photo-1562774053-701939374585?w=600",
+  "https://images.unsplash.com/photo-1523050854058-8df90110c476?w=600",
+  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600",
+  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600",
+  "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600",
+  "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=600",
+];
+
 // Pulsing "live" dot used on application CTAs.
 const LiveDot = () => (
   <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
-    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 pointer-events-none" />
-    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
   </span>
 );
 
@@ -79,15 +85,15 @@ const SidebarApplyStrip = ({ collegeName, applyUrl, applyLabel }: { collegeName:
     whileHover={{ scale: 1.02 }}
     whileTap={{ scale: 0.98 }}
   >
-    <div className="relative overflow-hidden rounded-xl border border-accent/70 bg-gradient-to-r from-accent via-accent/70 to-accent px-4 py-3.5 shadow-sm">
-      <div className="absolute -top-8 -right-8 w-24 h-24 bg-accent/40 rounded-full blur-2xl pointer-events-none" />
+    <div className="relative overflow-hidden rounded-xl border border-amber-300/70 bg-gradient-to-r from-amber-50 via-amber-100/70 to-amber-50 px-4 py-3.5 shadow-sm">
+      <div className="absolute -top-8 -right-8 w-24 h-24 bg-amber-200/40 rounded-full blur-2xl pointer-events-none" />
       <div className="relative z-10 flex items-center gap-3">
         <LiveDot />
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-extrabold uppercase tracking-wider text-accent">Applications Open · 2027-29</div>
-          <div className="font-bold text-foreground text-sm break-words">{applyLabel}</div>
+          <div className="text-xs font-extrabold uppercase tracking-wider text-amber-700">Applications Open · 2027-29</div>
+          <div className="font-bold text-foreground text-sm truncate">{applyLabel}</div>
         </div>
-        <ChevronUp className="w-4 h-4 rotate-90 text-primary shrink-0 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+        <ChevronUp className="w-4 h-4 rotate-90 text-amber-700 shrink-0 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
       </div>
     </div>
   </motion.a>
@@ -98,8 +104,8 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, repor
   <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
     <CardContent className="pt-6">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <TrendingUp className="w-4 h-4 text-primary" />
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+          <TrendingUp className="w-4 h-4 text-emerald-600" />
         </div>
         <h4 className="font-heading font-bold text-foreground">Placement Snapshot</h4>
       </div>
@@ -111,8 +117,8 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, repor
           </div>
         )}
         {college.placement_highest && (
-          <div className="rounded-xl bg-accent/10 border border-accent/20 p-3 text-center">
-            <div className="font-heading font-extrabold text-accent text-lg leading-tight">{numericStat(college.placement_highest)}</div>
+          <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+            <div className="font-heading font-extrabold text-amber-700 text-lg leading-tight">{numericStat(college.placement_highest)}</div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Highest Package</div>
           </div>
         )}
@@ -144,6 +150,18 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, repor
 );
 
 // Key facts, accreditations and actions — shared between the desktop sidebar and the mobile stack.
+// Auto-sliding marquee for logo/certificate strips — loops seamlessly, pauses on hover.
+const AutoMarquee = ({ items, render, speed = 40 }: { items: any[]; render: (item: any, i: number) => React.ReactNode; speed?: number }) => (
+  <div className="relative overflow-hidden marquee-hover-pause -mx-1 px-1">
+    <div className="flex gap-4 w-max animate-marquee py-2" style={{ animationDuration: `${speed}s` }}>
+      {items.map((it, i) => <div key={`a-${i}`} className="shrink-0">{render(it, i)}</div>)}
+      {items.map((it, i) => <div key={`b-${i}`} className="shrink-0" aria-hidden="true">{render(it, i)}</div>)}
+    </div>
+    <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-card via-card/70 to-transparent" />
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-card via-card/70 to-transparent" />
+  </div>
+);
+
 const quickInfoIcon = (label: string) => {
   const l = label.toLowerCase();
   if (l.includes("location") || l.includes("address")) return MapPin;
@@ -183,7 +201,7 @@ const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel, quickIte
             </div>
             <div className="min-w-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{item.label}</div>
-              <div className="font-bold text-foreground text-sm break-words">{item.value}</div>
+              <div className="font-bold text-foreground text-sm truncate">{item.value}</div>
             </div>
           </div>
         ))}
@@ -193,7 +211,7 @@ const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel, quickIte
           <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">Accreditations</div>
           <div className="flex flex-wrap gap-1.5">
             {accreditations.slice(0, 6).map((acc: string, i: number) => (
-              <span key={i} className="inline-flex items-center gap-1 text-xs font-semibold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full">
+              <span key={i} className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                 <CheckCircle className="w-3 h-3" /> {acc}
               </span>
             ))}
@@ -202,7 +220,7 @@ const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel, quickIte
       )}
       {applyUrl && (
         <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" aria-label={`${applyLabel} — official application form for ${college.name}`} className="block mt-4">
-          <Button className="w-full gap-1.5 font-bold bg-accent text-accent hover:bg-accent shadow-md">
+          <Button className="w-full gap-1.5 font-bold bg-amber-400 text-amber-950 hover:bg-amber-300 shadow-md">
             <GraduationCap className="w-4 h-4" /> {applyLabel}
           </Button>
         </a>
@@ -221,18 +239,18 @@ const QuickInfoCard = ({ college, accreditations, applyUrl, applyLabel, quickIte
 // Highlighted application CTA shown on colleges with an admin-managed external application link.
 const ApplyBanner = ({ collegeName, applyUrl, applyLabel }: { collegeName: string; applyUrl: string; applyLabel: string }) => (
   <Card className="overflow-hidden border-0 shadow-xl shadow-primary/15 bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-primary-foreground relative">
-    <div className="absolute -top-10 -right-10 w-36 h-36 bg-card/10 rounded-full blur-2xl pointer-events-none" />
-    <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-card/5 rounded-full blur-2xl pointer-events-none" />
+    <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+    <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-white/5 rounded-full blur-2xl pointer-events-none" />
     <CardContent className="relative z-10 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-4">
       <div className="flex-1 min-w-0 text-center sm:text-left">
-        <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-accent text-accent px-2 py-0.5 rounded-md shadow-md mb-2">
+        <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md mb-2">
           Applications Open
         </span>
         <h3 className="font-heading font-extrabold text-lg sm:text-xl leading-tight">Apply to {collegeName}</h3>
         <p className="text-sm text-primary-foreground/80 mt-1">Fill the official application form on the {collegeName} admissions portal. It takes only a few minutes.</p>
       </div>
       <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored" className="shrink-0">
-        <Button size="lg" className="bg-accent text-accent hover:bg-accent font-bold gap-2 shadow-2xl hover:scale-[1.03] transition-all px-6">
+        <Button size="lg" className="bg-amber-400 text-amber-950 hover:bg-amber-300 font-bold gap-2 shadow-2xl hover:scale-[1.03] transition-all px-6">
           <GraduationCap className="w-4 h-4" /> {applyLabel}
         </Button>
       </a>
@@ -246,11 +264,14 @@ const CollegeDetailPage = () => {
   const { data: allColleges } = useSuggestedColleges(slug);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [galleryIdx, setGalleryIdx] = useState(0);
   const [curriculumTerm, setCurriculumTerm] = useState(0);
   const [scholarshipCat, setScholarshipCat] = useState("All");
   const [qaOpen, setQaOpen] = useState<number | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const galleryRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scholarshipSliderRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch verified MBA programme portfolio for this college
   const { data: programmes = [] } = useProgrammeCourses(college?.id);
@@ -309,9 +330,14 @@ const CollegeDetailPage = () => {
     }
   }, [college]);
 
+  // Gallery auto-slide
   const galleryData = getSectionData("gallery");
-  const galleryImages = Array.isArray(galleryData.images)
-    ? galleryData.images.map((i: any) => i.url).filter((url: any) => typeof url === "string" && url.trim()) : [];
+  const galleryImages = galleryData.images?.length > 0 ? galleryData.images.map((i: any) => i.url).filter((u: any) => typeof u === "string" && u.trim()) : fallbackGallery;
+
+  useEffect(() => {
+    galleryRef.current = setInterval(() => setGalleryIdx(p => (p + 1) % galleryImages.length), 3000);
+    return () => clearInterval(galleryRef.current);
+  }, [galleryImages.length]);
 
   // Must call all hooks before any early returns to obey hooks rules
   const { gate: gateBrochure } = useCtaGate("college_download_brochure");
@@ -535,7 +561,6 @@ const CollegeDetailPage = () => {
   const hasKnowledgePartners = knowledgePartners.length > 0 || !!getSectionContent("knowledge_partners");
   const tabItems = [
     { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
-    ...(curriculumTerms.length ? [{ value: "curriculum", label: "Curriculum" }] : []),
     { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
     ...(hasInternational ? [{ value: "international", label: "Global Exposure" }] : []),
     ...(hasKnowledgePartners ? [{ value: "knowledge_partners", label: "Knowledge Partners" }] : []),
@@ -648,50 +673,198 @@ const CollegeDetailPage = () => {
   const whyJoinRatings = whyJoinData.ratings?.length > 0 ? whyJoinData.ratings : ratingAspects;
 
   return (
-    <div className="college-detail min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <SEOHead {...resolvedSeo} jsonLd={pageJsonLd as any} />
       <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} message="Sign in to access detailed college information." />
 
-      <header className="college-profile-header relative overflow-hidden border-b border-border bg-secondary/40">
-        {college.banner_url && <div className="pointer-events-none absolute inset-0">
-          <img src={cdnImage(college.banner_url, { width: 1280 })} alt="" width={1280} height={500} className="college-cover w-full object-cover" fetchPriority="high" loading="eager" decoding="async" />
-          <div className="college-cover-scrim pointer-events-none absolute inset-0" />
-        </div>}
-        <div className="container relative mx-auto px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <Link to="/colleges" className="text-sm font-medium text-primary">Colleges / {college.city || college.type}</Link>
-            <Button variant="outline" size="icon" title="Share college" aria-label="Share college" onClick={() => { navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied!" }); }}><Share2 /></Button>
+      {/* ===== Premium Hero Banner ===== */}
+      <div className="relative overflow-hidden" style={{ background: 'hsl(207 90% 54%)' }}>
+        {/* Layered background */}
+        <div className="absolute inset-0 pointer-events-none">
+          {college.banner_url && (
+            <img src={cdnImage(college.banner_url, { width: 1280 })} alt="" width={1920} height={600} className="absolute inset-0 w-full h-full object-cover opacity-55 md:scale-105" loading="eager" fetchPriority="high" decoding="async" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/65 to-primary/85" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(0_0%_100%/0.18),transparent_55%)]" />
+          <div className="absolute -top-20 -left-20 hidden w-[480px] h-[480px] bg-white/8 rounded-full blur-3xl md:block" />
+          <div className="absolute -bottom-32 right-0 hidden w-[420px] h-[420px] bg-white/5 rounded-full blur-3xl md:block" />
+          {/* Subtle dot grid */}
+          <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(hsl(0 0% 100%) 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
+        </div>
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-6 pb-12 md:pt-8 md:pb-16">
+          {/* Action row */}
+          <div className="flex items-center justify-end mb-6 gap-2">
+            <button
+              onClick={() => { navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied!" }); }}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-primary-foreground bg-white/10 hover:bg-white/15 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15 transition-colors"
+            >
+              <Share2 className="w-3.5 h-3.5" /> Share
+            </button>
+            <Badge className="bg-amber-400/95 text-amber-950 border-none font-bold text-xs uppercase tracking-wider px-2.5 py-1 shadow-md">
+              ✦ Verified Profile
+            </Badge>
           </div>
-          <div className="flex items-start gap-4 sm:gap-6">
-            {college.logo_url ? <img src={cdnImage(college.logo_url, { width: 192 })} alt={`${college.name} logo`} width={96} height={96} className="college-profile-logo shrink-0 rounded-lg border border-border bg-card object-contain p-2" decoding="async" />
-              : <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-3xl font-bold text-primary">{college.name.charAt(0)}</div>}
-            <div className="min-w-0">
-              <div className="mb-2 flex flex-wrap gap-2">{college.type && <Badge variant="secondary">{college.type}</Badge>}{college.tier && <Badge variant="outline">{college.tier}</Badge>}</div>
-              <h1 className="font-heading text-3xl font-bold leading-tight text-foreground">{college.name}</h1>
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 shrink-0" />{[college.city, college.state].filter(Boolean).join(", ")}</span>
-                {college.established && <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" />Established {college.established}</span>}
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            {/* Identity Row */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-5 mb-7">
+              <div className="relative shrink-0">
+                <div className="absolute -inset-1.5 bg-gradient-to-br from-amber-300 via-white/60 to-amber-200 rounded-3xl blur-md opacity-70" />
+                {college.logo_url ? (
+                  <img src={cdnImage(college.logo_url, { width: 192 })} alt={college.name} width={96} height={96} className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl object-contain bg-white p-2 shadow-2xl ring-2 ring-white/50" loading="eager" decoding="async" />
+                ) : (
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-white shadow-2xl ring-2 ring-white/50 flex items-center justify-center text-primary font-extrabold text-3xl">
+                    {Number(college.ranking) > 0 ? `#${college.ranking}` : college.name.charAt(0)}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  {Number(college.ranking) > 0 && (
+                    <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-950 bg-gradient-to-r from-amber-300 to-amber-400 px-2.5 py-1 rounded-md uppercase tracking-wider shadow-md">
+                      <Award className="w-3 h-3" /> NIRF Rank #{college.ranking}
+                    </span>
+                  )}
+                  {college.tier && (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-primary-foreground bg-white/15 backdrop-blur-sm border border-white/25 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      {college.tier}
+                    </span>
+                  )}
+                  {college.type && (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-primary-foreground bg-white/15 backdrop-blur-sm border border-white/25 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      <Building className="w-3 h-3" /> {college.type}
+                    </span>
+                  )}
+                </div>
+                <h1 className="font-heading text-2xl sm:text-3xl md:text-5xl font-extrabold text-primary-foreground leading-[1.08] tracking-tight mb-3 break-words [text-shadow:_0_2px_8px_rgb(0_0_0_/_0.2)]">
+                  {(() => {
+                    const words = (college.name || "").split(" ");
+                    if (words.length < 2) return college.name;
+                    const tail = words.slice(-1)[0];
+                    const head = words.slice(0, -1).join(" ");
+                    return (
+                      <>
+                        {head}{" "}
+                        <span className="font-editorial italic font-normal text-yellow-100/95">{tail}</span>
+                      </>
+                    );
+                  })()}
+                </h1>
+                <div className="h-px w-12 bg-primary-foreground/30 mb-3" />
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-primary-foreground/90 text-sm">
+                  <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {college.city}{college.state ? `, ${college.state}` : ""}</span>
+                  {college.established && <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Est. {college.established}</span>}
+                  <span className="inline-flex items-center gap-1.5">
+                    <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
+                    <span className="font-bold text-primary-foreground">{overallRating}</span>
+                    <span className="text-primary-foreground/70">/5 rating</span>
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <dl className="college-header-facts mt-7 grid grid-cols-2 gap-4 border-y border-border py-5 md:grid-cols-4">
-            {[{ label: "Total Fees", value: formatMoney(college.fees), icon: Banknote }, { label: "Average Package", value: formatMoney(college.placement_avg), icon: TrendingUp }, { label: "Highest Package", value: formatMoney(college.placement_highest), icon: Award },
-              Number(college.ranking) > 0 ? { label: "NIRF Rank", value: rankOnly(college.ranking), icon: Medal } : { label: "Accepted Exams", value: exams.join(" · "), icon: BookOpen }].map(fact => <div key={fact.label} className="min-w-0">
-                <dt className="mb-2 flex items-center gap-2 text-sm text-muted-foreground"><fact.icon className="h-4 w-4 shrink-0 text-primary" />{fact.label}</dt>
-                <dd className="font-heading text-xl font-bold text-foreground break-words">{fact.value || "Not disclosed"}</dd>
-              </div>)}
-          </dl>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Button onClick={handleDownloadBrochure} className="gap-2"><Download />Download Brochure</Button>
-            {applyUrl ? <Button asChild variant="outline"><a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored"><GraduationCap />{applyLabel}</a></Button>
-              : <Button variant="outline" onClick={() => scrollToSection("admission")}><GraduationCap />Admissions</Button>}
-            <Button asChild variant="outline"><Link to="/compare"><TrendingUp />Compare</Link></Button>
-            {college.website && <Button asChild variant="ghost"><a href={college.website} target="_blank" rel="noopener noreferrer"><Globe />Official Website</a></Button>}
-          </div>
-          {rankAccreditations.length > 0 && <div className="mt-5 flex flex-wrap gap-2">{rankAccreditations.map((item: string) => <span key={item} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-primary" />{item}</span>)}</div>}
-          <LastUpdatedBadge date={(college as any).last_seo_refresh || (college as any).updated_at} className="mt-4" />
+
+            {/* Premium Stats Strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
+              {[
+                ...(Number(college.ranking) > 0
+                  ? [{ label: "NIRF Ranking", value: rankOnly(college.ranking), source: "NIRF", icon: Award, year: new Date().getFullYear().toString() }]
+                  : [{ label: "Placement Rate", value: numericStat(placementData.placement_rate) || "Not disclosed", source: "Placement Report", icon: CheckCircle, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` }]),
+                { label: "Total Fees", value: formatMoney(college.fees) || "Not disclosed", source: "Brochure", icon: Banknote, year: new Date().getFullYear().toString() },
+                { label: "Avg Package", value: formatMoney(college.placement_avg) || "Not disclosed", source: "Placement Report", icon: TrendingUp, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
+                { label: "Highest Package", value: formatMoney(college.placement_highest) || "Not disclosed", source: "Placement Report", icon: Medal, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
+              ].map(s => {
+                const Icon = s.icon;
+                return (
+                  <div key={s.label} className="group relative bg-white/10 backdrop-blur-md rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 border border-white/15 hover:bg-white/15 hover:border-white/25 transition-all min-w-0">
+                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                    <div className="flex items-center gap-1.5 mb-1.5 min-w-0">
+                      <Icon className="w-3.5 h-3.5 text-primary-foreground/70 shrink-0" />
+                      <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/70 truncate">{s.label}</span>
+                    </div>
+                    <div className="font-heading font-extrabold text-primary-foreground text-sm sm:text-base md:text-lg leading-tight truncate" title={s.value}>{s.value}</div>
+
+                    <div className="mt-1.5">
+                      <CitationLink source={s.source} year={s.year} entityName={college.name} entityWebsite={(college as any).website} className="!bg-white/10 !border-white/20 !text-primary-foreground/80" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Premium Action Row */}
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+              <Button
+                onClick={handleDownloadBrochure}
+                size="lg"
+                className="bg-white text-primary hover:bg-white/95 font-bold shadow-2xl hover:shadow-white/20 hover:scale-[1.02] transition-all gap-2 px-6"
+              >
+                <Download className="w-4 h-4" /> Download Brochure
+              </Button>
+              {applyUrl ? (
+                <a href={applyUrl} target="_blank" rel="noopener noreferrer sponsored">
+                  <Button
+                    size="lg"
+                    className="bg-amber-400 text-amber-950 hover:bg-amber-300 font-bold shadow-2xl hover:scale-[1.02] transition-all gap-2 px-6"
+                  >
+                    <GraduationCap className="w-4 h-4" /> Apply Now
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })}
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/10 backdrop-blur-md border-white/30 text-primary-foreground hover:bg-white/20 hover:border-white/50 hover:text-primary-foreground font-bold gap-2"
+                >
+                  <GraduationCap className="w-4 h-4" /> Apply Now
+                </Button>
+              )}
+              <Link to="/compare">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/10 backdrop-blur-md border-white/30 text-primary-foreground hover:bg-white/20 hover:border-white/50 hover:text-primary-foreground font-bold gap-2"
+                >
+                  <TrendingUp className="w-4 h-4" /> Compare
+                </Button>
+              </Link>
+              {college.website && (
+                <a href={college.website} target="_blank" rel="noopener noreferrer">
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground font-semibold gap-2"
+                  >
+                    <Globe className="w-4 h-4" /> Visit Website
+                  </Button>
+                </a>
+              )}
+            </div>
+
+            {/* Footer row: Accreditations + Last Updated */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              {rankAccreditations.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {rankAccreditations.slice(0, 6).map((a: string) => (
+                    <span key={a} className="text-xs font-bold px-2 py-0.5 rounded-[0.25rem] bg-emerald-400/95 text-emerald-950 shadow-xs">
+                      ✓ {a}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <LastUpdatedBadge
+                date={(college as any).last_seo_refresh || (college as any).updated_at}
+                className="!bg-white/10 !border-white/20 !text-primary-foreground/85 ml-auto"
+              />
+            </div>
+          </motion.div>
         </div>
-      </header>
+
+        {/* Subtle bottom curve */}
+        <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-b from-transparent to-background/60" />
+      </div>
 
       {/* Sticky Tab Nav — Premium pill style */}
       <div className="sticky top-16 z-40 bg-card/95 backdrop-blur-xl border-b border-border shadow-xs">
@@ -699,13 +872,13 @@ const CollegeDetailPage = () => {
 
           <div className="flex overflow-x-auto gap-1.5 py-2.5 scrollbar-hide">
             {tabItems.map(t => (
-              <Button variant="ghost"
+              <button
                 key={t.value}
                 onClick={() => scrollToSection(t.value)}
                 className="group relative shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all text-muted-foreground hover:text-primary hover:bg-primary/8 border border-transparent hover:border-primary/15"
               >
                 {t.label}
-              </Button>
+              </button>
             ))}
           </div>
         </div>
@@ -749,7 +922,7 @@ const CollegeDetailPage = () => {
 
             {/* Overview */}
             <div id="overview" ref={el => { sectionRefs.current["overview"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card className="overflow-hidden border-border/60 shadow-md">
                 <div className="h-1 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
                 <CardHeader>
                   <CardTitle className="font-heading flex items-center gap-2.5">
@@ -768,33 +941,38 @@ const CollegeDetailPage = () => {
                   {highlights && (
                     <div className="mt-6 pt-6 border-t border-dashed border-border">
                       <h3 className="font-heading font-bold text-foreground mb-4 flex items-center gap-2">
-                        <Star className="w-4 h-4 text-accent fill-accent" /> Key Highlights
+                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" /> Key Highlights
                       </h3>
-                      <CollegeAutoSlider items={Array.isArray(highlights) ? highlights : Object.entries(highlights).map(([key, value]) => `${key}: ${value}`)} label="Key highlights" render={(highlight: any) => (
-                        <div className="flex h-full min-h-24 items-start gap-3 rounded-lg border border-border bg-card p-4"><CheckCircle className="mt-1 h-5 w-5 shrink-0 text-primary" /><span className="text-base text-foreground">{String(highlight)}</span></div>
-                      )} />
+                      <div className="grid sm:grid-cols-2 gap-2.5">
+                        {(Array.isArray(highlights) ? highlights : Object.entries(highlights).map(([k, v]) => `${k}: ${v}`)).map((h: string, i: number) => (
+                          <div key={i} className="flex items-start gap-2.5 text-sm text-foreground p-2.5 rounded-lg bg-gradient-to-br from-primary/5 to-transparent border border-border/40">
+                            <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                            <span>{h}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
 
               {/* Why Join Ratings */}
-              <CollegeContentSection>
-                <div className="h-1 bg-gradient-to-r from-accent via-accent to-transparent" />
+              <Card className="overflow-hidden border-amber-200/50 dark:border-amber-900/30 shadow-md mt-6 bg-gradient-to-br from-amber-50/30 to-transparent dark:from-amber-950/10">
+                <div className="h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-transparent" />
                 <CardHeader>
                   <CardTitle className="font-heading flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent/30 to-accent/10 flex items-center justify-center">
-                      <Star className="w-5 h-5 text-accent fill-accent" />
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400/30 to-amber-500/10 flex items-center justify-center">
+                      <Star className="w-5 h-5 text-amber-600 fill-amber-500" />
                     </div>
                     Why Join {college.name}?
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6">
-                    <div className="text-center shrink-0 p-4 rounded-2xl bg-gradient-to-br from-accent/15 to-accent/5 border border-accent/40 dark:border-accent/30 self-center sm:self-auto min-w-[120px]">
-                      <div className="text-4xl font-heading font-extrabold bg-gradient-to-br from-accent to-accent bg-clip-text text-transparent">{overallRating}</div>
+                    <div className="text-center shrink-0 p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 to-amber-500/5 border border-amber-200/40 dark:border-amber-900/30 self-center sm:self-auto min-w-[120px]">
+                      <div className="text-4xl font-heading font-extrabold bg-gradient-to-br from-amber-600 to-amber-500 bg-clip-text text-transparent">{overallRating}</div>
                       <div className="flex items-center gap-0.5 justify-center mt-1">
-                        {[...Array(5)].map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(Number(overallRating)) ? "fill-accent text-accent" : "text-muted-foreground/40"}`} />)}
+                        {[...Array(5)].map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(Number(overallRating)) ? "fill-amber-500 text-amber-500" : "text-muted-foreground/40"}`} />)}
                       </div>
                       <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-1">Overall</div>
                     </div>
@@ -811,7 +989,7 @@ const CollegeDetailPage = () => {
                     </div>
                   </div>
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
 
               {applyUrl && <ApplyBanner collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} />}
             </div>
@@ -824,29 +1002,45 @@ const CollegeDetailPage = () => {
                   collegeSlug={college.slug}
                 />
               ) : coursesFeesList.length > 0 ? (
-                <CollegeContentSection>
+                <Card>
                   <CardHeader><CardTitle className="font-heading">Courses & Fee Structure</CardTitle></CardHeader>
                   <CardContent>
-                    <CollegeDataDossiers rows={coursesFeesList} label="Courses" columns={[
-                      { label: "Course", value: (c: any) => c.name }, { label: "Duration", value: (c: any) => c.duration },
-                      { label: "Eligibility", value: (c: any) => c.eligibility }, { label: "Fees", value: (c: any) => numericStat(c.fees) },
-                    ]} />
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border-collapse">
+                        <thead><tr className="bg-muted/50">
+                          <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Course</th>
+                          <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Duration</th>
+                          <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Eligibility</th>
+                          <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Fees</th>
+                        </tr></thead>
+                        <tbody>
+                          {coursesFeesList.map((c: any, i: number) => (
+                            <tr key={i} className="border-b border-border hover:bg-muted/30">
+                              <td className="py-3 px-3 font-medium text-foreground">{c.name}</td>
+                              <td className="py-3 px-3 text-muted-foreground">{c.duration}</td>
+                              <td className="py-3 px-3 text-muted-foreground">{c.eligibility}</td>
+                              <td className="py-3 px-3 text-right font-heading font-bold text-primary whitespace-nowrap">{numericStat(c.fees)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </CardContent>
-                </CollegeContentSection>
+                </Card>
               ) : (
-                <CollegeContentSection>
+                <Card>
                   <CardHeader><CardTitle className="font-heading">Courses & Fee Structure</CardTitle></CardHeader>
                   <CardContent>
                     <div className="text-center py-8"><BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" /><p className="text-muted-foreground">Course details coming soon.</p></div>
                   </CardContent>
-                </CollegeContentSection>
+                </Card>
               )}
             </div>
 
             {/* Term-wise Curriculum */}
             {curriculumTerms.length > 0 && (
               <div id="curriculum" ref={el => { sectionRefs.current["curriculum"] = el; }} className="scroll-mt-32">
-                <CollegeContentSection>
+                <Card className="overflow-hidden border-border/60 shadow-md">
                   <div className="h-1 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
                   <CardHeader>
                     <CardTitle className="font-heading flex items-center gap-2.5">
@@ -866,7 +1060,7 @@ const CollegeDetailPage = () => {
                           aria-selected={curriculumTerm === i}
                           onClick={() => setCurriculumTerm(i)}
                           className={`px-4 py-2 rounded-t-xl rounded-b-md text-sm font-bold transition-all ${curriculumTerm === i
-                            ? "bg-accent text-accent shadow-md"
+                            ? "bg-amber-400 text-amber-950 shadow-md"
                             : "bg-primary/90 text-primary-foreground hover:bg-primary"}`}
                         >
                           {t.term}
@@ -905,13 +1099,13 @@ const CollegeDetailPage = () => {
                       <p className="text-xs text-muted-foreground mt-3">{curriculumTerms[curriculumTerm].note}</p>
                     )}
                   </CardContent>
-                </CollegeContentSection>
+                </Card>
               </div>
             )}
 
             {/* Admissions */}
             <div id="admission" ref={el => { sectionRefs.current["admission"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading">Admission Process</CardTitle></CardHeader>
                 <CardContent>
                   {getSectionContent("admission") ? (
@@ -951,17 +1145,17 @@ const CollegeDetailPage = () => {
                   )}
                   <AIExtensionBlock section={getAIExtension("admission")} extensionLabel="Detailed Admission Guide" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Placements */}
             <div id="placements" ref={el => { sectionRefs.current["placements"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
-                <div className="h-1 bg-gradient-to-r from-primary via-primary to-transparent" />
+              <Card className="overflow-hidden border-border/60 shadow-md">
+                <div className="h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-transparent" />
                 <CardHeader>
                   <CardTitle className="font-heading flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-primary" />
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-emerald-600" />
                     </div>
                     Placement Statistics
                   </CardTitle>
@@ -969,10 +1163,10 @@ const CollegeDetailPage = () => {
                 <CardContent>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                     {[
-                      { label: "Average Package", value: formatMoney(college.placement_avg) || "—", icon: TrendingUp, color: "from-primary/15 to-primary/5", iconColor: "text-primary" },
-                      { label: "Highest Package", value: formatMoney(college.placement_highest) || "—", icon: Award, color: "from-accent/15 to-accent/5", iconColor: "text-accent" },
-                      { label: "Median Package", value: formatMoney(college.placement_median) || "—", icon: Star, color: "from-primary/15 to-primary/5", iconColor: "text-primary" },
-                      { label: "Placement Rate", value: numericStat(placementData.placement_rate), icon: CheckCircle, color: "from-primary/15 to-primary/5", iconColor: "text-primary" },
+                      { label: "Average Package", value: formatMoney(college.placement_avg) || "—", icon: TrendingUp, color: "from-blue-500/15 to-blue-500/5", iconColor: "text-blue-600" },
+                      { label: "Highest Package", value: formatMoney(college.placement_highest) || "—", icon: Award, color: "from-amber-500/15 to-amber-500/5", iconColor: "text-amber-600" },
+                      { label: "Median Package", value: formatMoney(college.placement_median) || "—", icon: Star, color: "from-purple-500/15 to-purple-500/5", iconColor: "text-purple-600" },
+                      { label: "Placement Rate", value: numericStat(placementData.placement_rate), icon: CheckCircle, color: "from-emerald-500/15 to-emerald-500/5", iconColor: "text-emerald-600" },
                     ].map(s => (
                       <div key={s.label} className={`relative bg-gradient-to-br ${s.color} rounded-xl p-4 text-center border border-border/40 hover:shadow-md hover:-translate-y-0.5 transition-all`}>
                         <s.icon className={`w-5 h-5 ${s.iconColor} mx-auto mb-2`} />
@@ -994,7 +1188,7 @@ const CollegeDetailPage = () => {
                         ].filter(Boolean).map((s: any) => (
                           <div key={s.label} className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-3.5 py-2">
                             <span className="font-heading font-extrabold text-foreground text-sm">{s.value}</span>
-                            <span className="text-sm uppercase tracking-wider text-muted-foreground font-semibold">{s.label}</span>
+                            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{s.label}</span>
                           </div>
                         ))}
                       </div>
@@ -1014,10 +1208,28 @@ const CollegeDetailPage = () => {
                     <div className="mb-6">
                       <h3 className="font-heading font-semibold text-foreground mb-3">Year-wise Placement Trends</h3>
                       <PlacementTrendChart yearly={placementData.yearly} />
-                      <div className="mt-4"><CollegeDataDossiers rows={placementData.yearly} label="Placement years" columns={[
-                        { label: "Year", value: (y: any) => stripText(y.year) }, { label: "Average CTC", value: (y: any) => stripText(y.average) },
-                        { label: "Median CTC", value: (y: any) => stripText(y.median) }, { label: "Highest CTC", value: (y: any) => stripText(y.highest) },
-                      ]} /></div>
+                      <div className="overflow-x-auto rounded-lg border border-border mt-4">
+                        <table className="w-full text-sm border-collapse min-w-[420px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Year</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Average CTC</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Median CTC</th>
+                              <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border">Highest CTC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {placementData.yearly.map((y: any, i: number) => (
+                              <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-3 px-3 font-medium text-foreground">{stripText(y.year)}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-primary">{stripText(y.average)}</td>
+                                <td className="py-3 px-3 text-right text-muted-foreground">{stripText(y.median)}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-amber-600">{stripText(y.highest)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   )}
                   <h3 className="font-heading font-semibold text-foreground mb-3">Sector-wise Placements</h3>
@@ -1048,17 +1260,32 @@ const CollegeDetailPage = () => {
                       {placementStats?.top10_mean && (
                         <p className="text-xs text-muted-foreground mb-3">Top 10% of offers: mean {stripText(placementStats.top10_mean)}{placementStats.top10_median ? `, median ${stripText(placementStats.top10_median)}` : ""}.</p>
                       )}
-                      <CollegeDataDossiers rows={topOffers} label="Top offers" columns={[
-                        { label: "Company", value: (o: any) => o.company }, { label: "CTC", value: (o: any) => o.ctc },
-                      ]} />
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-sm border-collapse min-w-[320px]">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="text-left py-2.5 px-3 font-heading font-semibold text-foreground border-b border-border">Company</th>
+                              <th className="text-right py-2.5 px-3 font-heading font-semibold text-foreground border-b border-border">CTC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {topOffers.map((o: any, i: number) => (
+                              <tr key={o.company} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                <td className="py-2.5 px-3 font-medium text-foreground">{o.company}</td>
+                                <td className={`py-2.5 px-3 text-right font-heading font-bold ${i < 3 ? "text-amber-600" : "text-primary"}`}>{o.ctc}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   )}
                   {placementRecruiters.length > 0 && (
                     <div>
                       <h3 className="font-heading font-semibold text-foreground mb-3">Top Recruiters</h3>
-                      <CollegeAutoSlider items={placementRecruiters} label="Recruiters" render={(r: string) => (
-                        <div className="flex min-h-24 items-center gap-3 rounded-lg border border-border bg-card p-5"><Building className="h-6 w-6 shrink-0 text-primary" /><span className="font-heading text-base font-semibold text-foreground">{r}</span></div>
-                      )} />
+                      <div className="flex flex-wrap gap-2">
+                        {placementRecruiters.map((r: string) => <Badge key={r} variant="outline" className="text-xs py-1.5 px-3"><Building className="w-3 h-3 mr-1" /> {r}</Badge>)}
+                      </div>
                     </div>
                   )}
                   {getSectionContent("placements") && (
@@ -1066,7 +1293,7 @@ const CollegeDetailPage = () => {
                   )}
                   <AIExtensionBlock section={getAIExtension("placements")} extensionLabel="Placement Insights & Trends" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
               {applyUrl && <div className="mt-6"><ApplyBanner collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} /></div>}
             </div>
 
@@ -1075,12 +1302,12 @@ const CollegeDetailPage = () => {
             {/* International Collaborations */}
             {(intlPartners.length > 0 || getSectionContent("international")) && (
               <div id="international" ref={el => { sectionRefs.current["international"] = el; }} className="scroll-mt-32">
-                <CollegeContentSection>
-                  <div className="h-1 bg-gradient-to-r from-primary via-primary to-transparent" />
+                <Card className="overflow-hidden border-border/60 shadow-md">
+                  <div className="h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-transparent" />
                   <CardHeader>
                     <CardTitle className="font-heading flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                        <Globe className="w-5 h-5 text-primary" />
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500/20 to-sky-500/5 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-sky-600" />
                       </div>
                       International Collaborations
                     </CardTitle>
@@ -1090,40 +1317,40 @@ const CollegeDetailPage = () => {
                       <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("international"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
                     )}
                     {intlPartners.length > 0 && (
-                      <CollegeAutoSlider
+                      <AutoMarquee
                         items={intlPartners}
-                        label="International collaborations"
+                        speed={35}
                         render={(p: any) => (
-                          <div className="h-full rounded-lg border border-border/60 bg-gradient-to-b from-card to-primary/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 transition-all duration-300">
+                          <div className="w-52 rounded-2xl border border-border/60 bg-gradient-to-b from-card to-sky-500/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-sky-500/40 transition-all duration-300">
                             {p.logo ? (
                               <div className="h-16 w-full flex items-center justify-center rounded-xl bg-background/80 border border-border/40 px-3 py-2">
-                                <img src={p.logo} alt={`${p.name} logo`} width={200} height={80} className="max-h-16 w-full object-contain" loading="lazy" decoding="async" />
+                                <img src={p.logo} alt={`${p.name} logo`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
                               </div>
                             ) : (
-                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center text-primary-foreground font-extrabold text-lg shadow-lg shadow-primary/30">{p.name.charAt(0)}</div>
+                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-sky-500/30">{p.name.charAt(0)}</div>
                             )}
                             <div>
                               <div className="text-xs font-bold text-foreground leading-snug">{p.name}</div>
-                              {p.country && <div className="text-sm text-muted-foreground mt-0.5">{p.country}</div>}
+                              {p.country && <div className="text-[11px] text-muted-foreground mt-0.5">{p.country}</div>}
                             </div>
                           </div>
                         )}
                       />
                     )}
                   </CardContent>
-                </CollegeContentSection>
+                </Card>
               </div>
             )}
 
             {/* Knowledge Partners */}
             {(knowledgePartners.length > 0 || getSectionContent("knowledge_partners")) && (
               <div id="knowledge_partners" ref={el => { sectionRefs.current["knowledge_partners"] = el; }} className="scroll-mt-32">
-                <CollegeContentSection>
-                  <div className="h-1 bg-gradient-to-r from-primary via-primary to-transparent" />
+                <Card className="overflow-hidden border-border/60 shadow-md">
+                  <div className="h-1 bg-gradient-to-r from-violet-500 via-violet-400 to-transparent" />
                   <CardHeader>
                     <CardTitle className="font-heading flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                        <BookOpen className="w-5 h-5 text-primary" />
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-violet-600" />
                       </div>
                       Knowledge Partners
                     </CardTitle>
@@ -1133,45 +1360,77 @@ const CollegeDetailPage = () => {
                       <div className="text-muted-foreground leading-relaxed mb-6 ai-content max-w-none" dangerouslySetInnerHTML={{ __html: enhanceAIContent(getSectionContent("knowledge_partners"), { entityName: college.name, entityWebsite: (college as any).website }) }} />
                     )}
                     {knowledgePartners.length > 0 && (
-                      <CollegeAutoSlider
+                      <AutoMarquee
                         items={knowledgePartners}
-                        label="Knowledge partners"
+                        speed={40}
                         render={(p: any) => (
-                          <div className="h-full rounded-lg border border-border/60 bg-gradient-to-b from-card to-primary/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 transition-all duration-300">
+                          <div className="w-52 rounded-2xl border border-border/60 bg-gradient-to-b from-card to-violet-500/5 p-5 flex flex-col items-center text-center gap-3 hover:shadow-lg hover:-translate-y-1 hover:border-violet-500/40 transition-all duration-300">
                             {p.logo ? (
                               <div className="h-16 w-full flex items-center justify-center rounded-xl bg-background/80 border border-border/40 px-3 py-2">
-                                <img src={p.logo} alt={`${p.name} logo`} width={200} height={80} className="max-h-16 w-full object-contain" loading="lazy" decoding="async" />
+                                <img src={p.logo} alt={`${p.name} logo`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
                               </div>
                             ) : (
-                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center text-primary-foreground font-extrabold text-lg shadow-lg shadow-primary/30">{p.name.charAt(0)}</div>
+                              <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-violet-500/30">{p.name.charAt(0)}</div>
                             )}
                             <div>
                               <div className="text-xs font-bold text-foreground leading-snug">{p.name}</div>
-                              {p.tagline && <div className="text-sm text-muted-foreground mt-0.5">{p.tagline}</div>}
+                              {p.tagline && <div className="text-[11px] text-muted-foreground mt-0.5">{p.tagline}</div>}
                             </div>
                           </div>
                         )}
                       />
                     )}
                   </CardContent>
-                </CollegeContentSection>
+                </Card>
               </div>
             )}
 
             {/* Cutoff */}
             <div id="cutoff" ref={el => { sectionRefs.current["cutoff"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading">Cutoff Details</CardTitle></CardHeader>
                 <CardContent>
                   {Array.isArray(cutoffData.cutoffs) && cutoffData.cutoffs.length > 0 ? (
-                    <CollegeDataDossiers rows={cutoffData.cutoffs} label="Cutoffs" columns={[
-                      { label: "Category", value: (c: any) => c.category }, { label: "Exam", value: (c: any) => c.exam },
-                      { label: "Year", value: (c: any) => c.year }, { label: "Percentile", value: (c: any) => numericStat(c.percentile, stripTBA(c.percentile) || "—") },
-                    ]} />
+                    <div className="-mx-6 px-6">
+                      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+                        <table className="w-full text-sm border-collapse min-w-[480px]">
+                          <thead><tr className="bg-muted/50">
+                            <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">Category</th>
+                            <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">Exam</th>
+                            <th className="text-left py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">Year</th>
+                            <th className="text-right py-3 px-3 font-heading font-semibold text-foreground border-b border-border whitespace-nowrap">Percentile</th>
+                          </tr></thead>
+                          <tbody>
+                            {(cutoffData.cutoffs as any[]).map((c: any, i: number) => (
+                              <tr key={i} className="border-b border-border last:border-0">
+                                <td className="py-3 px-3 font-medium text-foreground whitespace-nowrap">{c.category}</td>
+                                <td className="py-3 px-3 text-muted-foreground whitespace-nowrap">{c.exam}</td>
+                                <td className="py-3 px-3 text-muted-foreground whitespace-nowrap">{c.year}</td>
+                                <td className="py-3 px-3 text-right font-heading font-bold text-primary whitespace-nowrap">{numericStat(c.percentile, stripTBA(c.percentile) || "—")}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 sm:hidden">← Swipe to view all columns →</p>
+                    </div>
                   ) : cutoffInfo ? (
-                    <CollegeDataDossiers rows={Object.entries(cutoffInfo)} label="Cutoffs" columns={[
-                      { label: "Category", value: (c: any) => c[0] }, { label: "Cutoff", value: (c: any) => String(c[1]) },
-                    ]} />
+                    <div className="overflow-x-auto rounded-lg border border-border">
+                      <table className="w-full text-sm border-collapse min-w-[320px]">
+                        <thead><tr className="bg-muted/50">
+                          <th className="text-left py-3 px-3 font-heading font-semibold border-b border-border">Category</th>
+                          <th className="text-right py-3 px-3 font-heading font-semibold border-b border-border">Cutoff</th>
+                        </tr></thead>
+                        <tbody>
+                          {Object.entries(cutoffInfo).map(([cat, val]) => (
+                            <tr key={cat} className="border-b border-border last:border-0">
+                              <td className="py-3 px-3 font-medium capitalize">{cat}</td>
+                              <td className="py-3 px-3 text-right font-bold text-primary">{String(val)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : (
                     <p className="text-center text-muted-foreground py-8">Cutoff data coming soon.</p>
                   )}
@@ -1180,17 +1439,17 @@ const CollegeDetailPage = () => {
                   )}
                   <AIExtensionBlock section={getAIExtension("cutoff")} extensionLabel="Cut-off Trends & Analysis" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Rankings */}
             <div id="rankings" ref={el => { sectionRefs.current["rankings"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
-                <div className="h-1 bg-gradient-to-r from-accent via-accent to-transparent" />
+              <Card className="overflow-hidden border-border/60 shadow-md">
+                <div className="h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-transparent" />
                 <CardHeader>
                   <CardTitle className="font-heading flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent/30 to-accent/10 flex items-center justify-center">
-                      <Medal className="w-5 h-5 text-accent" />
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400/30 to-amber-500/10 flex items-center justify-center">
+                      <Medal className="w-5 h-5 text-amber-600" />
                     </div>
                     Rankings & Accreditations
                   </CardTitle>
@@ -1198,8 +1457,8 @@ const CollegeDetailPage = () => {
                 <CardContent>
                   <div className="grid sm:grid-cols-2 gap-3 mb-6">
                     {rankingsList.map((r: any, i: number) => (
-                      <div key={i} className="relative bg-gradient-to-br from-accent/40 to-transparent dark:from-accent/10 rounded-xl p-4 flex items-center gap-4 border border-accent/40 dark:border-accent/30 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent to-accent flex items-center justify-center text-foreground font-extrabold text-base shrink-0 shadow-lg shadow-accent/30">
+                      <div key={i} className="relative bg-gradient-to-br from-amber-50/40 to-transparent dark:from-amber-950/10 rounded-xl p-4 flex items-center gap-4 border border-amber-200/40 dark:border-amber-900/30 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-extrabold text-base shrink-0 shadow-lg shadow-amber-500/30">
                           {r.rank}
                         </div>
                         <div className="min-w-0">
@@ -1212,12 +1471,12 @@ const CollegeDetailPage = () => {
                   {rankAccreditations.length > 0 && (
                     <div className="pt-4 border-t border-dashed border-border">
                       <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" /> Accreditations
+                        <CheckCircle className="w-4 h-4 text-emerald-600" /> Accreditations
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {rankAccreditations.map((a: string) => (
-                          <div key={a} className="flex items-center gap-1.5 bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/50 dark:border-primary/30 rounded-lg px-3 py-1.5">
-                            <Award className="w-3.5 h-3.5 text-primary" />
+                          <div key={a} className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500/15 to-emerald-500/5 border border-emerald-200/50 dark:border-emerald-900/30 rounded-lg px-3 py-1.5">
+                            <Award className="w-3.5 h-3.5 text-emerald-600" />
                             <span className="text-xs font-bold text-foreground">{a}</span>
                           </div>
                         ))}
@@ -1227,20 +1486,20 @@ const CollegeDetailPage = () => {
                   {rankCertificates.length > 0 && (
                     <div className="pt-4 border-t border-dashed border-border mt-4">
                       <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
-                        <Medal className="w-4 h-4 text-accent" /> Certificates & Awards
+                        <Medal className="w-4 h-4 text-amber-600" /> Certificates & Awards
                       </h3>
-                      <CollegeAutoSlider
+                      <AutoMarquee
                         items={rankCertificates}
-                        label="Certificates and awards"
+                        speed={45}
                         render={(c: any, i: number) => (
-                          <figure className="group h-full rounded-lg overflow-hidden border border-border/60 bg-card shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-accent/40 transition-all duration-300">
+                          <figure className="group w-64 rounded-2xl overflow-hidden border border-border/60 bg-card shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-amber-500/40 transition-all duration-300">
                             <div className="overflow-hidden">
-                              <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} width={640} height={480} className="w-full aspect-[4/3] object-contain group-hover:scale-[1.04] transition-transform duration-500" loading="lazy" decoding="async" />
+                              <img src={c.image} alt={c.title || `Award certificate ${i + 1}`} className="w-full aspect-[4/3] object-cover object-top group-hover:scale-[1.04] transition-transform duration-500" loading="lazy" decoding="async" />
                             </div>
                             {(c.title || c.issuer) && (
                               <figcaption className="p-2.5">
                                 {c.title && <div className="text-xs font-bold text-foreground leading-snug">{c.title}</div>}
-                                {(c.issuer || c.year) && <div className="text-sm text-muted-foreground mt-0.5">{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>}
+                                {(c.issuer || c.year) && <div className="text-[11px] text-muted-foreground mt-0.5">{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>}
                               </figcaption>
                             )}
                           </figure>
@@ -1250,19 +1509,19 @@ const CollegeDetailPage = () => {
                   )}
                   <AIExtensionBlock section={getAIExtension("rankings")} extensionLabel="Rankings Context & Recognition" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Reviews */}
             <div id="reviews" ref={el => { sectionRefs.current["reviews"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading flex items-center gap-2"><MessageSquare className="w-5 h-5 text-primary" /> Student Reviews</CardTitle></CardHeader>
                 <CardContent>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6 p-4 bg-secondary/30 rounded-lg">
                     <div className="text-center self-center sm:self-auto shrink-0">
                       <div className="text-4xl font-heading font-bold text-primary">{overallRating}</div>
                       <div className="flex items-center gap-0.5 justify-center mt-1">
-                        {[...Array(5)].map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(Number(overallRating)) ? "fill-accent text-accent" : "text-muted-foreground"}`} />)}
+                        {[...Array(5)].map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(Number(overallRating)) ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />)}
                       </div>
                     </div>
                     <div className="flex-1 w-full space-y-2 min-w-0">
@@ -1282,102 +1541,138 @@ const CollegeDetailPage = () => {
                       <div className="flex items-center justify-between mb-3">
                         <div><span className="font-semibold text-foreground">{review.name}</span><span className="text-xs text-muted-foreground ml-2">{review.year}</span></div>
                         <div className="flex items-center gap-0.5">
-                          {[...Array(5)].map((_, j) => <Star key={j} className={`w-3.5 h-3.5 ${j < Number(review.rating) ? "fill-accent text-accent" : "text-muted-foreground"}`} />)}
+                          {[...Array(5)].map((_, j) => <Star key={j} className={`w-3.5 h-3.5 ${j < Number(review.rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />)}
                         </div>
                       </div>
                       <div className="grid sm:grid-cols-2 gap-3">
-                        <div className="bg-primary dark:bg-primary/30 border border-primary dark:border-primary rounded-lg p-3">
-                          <div className="flex items-center gap-1 mb-1.5 text-primary dark:text-primary text-sm font-semibold"><ThumbsUp className="w-3.5 h-3.5" /> Positives</div>
-                          <p className="text-xs text-primary dark:text-primary leading-relaxed">{review.positives}</p>
+                        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-lg p-3">
+                          <div className="flex items-center gap-1 mb-1.5 text-green-700 dark:text-green-400 text-sm font-semibold"><ThumbsUp className="w-3.5 h-3.5" /> Positives</div>
+                          <p className="text-xs text-green-800 dark:text-green-300 leading-relaxed">{review.positives}</p>
                         </div>
-                        <div className="bg-destructive dark:bg-destructive/30 border border-destructive dark:border-destructive rounded-lg p-3">
-                          <div className="flex items-center gap-1 mb-1.5 text-destructive dark:text-destructive text-sm font-semibold"><ThumbsDown className="w-3.5 h-3.5" /> Negatives</div>
-                          <p className="text-xs text-destructive dark:text-destructive leading-relaxed">{review.negatives}</p>
+                        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg p-3">
+                          <div className="flex items-center gap-1 mb-1.5 text-red-700 dark:text-red-400 text-sm font-semibold"><ThumbsDown className="w-3.5 h-3.5" /> Negatives</div>
+                          <p className="text-xs text-red-800 dark:text-red-300 leading-relaxed">{review.negatives}</p>
                         </div>
                       </div>
                     </div>
                   ))}
                   <AIExtensionBlock section={getAIExtension("reviews")} extensionLabel="Aggregated Student Sentiment" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Gallery */}
             <div id="gallery" ref={el => { sectionRefs.current["gallery"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading flex items-center gap-2"><Image className="w-5 h-5 text-primary" /> Campus Gallery</CardTitle></CardHeader>
                 <CardContent>
-                  {galleryImages.length > 0 ? <CollegeAutoSlider items={galleryImages} label="Campus photos" render={(image: string, i: number) => (
-                    <figure className="overflow-hidden rounded-lg border border-border bg-card">
-                      <img src={cdnImage(image, { width: 640 })} alt={`${college.name} campus photo ${i + 1}`} width={640} height={426} className="w-full aspect-[3/2] object-cover" loading="lazy" decoding="async" />
-                      <figcaption className="px-4 py-3 text-sm text-muted-foreground">{college.name} · {i + 1} / {galleryImages.length}</figcaption>
-                    </figure>
-                  )} /> : <p className="text-muted-foreground">Campus photos have not been published.</p>}
+                  <div className="relative rounded-xl overflow-hidden aspect-video mb-4">
+                    <AnimatePresence mode="wait">
+                      <motion.img key={galleryIdx} src={galleryImages[galleryIdx]} alt={`Campus ${galleryIdx + 1}`} className="w-full h-full object-cover" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} />
+                    </AnimatePresence>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {galleryImages.map((_: any, i: number) => <button key={i} onClick={() => setGalleryIdx(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === galleryIdx ? "bg-primary-foreground scale-125" : "bg-primary-foreground/50"}`} />)}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {galleryImages.map((img: string, i: number) => (
+                      <button key={i} onClick={() => setGalleryIdx(i)} className={`rounded-lg overflow-hidden aspect-square border-2 transition-all ${i === galleryIdx ? "border-primary" : "border-transparent hover:border-primary/50"}`}>
+                        <img src={img} alt="" width={120} height={120} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                      </button>
+                    ))}
+                  </div>
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Scholarships — filter-wise slider */}
             <div id="scholarships" ref={el => { sectionRefs.current["scholarships"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
-                <div className="relative border-y border-border bg-secondary/50 px-6 py-6">
-                  <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-card/10" />
-                  <div className="pointer-events-none absolute -bottom-12 left-1/3 w-32 h-32 rounded-full bg-card/5" />
+              <Card className="overflow-hidden border-border/60 shadow-lg">
+                <div className="relative bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 px-6 py-6">
+                  <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
+                  <div className="pointer-events-none absolute -bottom-12 left-1/3 w-32 h-32 rounded-full bg-white/5" />
                   <div className="relative flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-11 h-11 rounded-2xl bg-card/15 border border-border/25 backdrop-blur flex items-center justify-center shadow-lg">
-                        <Banknote className="w-5 h-5 text-foreground" />
+                      <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 backdrop-blur flex items-center justify-center shadow-lg">
+                        <Banknote className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h2 className="font-heading text-xl font-extrabold text-foreground leading-tight">Scholarships &amp; Financial Aid</h2>
-                        <p className="text-muted-foreground text-xs mt-0.5">Merit, entrance-score and special-category awards at {college.name}</p>
+                        <h2 className="font-heading text-xl font-extrabold text-white leading-tight">Scholarships &amp; Financial Aid</h2>
+                        <p className="text-emerald-50/90 text-xs mt-0.5">Merit, entrance-score and special-category awards at {college.name}</p>
                       </div>
                     </div>
                     {maxScholarship && (
-                      <div className="rounded-xl bg-card/15 border border-border/25 backdrop-blur px-5 py-2.5 text-center shadow-lg">
-                        <div className="font-heading text-lg font-extrabold text-foreground leading-tight">Up to {maxScholarship}</div>
-                        <div className="text-sm uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Scholarship available</div>
+                      <div className="rounded-xl bg-white/15 border border-white/25 backdrop-blur px-5 py-2.5 text-center shadow-lg">
+                        <div className="font-heading text-lg font-extrabold text-white leading-tight">Up to {maxScholarship}</div>
+                        <div className="text-[10px] uppercase tracking-wider text-emerald-50/90 font-semibold mt-0.5">Scholarship available</div>
                       </div>
                     )}
                   </div>
                 </div>
                 <CardContent className="pt-6">
                   {scholarshipNote && (
-                    <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/5 px-4 py-3">
-                      <Award className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                      <p className="text-sm font-medium text-foreground">{scholarshipNote}</p>
+                    <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/15 to-amber-500/5 px-4 py-3">
+                      <Award className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{scholarshipNote}</p>
                     </div>
                   )}
                   {scholarshipCategories.length > 0 && (
                     <div className="flex gap-2 overflow-x-auto pb-2 mb-5 -mx-1 px-1 scrollbar-thin" role="tablist" aria-label="Scholarship categories">
                       {["All", ...scholarshipCategories].map((cat) => (
-                        <Button variant="ghost"
+                        <button
                           key={cat}
                           type="button"
                           role="tab"
                           aria-selected={scholarshipCat === cat}
                           onClick={() => {
                             setScholarshipCat(cat);
+                            scholarshipSliderRef.current?.scrollTo({ left: 0 });
                           }}
                           className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-all duration-300 ${
                             scholarshipCat === cat
-                              ? "bg-primary text-primary-foreground border-transparent shadow-md shadow-primary/30 scale-[1.03]"
-                              : "bg-muted/40 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground hover:bg-primary/5"
+                              ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-500/30 scale-[1.03]"
+                              : "bg-muted/40 text-muted-foreground border-border hover:border-emerald-500/40 hover:text-foreground hover:bg-emerald-500/5"
                           }`}
                         >
                           {cat}
-                        </Button>
+                        </button>
                       ))}
                     </div>
                   )}
-                  <CollegeAutoSlider key={scholarshipCat} items={filteredScholarships} label="Scholarships" render={(s: any, i: number) => (
-                        <div
-                          className="group relative snap-start shrink-0 h-full rounded-lg border border-border/60 bg-gradient-to-b from-card to-primary/5 p-5 pt-6 flex flex-col overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:border-primary/40 transition-all duration-300"
+                  <div className="relative">
+                    {filteredScholarships.length > 3 && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="Scroll scholarships left"
+                          onClick={() => scholarshipSliderRef.current?.scrollBy({ left: -280, behavior: "smooth" })}
+                          className="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-muted transition-colors"
                         >
-                          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-primary to-primary pointer-events-none" />
-                          <div className="pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors" />
+                          <ChevronDown className="w-4 h-4 rotate-90" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Scroll scholarships right"
+                          onClick={() => scholarshipSliderRef.current?.scrollBy({ left: 280, behavior: "smooth" })}
+                          className="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-muted transition-colors"
+                        >
+                          <ChevronDown className="w-4 h-4 -rotate-90" />
+                        </button>
+                      </>
+                    )}
+                    <div
+                      ref={scholarshipSliderRef}
+                      className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-thin"
+                    >
+                      {filteredScholarships.map((s: any, i: number) => (
+                        <div
+                          key={`${s.category}-${s.level}-${i}`}
+                          className="group relative snap-start shrink-0 w-[250px] sm:w-[270px] rounded-2xl border border-border/60 bg-gradient-to-b from-card to-emerald-500/5 p-5 pt-6 flex flex-col overflow-hidden hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/40 transition-all duration-300"
+                        >
+                          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500" />
+                          <div className="pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors" />
                           {s.category && (
-                            <span className="self-start text-sm font-bold uppercase tracking-wider text-primary dark:text-primary bg-primary/10 border border-primary/25 rounded-full px-2.5 py-1 mb-3">
+                            <span className="self-start text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 rounded-full px-2.5 py-1 mb-3">
                               {s.category}
                             </span>
                           )}
@@ -1386,22 +1681,24 @@ const CollegeDetailPage = () => {
                           {s.criteria && <p className="text-xs text-muted-foreground mt-1.5 break-words flex-1 leading-relaxed">{s.criteria}</p>}
                           {s.description && <p className="text-xs text-muted-foreground mt-1.5 break-words flex-1 leading-relaxed">{s.description}</p>}
                           {s.amount && (
-                            <div className="mt-4 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/25 px-3 py-3 text-center">
-                              <div className="font-heading font-extrabold text-primary dark:text-primary text-xl leading-tight">{s.amount}</div>
-                              <div className="text-sm uppercase tracking-wider text-muted-foreground font-semibold mt-1">Scholarship Amount</div>
+                            <div className="mt-4 rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/5 border border-emerald-500/25 px-3 py-3 text-center">
+                              <div className="font-heading font-extrabold text-emerald-700 dark:text-emerald-400 text-xl leading-tight">{s.amount}</div>
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mt-1">Scholarship Amount</div>
                             </div>
                           )}
                         </div>
-                  )} />
+                      ))}
+                    </div>
+                  </div>
                   {scholarshipPolicy.length > 0 && (
                     <div className="mt-6 rounded-2xl border border-border/60 bg-gradient-to-br from-muted/40 to-transparent p-5">
                       <h4 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" /> Scholarship Policy
+                        <CheckCircle className="w-4 h-4 text-emerald-600" /> Scholarship Policy
                       </h4>
                       <div className="grid sm:grid-cols-2 gap-3">
                         {scholarshipPolicy.map((p, i) => (
                           <div key={i} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-3.5 py-3">
-                            <span className="shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary text-primary-foreground text-sm font-extrabold flex items-center justify-center mt-0.5">{i + 1}</span>
+                            <span className="shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-[11px] font-extrabold flex items-center justify-center mt-0.5">{i + 1}</span>
                             <span className="text-sm text-muted-foreground leading-relaxed">{p}</span>
                           </div>
                         ))}
@@ -1410,12 +1707,12 @@ const CollegeDetailPage = () => {
                   )}
                   <AIExtensionBlock section={getAIExtension("scholarships")} extensionLabel="Scholarship Eligibility Guide" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Faculty */}
             <div id="faculty" ref={el => { sectionRefs.current["faculty"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading">Faculty Profiles</CardTitle></CardHeader>
                 <CardContent>
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -1438,12 +1735,12 @@ const CollegeDetailPage = () => {
                   </div>
                   <AIExtensionBlock section={getAIExtension("faculty")} extensionLabel="Faculty & Research Strengths" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Hostel & Campus */}
             <div id="hostel" ref={el => { sectionRefs.current["hostel"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading flex items-center gap-2"><Home className="w-5 h-5 text-primary" /> Hostel & Campus Life</CardTitle></CardHeader>
                 <CardContent>
                   <div className="grid sm:grid-cols-2 gap-4 mb-6">
@@ -1470,12 +1767,12 @@ const CollegeDetailPage = () => {
                   )}
                   <AIExtensionBlock section={getAIExtension("hostel")} extensionLabel="Campus Life Deep-Dive" entityName={college.name} entityWebsite={(college as any).website} />
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* Q&A */}
             <div id="qa" ref={el => { sectionRefs.current["qa"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading flex items-center gap-2"><HelpCircle className="w-5 h-5 text-primary" /> Frequently Asked Questions</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -1496,12 +1793,12 @@ const CollegeDetailPage = () => {
                     ))}
                   </div>
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
 
             {/* News */}
             <div id="news" ref={el => { sectionRefs.current["news"] = el; }} className="scroll-mt-32">
-              <CollegeContentSection>
+              <Card>
                 <CardHeader><CardTitle className="font-heading">Latest News & Articles</CardTitle></CardHeader>
                 <CardContent>
                   {(relatedArticles || []).length > 0 ? (
@@ -1521,7 +1818,7 @@ const CollegeDetailPage = () => {
                     <p className="text-center text-muted-foreground py-6">No related articles yet.</p>
                   )}
                 </CardContent>
-              </CollegeContentSection>
+              </Card>
             </div>
           </div>
 
@@ -1531,17 +1828,17 @@ const CollegeDetailPage = () => {
               <div data-ad-sidebar className="order-last shrink-0" />
               {/* Premium Fees + Brochure Card — pinned at top of sticky sidebar */}
               <Card className="shrink-0 overflow-hidden border-0 shadow-2xl shadow-primary/15 bg-gradient-to-br from-primary via-primary/95 to-primary/85 text-primary-foreground relative">
-                <div className="absolute -top-12 -right-12 w-40 h-40 bg-card/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-card/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none" />
                 <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{ backgroundImage: 'radial-gradient(hsl(0 0% 100%) 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
                 <CardContent className="px-5 py-5 relative z-10">
                   <div className="flex flex-col gap-2 mb-3.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-accent text-accent px-2 py-0.5 rounded-md shadow-md">
+                      <span className="inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-md shadow-md">
                         ★ Featured
                       </span>
                       {applyUrl && (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider bg-card/15 border border-border/25 text-primary-foreground px-2 py-0.5 rounded-md">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider bg-white/15 border border-white/25 text-primary-foreground px-2 py-0.5 rounded-md">
                           <LiveDot /> Applications Open
                         </span>
                       )}
@@ -1554,7 +1851,7 @@ const CollegeDetailPage = () => {
                   <p className="text-xs text-primary-foreground/75 mb-5">For complete 2-year program · GST inclusive</p>
 
 
-                  <Button onClick={handleDownloadBrochure} size="lg" className="w-full bg-card text-primary hover:bg-card/95 font-bold gap-2 shadow-xl mb-2">
+                  <Button onClick={handleDownloadBrochure} size="lg" className="w-full bg-white text-primary hover:bg-white/95 font-bold gap-2 shadow-xl mb-2">
                     <Download className="w-4 h-4" /> Download Brochure
                   </Button>
                   {applyUrl ? (
@@ -1567,22 +1864,22 @@ const CollegeDetailPage = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <Button variant="outline" className="w-full bg-accent border-accent text-accent hover:bg-accent hover:border-accent hover:text-accent font-bold gap-2 shadow-lg">
+                      <Button variant="outline" className="w-full bg-amber-400 border-amber-400 text-amber-950 hover:bg-amber-300 hover:border-amber-300 hover:text-amber-950 font-bold gap-2 shadow-lg">
                         <GraduationCap className="w-4 h-4" /> {applyLabel}
                       </Button>
                     </motion.a>
                   ) : (
-                    <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-card/10 backdrop-blur-sm border-border/30 text-primary-foreground hover:bg-card/20 hover:text-primary-foreground hover:border-border/50 font-semibold gap-2">
+                    <Button onClick={() => sectionRefs.current["admission"]?.scrollIntoView({ behavior: "smooth" })} variant="outline" className="w-full bg-white/10 backdrop-blur-sm border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground hover:border-white/50 font-semibold gap-2">
                       <GraduationCap className="w-4 h-4" /> Apply Now
                     </Button>
                   )}
 
-                  <div className="mt-5 pt-4 border-t border-border/20 grid grid-cols-3 gap-2 text-center">
+                  <div className="mt-5 pt-4 border-t border-white/20 grid grid-cols-3 gap-2 text-center">
                     <div>
                       <div className="text-base font-extrabold">100%</div>
                       <div className="text-xs text-primary-foreground/70 uppercase tracking-wider">Verified</div>
                     </div>
-                    <div className="border-x border-border/20">
+                    <div className="border-x border-white/20">
                       <div className="text-base font-extrabold">Free</div>
                       <div className="text-xs text-primary-foreground/70 uppercase tracking-wider">Brochure</div>
                     </div>
@@ -1598,7 +1895,21 @@ const CollegeDetailPage = () => {
                 <CollegeSectionNav
                   className="w-full"
                   topOffset={140}
-                  items={tabItems.map((item) => ({ id: item.value, label: item.label }))}
+                  items={[
+                    { id: "overview", label: "Overview", icon: <BookOpen className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("why_join") },
+                    { id: "courses", label: "Courses & Fees", icon: <GraduationCap className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("courses_fees") },
+                    { id: "admission", label: "Admissions", icon: <CheckCircle className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("admission") },
+                    { id: "placements", label: "Placements", icon: <TrendingUp className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("placements") },
+                    { id: "cutoff", label: "Cut-offs", icon: <Award className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("cutoff") },
+                    { id: "rankings", label: "Rankings", icon: <Medal className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("rankings") },
+                    { id: "reviews", label: "Reviews", icon: <MessageSquare className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("reviews") },
+                    { id: "gallery", label: "Gallery", icon: <Image className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("gallery") },
+                    { id: "scholarships", label: "Scholarships", icon: <Banknote className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("scholarships") },
+                    { id: "faculty", label: "Faculty", icon: <Users className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("faculty") },
+                    { id: "hostel", label: "Hostel & Campus", icon: <Home className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("hostel") },
+                    { id: "qa", label: "FAQs", icon: <HelpCircle className="w-3.5 h-3.5" />, hasAI: !!getAIExtension("qa") },
+                    { id: "news", label: "News", icon: <Star className="w-3.5 h-3.5" />, hasAI: false },
+                  ]}
                 />
 
                 {/* Animated application strip — quick entry to the official form */}
@@ -1622,8 +1933,8 @@ const CollegeDetailPage = () => {
                   <Card className="overflow-hidden border-border/60">
                     <CardContent className="pt-6">
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                          <Star className="w-4 h-4 text-accent" />
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                          <Star className="w-4 h-4 text-amber-500" />
                         </div>
                         <h4 className="font-heading font-bold text-foreground">You May Also Like</h4>
                       </div>
@@ -1632,7 +1943,7 @@ const CollegeDetailPage = () => {
                           <Link key={sc.slug} to={`/college/${sc.slug}`} className="block p-3 rounded-xl hover:bg-primary/5 border border-border hover:border-primary/30 transition-all group/sc">
                             <div className="flex items-start gap-2">
                               {sc.ranking && (
-                                <span className="text-xs font-extrabold text-accent bg-accent border border-accent px-1.5 py-0.5 rounded-[0.25rem] shrink-0">#{sc.ranking}</span>
+                                <span className="text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-[0.25rem] shrink-0">#{sc.ranking}</span>
                               )}
                               <div className="min-w-0 flex-1">
                                 <div className="font-bold text-foreground text-sm group-hover/sc:text-primary transition-colors line-clamp-1">{sc.name}</div>
