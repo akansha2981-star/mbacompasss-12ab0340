@@ -57,6 +57,7 @@ interface CATSubmission {
   slot: string | null;
   response_sheet_url: string | null;
   phone_verified: boolean | null;
+  work_experience: string | null;
 }
 
 async function downloadResponseSheet(s: { response_sheet_url: string | null; candidate_name: string }) {
@@ -182,12 +183,12 @@ const AdminCATScores = () => {
 
   const downloadCSV = () => {
     const headers = [
-      "Name", "Email", "Phone", "Phone Verified", "Slot", "Response Sheet Link", "State", "Test Date", "Total Score", "Max Score", "Percentile",
+      "Name", "Email", "Phone", "Phone Verified", "Work Experience", "Slot", "Response Sheet Link", "State", "Test Date", "Total Score", "Max Score", "Percentile",
       "Total Qs", "Attempted", "Correct", "Incorrect", "Accuracy%", "Negative Marks",
       "VARC Score", "VARC Acc%", "DILR Score", "DILR Acc%", "QA Score", "QA Acc%", "Date",
     ];
     const rows = filtered.map((s) => [
-      s.candidate_name, s.email || "", s.phone || "", s.phone_verified ? "Yes" : "No", s.slot || "", s.response_sheet_url || "", s.state || "", s.test_date || "",
+      s.candidate_name, s.email || "", s.phone || "", s.phone_verified ? "Yes" : "No", s.work_experience || "", s.slot || "", s.response_sheet_url || "", s.state || "", s.test_date || "",
       s.total_score, s.max_score, s.estimated_percentile,
       s.total_questions, s.attempted, s.correct, s.incorrect, s.accuracy?.toFixed(1), s.negative_marks,
       s.varc_score, s.varc_accuracy?.toFixed(1), s.dilr_score, s.dilr_accuracy?.toFixed(1),
@@ -318,6 +319,7 @@ const AdminCATScores = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>Experience</TableHead>
                 <TableHead>Slot</TableHead>
                 <TableHead className="text-center">Score</TableHead>
                 <TableHead className="text-center">Percentile</TableHead>
@@ -336,6 +338,7 @@ const AdminCATScores = () => {
                   <TableCell className="font-medium">{s.candidate_name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{s.email || "—"}</TableCell>
                   <TableCell className="text-sm">{s.phone || "—"}{s.phone_verified ? <span className="ml-1 text-xs text-emerald-600">Verified</span> : null}</TableCell>
+                  <TableCell className="text-sm whitespace-nowrap">{s.work_experience || "—"}</TableCell>
                   <TableCell className="text-sm">{s.slot || "—"}</TableCell>
                   <TableCell className="text-center font-bold">{s.total_score}</TableCell>
                   <TableCell className="text-center">{s.estimated_percentile}</TableCell>
@@ -404,6 +407,7 @@ const AdminCATScores = () => {
                   ["Name", selected.candidate_name],
                   ["Email", selected.email || "—"],
                   ["Phone", selected.phone || "—"],
+                  ["Work Experience", selected.work_experience || "—"],
                   ["State", selected.state || "—"],
                   ["Test Date", selected.test_date || "—"],
                   ["Application No", selected.application_no || "—"],

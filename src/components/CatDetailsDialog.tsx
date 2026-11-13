@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
+import { WORK_EXPERIENCE_OPTIONS, isWorkExperience, type WorkExperience } from "@/lib/workExperience";
 
-export interface CatContact { name: string; email: string; phone: string }
+export interface CatContact { name: string; email: string; phone: string; workExperience: WorkExperience }
 
 interface Props {
   open: boolean;
@@ -22,6 +23,7 @@ const CatDetailsDialog = ({ open, onOpenChange, name, defaultEmail = "", default
   const [fullName, setFullName] = useState(name);
   const [email, setEmail] = useState(defaultEmail);
   const [phone, setPhone] = useState("");
+  const [experience, setExperience] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -30,7 +32,7 @@ const CatDetailsDialog = ({ open, onOpenChange, name, defaultEmail = "", default
   useEffect(() => {
     if (!open) return;
     setFullName(name); setEmail(defaultEmail);
-    setPhone(defaultPhone.replace(/\D/g, "").slice(-10)); setOtp(""); setOtpSent(false);
+    setPhone(defaultPhone.replace(/\D/g, "").slice(-10)); setOtp(""); setOtpSent(false); setExperience("");
   }, [open, name, defaultEmail, defaultPhone]);
 
   useEffect(() => {
@@ -43,6 +45,7 @@ const CatDetailsDialog = ({ open, onOpenChange, name, defaultEmail = "", default
   const phoneOk = /^[6-9]\d{9}$/.test(phone);
 
   const sendOtp = async () => {
+    if (!isWorkExperience(experience)) { toast.error("Select your work experience."); return; }
     if (!emailOk) { toast.error("Enter a valid email address."); return; }
     if (!phoneOk) { toast.error("Enter a valid 10-digit mobile number."); return; }
     setBusy(true);
@@ -55,13 +58,14 @@ const CatDetailsDialog = ({ open, onOpenChange, name, defaultEmail = "", default
   };
 
   const verifyAndSubmit = async () => {
+    if (!isWorkExperience(experience)) { toast.error("Select your work experience."); return; }
     if (otp.length !== 6) { toast.error("Enter the 6-digit OTP."); return; }
     if (!fullName.trim()) { toast.error("Enter your name."); return; }
     setBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("verify-otp", { body: { phone, otp } });
       if (error || data?.error || !data?.verified) throw new Error(data?.error || "Incorrect OTP. Please try again.");
-      await onSubmit({ name: fullName.trim(), email: email.trim(), phone });
+      await onSubmit({ name: fullName.trim(), email: email.trim(), phone, workExperience: experience });
       onOpenChange(false);
     } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
   };
@@ -90,8 +94,24 @@ const CatDetailsDialog = ({ open, onOpenChange, name, defaultEmail = "", default
             <Input id="cat-phone" inputMode="numeric" value={phone} disabled={otpSent} maxLength={10}
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit mobile number" />
           </div>
+          <fieldset className="space-y-2" aria-required="true">
+            <legend className="text-sm font-medium text-foreground">Work experience <span className="text-destructive">*</span></legend>
+            <div role="radiogroup" aria-label="Work experience" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {WORK_EXPERIENCE_OPTIONS.map((o) => {
+                const on = experience === o;
+                return (
+                  <button key={o} type="button" role="radio" aria-checked={on} disabled={otpSent}
+                    onClick={() => setExperience(o)}
+                    className={`min-h-11 rounded-lg border px-2 py-2 text-sm font-medium transition-colors disabled:opacity-60 ${on ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:border-primary hover:bg-accent"}`}>
+                    {o}
+                  </button>
+                );
+              })}
+            </div>
+            {!experience && <p className="text-sm text-muted-foreground">Required — tap one option.</p>}
+          </fieldset>
           {!otpSent ? (
-            <Button className="w-full" onClick={sendOtp} disabled={busy}>{busy ? "Sending OTP..." : "Send OTP"}</Button>
+            <Button className="w-full" onClick={sendOtp} disabled={busy || !experience}>{busy ? "Sending OTP..." : "Send OTP"}</Button>
           ) : (
             <>
               <p className="text-sm text-muted-foreground">Enter the OTP sent to {phone}.</p>

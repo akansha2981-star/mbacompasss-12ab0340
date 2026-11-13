@@ -351,6 +351,13 @@
       "when": 1794547805962,
       "tag": "0049_bind_freebie_file_reads_to_user_access",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1794563179053,
+      "tag": "0050_add_work_experience_to_score_submissions",
+      "breakpoints": true
     }
   ]
 }

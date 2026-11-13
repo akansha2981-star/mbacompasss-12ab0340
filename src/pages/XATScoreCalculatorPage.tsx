@@ -157,7 +157,7 @@ export default function XATScoreCalculatorPage() {
 
   const submitDetails = async (c: CatContact) => {
     if (!pending) return;
-    await saveFn({ data: { name: c.name, email: c.email, phone: c.phone, row: buildRow(pending.parsed, pending.url) } });
+    await saveFn({ data: { name: c.name, email: c.email, phone: c.phone, workExperience: c.workExperience, row: buildRow(pending.parsed, pending.url) } });
     setResult({ ...pending.parsed, candidateName: c.name }); setPending(null);
     trackCatEvent("calculator_completed", { mode: "sheet", exam: "XAT", score: pending.parsed.score.part1.score });
     window.scrollTo({ top: 0, behavior: "smooth" });

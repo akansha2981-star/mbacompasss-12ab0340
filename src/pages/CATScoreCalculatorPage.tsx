@@ -315,7 +315,7 @@ const CATScoreCalculatorPage: React.FC = () => {
 
   const submitDetails = async (c: CatContact) => {
     if (!pending) return;
-    const saved = await saveFn({ data: { name: c.name, email: c.email, phone: c.phone, row: buildRow(pending.parsed, pending.url) } });
+    const saved = await saveFn({ data: { name: c.name, email: c.email, phone: c.phone, workExperience: c.workExperience, row: buildRow(pending.parsed, pending.url) } });
     setResult({ ...pending.parsed, candidateName: c.name });
     setSubmittedAt(saved.createdAt);
     setPending(null);

@@ -1,11 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { WORK_EXPERIENCE_OPTIONS } from "@/lib/workExperience";
 
 const schema = z.object({
   name: z.string().trim().min(1).max(255),
   email: z.string().trim().email().max(255),
   phone: z.string().regex(/^[6-9]\d{9}$/),
+  workExperience: z.enum(WORK_EXPERIENCE_OPTIONS),
   row: z.record(z.string(), z.any()),
 });
 
@@ -34,7 +36,7 @@ export const saveCatScoreSubmission = createServerFn({ method: "POST" })
     for (const k of allowed) if (k in data.row) row[k] = data.row[k];
 
     const { data: ins, error } = await supabaseAdmin.from("cat_score_submissions").insert({
-      ...row, candidate_name: data.name, email: data.email, phone: data.phone, phone_verified: true, user_id: userId,
+      ...row, candidate_name: data.name, email: data.email, phone: data.phone, work_experience: data.workExperience, phone_verified: true, user_id: userId,
     } as any).select("id, created_at").single();
     if (error) { console.error("cat save", error); throw new Error("Could not save your details. Please try again."); }
     return { id: ins.id as string, createdAt: ins.created_at as string };

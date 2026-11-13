@@ -1811,6 +1811,7 @@ export type Database = {
           varc_correct: number | null
           varc_incorrect: number | null
           varc_score: number | null
+          work_experience: string | null
         }
         Insert: {
           accuracy?: number | null
@@ -1854,6 +1855,7 @@ export type Database = {
           varc_correct?: number | null
           varc_incorrect?: number | null
           varc_score?: number | null
+          work_experience?: string | null
         }
         Update: {
           accuracy?: number | null
@@ -1897,6 +1899,7 @@ export type Database = {
           varc_correct?: number | null
           varc_incorrect?: number | null
           varc_score?: number | null
+          work_experience?: string | null
         }
         Relationships: []
       }
@@ -16954,6 +16957,7 @@ export type Database = {
           unattempted_penalty: number
           user_id: string | null
           valr_score: number | null
+          work_experience: string | null
         }
         Insert: {
           accuracy?: number
@@ -16982,6 +16986,7 @@ export type Database = {
           unattempted_penalty?: number
           user_id?: string | null
           valr_score?: number | null
+          work_experience?: string | null
         }
         Update: {
           accuracy?: number
@@ -17010,6 +17015,7 @@ export type Database = {
           unattempted_penalty?: number
           user_id?: string | null
           valr_score?: number | null
+          work_experience?: string | null
         }
         Relationships: []
       }
