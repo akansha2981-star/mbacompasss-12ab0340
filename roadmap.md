@@ -14,3 +14,9 @@
 - [x] Add tabbed six-term curriculum section
 - [x] Fix old wrong programme cards (MBA Sustainability, FPM etc.) from programme courses source
 - [x] Make Knowledge Partners, International Collaborations and Certificates animated auto-sliders
+
+## Shared college-page redesign
+- [x] Improve the common college heading, section layout and navigation using existing content
+- [x] Share accessible, visible-only auto-sliders across highlights, recruiters, partners, awards and scholarships
+- [x] Replace cramped structured tables with readable dossiers and optional comparison views
+- [x] Verify representative colleges on desktop and mobile, interactions and reduced motion
