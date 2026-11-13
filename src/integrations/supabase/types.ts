@@ -4707,6 +4707,32 @@ export type Database = {
           },
         ]
       }
+      freebie_file_access: {
+        Row: {
+          created_at: string
+          freebie_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          freebie_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          freebie_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freebie_file_access_freebie_id_fkey"
+            columns: ["freebie_id"]
+            isOneToOne: false
+            referencedRelation: "freebies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       freebies: {
         Row: {
           category: string | null

@@ -14,6 +14,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { freebiesQuery } from "@/lib/queries/listingQueries";
+import { ensureFreebieFileAccess } from "@/lib/freebieFileAccess";
 
 
 import {
@@ -227,6 +228,7 @@ const FreebiesPage = () => {
 
       let url = f.file_url;
       if (!url.startsWith("http")) {
+        await ensureFreebieFileAccess(supabase, user.id, f.id);
         const { data, error } = await supabase.storage
           .from("freebies")
           .createSignedUrl(url, 60 * 10, { download: f.file_name || true });

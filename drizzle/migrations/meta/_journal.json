@@ -344,6 +344,13 @@
       "when": 1794487116934,
       "tag": "0048_scope_daily_tests_and_xat_settings_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1794547805962,
+      "tag": "0049_bind_freebie_file_reads_to_user_access",
+      "breakpoints": true
     }
   ]
 }
