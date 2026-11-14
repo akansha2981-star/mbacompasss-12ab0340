@@ -50,7 +50,10 @@ export function AutoTOC({ contentRef, title = "Table of Contents", className, de
 
     let tid = 0;
     const scan = () => {
-      const headings = Array.from(root.querySelectorAll("h2, h3")) as HTMLHeadingElement[];
+      // Question-led articles list only their numbered question cards.
+      const questionHeadings = Array.from(root.querySelectorAll("section.ed-q h3")) as HTMLHeadingElement[];
+      const questionMode = questionHeadings.length > 0;
+      const headings = questionMode ? questionHeadings : (Array.from(root.querySelectorAll("h2, h3")) as HTMLHeadingElement[]);
       const used = new Set<string>();
       const built: TocItem[] = [];
 
@@ -70,7 +73,7 @@ export function AutoTOC({ contentRef, title = "Table of Contents", className, de
         // Add a little scroll offset for sticky headers
         h.style.scrollMarginTop = "96px";
 
-        built.push({ id, text, level: h.tagName === "H2" ? 2 : 3 });
+        built.push({ id, text, level: questionMode || h.tagName === "H2" ? 2 : 3 });
       }
       setItems((prev) =>
         prev.length === built.length && prev.every((p, i) => p.id === built[i].id && p.text === built[i].text)
@@ -122,7 +125,7 @@ export function AutoTOC({ contentRef, title = "Table of Contents", className, de
       // Fallback: ids were lost on re-render — locate the heading by position/text.
       const root = contentRef.current;
       const hs = root
-        ? (Array.from(root.querySelectorAll("h2, h3")) as HTMLElement[]).filter(
+        ? (Array.from(root.querySelectorAll(root.querySelector("section.ed-q h3") ? "section.ed-q h3" : "h2, h3")) as HTMLElement[]).filter(
             (h) => (h.textContent || "").trim().length >= 2 && !h.closest("nav, aside, form, button, [data-no-toc]"),
           )
         : [];

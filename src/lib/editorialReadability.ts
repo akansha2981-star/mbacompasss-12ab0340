@@ -59,6 +59,12 @@ export function formatEditorialReadability(html: string): string {
       return block;
     });
   out = splitLongParagraphs(out);
+  // Question-led articles (numbered section.ed-q cards) list only their questions in the contents.
+  const questionMode = /<section\b[^>]*class=["'][^"']*\bed-q\b/i.test(out);
+  if (questionMode) {
+    out = out.replace(/<section\b[^>]*class=["'][^"']*\bed-q\b[^"']*["'][^>]*>[\s\S]*?<\/section>/gi,
+      (section: string) => section.replace(/<h3\b/i, '<h3 data-edq-toc="1"'));
+  }
   const used = new Set(Array.from(out.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi), (match) => match[1]));
   const seen = new Set<string>();
   const entries: { id: string; text: string; level: string }[] = [];
@@ -74,7 +80,10 @@ export function formatEditorialReadability(html: string): string {
       attrs = attrs.replace(/\s*\bid\s*=\s*["'][^"']*["']/i, '') + ` id="${escape(id)}"`;
     }
     used.add(id); seen.add(id);
-    entries.push({ id, text, level });
+    const isQuestion = /\sdata-edq-toc="1"/.test(attrs);
+    attrs = attrs.replace(/\sdata-edq-toc="1"/, '');
+    if (!questionMode) entries.push({ id, text, level });
+    else if (isQuestion) entries.push({ id, text, level: '2' });
     return `<h${level}${attrs}>${inner}</h${level}>`;
   });
   if (entries.length < 2) return out;

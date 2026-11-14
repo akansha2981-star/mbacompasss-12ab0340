@@ -17,6 +17,17 @@ describe('editorial readability', () => {
     expect(out).toContain('Apply online.');
     expect(formatEditorialReadability(out)).toBe(out);
   });
+  it('lists only numbered question cards in the contents of question-led articles', () => {
+    const q = (n: number) => `<section class="ed-q"><span class="ed-q-num">${n}</span><h3>Question ${n}?</h3><p>Answer.</p></section>`;
+    const out = formatEditorialReadability('<h2>Introduction</h2><p>Intro.</p>' + [1, 2, 3].map(q).join('') + '<h2>Frequently Asked Questions</h2><h3>Other?</h3><p>Yes.</p>');
+    const nav = /<nav[\s\S]*?<\/nav>/.exec(out)?.[0] ?? '';
+    expect(nav.match(/<li/g)).toHaveLength(3);
+    expect(nav).toContain('Question 1?');
+    expect(nav).not.toContain('Introduction');
+    expect(nav).not.toContain('Other?');
+    expect(out).not.toContain('data-edq-toc');
+    expect(formatEditorialReadability(out)).toBe(out);
+  });
   it('keeps existing anchors and repairs duplicate heading ids', () => {
     const out = formatEditorialReadability('<h2 id="fees">Fees</h2><h2 id="fees">Fees</h2><p><a href="/colleges">Browse colleges</a></p>');
     expect(out).toContain('id="fees-2"');
