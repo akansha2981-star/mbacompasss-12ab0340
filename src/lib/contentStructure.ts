@@ -28,7 +28,7 @@ export const normalizeHeadingHierarchy = (html: string): string => {
 
 /** Give tables real header semantics so data can be parsed as a fact table. */
 export const normalizeTableSemantics = (html: string): string =>
-  html.replace(/<th(?![^>]*\bscope=)([^>]*)>/gi, "<th scope=\"col\"$1>");
+  html.replace(/<th\b(?![^>]*\bscope=)([^>]*)>/gi, "<th scope=\"col\"$1>");
 
 /** Lazy-load + decode async every in-content image; guarantee an alt attribute. */
 export const normalizeImages = (html: string): string =>

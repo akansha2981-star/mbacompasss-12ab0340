@@ -48,3 +48,4 @@
 - Meritto admin submissions share response-body error handling and retry only confirmed function-level pre-dispatch rate limits; never automatically retry uncertain network or provider failures to avoid duplicate sends.
 - Meritto bulk uploads queue rows in the database and a self-removing per-minute tick sends them server-side, pausing on the daily limit until after IST midnight (rules in supabase/functions/_shared/merittoBulk.ts), so uploads survive closed pages without duplicate sends.
 - Private freebie files require an owner-scoped freebie_file_access claim before URL signing; storage also rechecks publication and exact file identity, so sign-in alone never authorizes all resource files.
+- Hand-built long-form articles use the token-based ed-* editorial blocks in src/styles.css inside article HTML, because article bodies are sanitized HTML and cannot carry components or inline colours.
