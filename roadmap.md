@@ -23,5 +23,5 @@
 - [x] Global Associations auto-scroller (both pages)
 - [x] Marquee Recruiters auto-scroller with split single logos (both pages)
 - [x] Rankings and "School of Firsts" blocks from website screenshots
-- [x] Chennai programme portfolio cards (PGPM, PGDM, PGDM-BA, PGPM Family Business, PGXPM, PGPM Weekend, Executive MBA, Doctoral, Online, Exec Ed)
+- [x] Chennai programme cards (PGPM, PGDM, PGPM-FBE, PGXPM, FPM, PGDM Online, Corporate L&D)
 - [x] Gurgaon programme portfolio cards from website screenshot
