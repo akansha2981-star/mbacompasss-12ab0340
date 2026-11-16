@@ -39,6 +39,7 @@ import { numericStat, rankOnly, stripTBA } from "@/lib/textClip";
 import MobileActionBar from "@/components/mobile/MobileActionBar";
 import FloatingTOC from "@/components/mobile/FloatingTOC";
 import ProgrammePortfolioTable from "@/components/college/ProgrammePortfolioTable";
+import { parseCampusShowcase, CampusHighlightsBoard, ProgrammeCatalogue, ProgrammeDeepDive, PlacementReportsShowcase, RankingSpotlight, KarmaYogaImpact, BrochureDownloads, LogoMarquee } from "@/components/college/CampusShowcase";
 import { PlacementTrendChart, SectorDonut } from "@/components/college/PlacementCharts";
 import { collegeTitle, collegeDescription } from "@/lib/collegeSeo";
 import { normalizeCollegeSectionData } from "@/lib/collegeSectionData";
@@ -556,11 +557,25 @@ const CollegeDetailPage = () => {
         .filter((p: any) => p.name)
     : [];
 
+  // Campus showcase (programme cards, programme deep dive, placement reports, logo strips, downloads)
+  const showcase = parseCampusShowcase(getSection("campus_showcase")?.data);
+  const showcaseBrochures = showcase?.brochures?.length ? showcase.brochures : [];
+  const hasShowcasePlacements = !!(showcase?.placement_reports?.length || showcase?.recruiter_logos?.length);
+  const handleShowcaseDownload = gateBrochure((url: string, filename: string) => {
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.rel = "noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+    toast({ title: "Download started" });
+  }, "Sign in to download the official brochure.");
+
   // Tab nav / TOC — only include sections that actually render for this college
   const hasInternational = intlPartners.length > 0 || !!getSectionContent("international");
   const hasKnowledgePartners = knowledgePartners.length > 0 || !!getSectionContent("knowledge_partners");
   const tabItems = [
-    { value: "overview", label: "Overview" }, { value: "courses", label: "Courses & Fees" },
+    { value: "overview", label: "Overview" },
+    ...(showcaseBrochures.length > 0 ? [{ value: "downloads", label: "Brochures" }] : []),
+    { value: "courses", label: "Courses & Fees" },
+    ...(showcase?.programme_details?.length ? [{ value: "programme_details", label: "Curriculum" }] : []),
     { value: "admission", label: "Admissions" }, { value: "placements", label: "Placements" },
     ...(hasInternational ? [{ value: "international", label: "Global Exposure" }] : []),
     ...(hasKnowledgePartners ? [{ value: "knowledge_partners", label: "Knowledge Partners" }] : []),
@@ -796,7 +811,7 @@ const CollegeDetailPage = () => {
             {/* Premium Action Row */}
             <div className="flex flex-wrap items-center gap-3 mb-5">
               <Button
-                onClick={handleDownloadBrochure}
+                onClick={showcaseBrochures.length > 0 ? () => sectionRefs.current["downloads"]?.scrollIntoView({ behavior: "smooth", block: "start" }) : handleDownloadBrochure}
                 size="lg"
                 className="bg-white text-primary hover:bg-white/95 font-bold shadow-2xl hover:shadow-white/20 hover:scale-[1.02] transition-all gap-2 px-6"
               >
@@ -994,9 +1009,19 @@ const CollegeDetailPage = () => {
               {applyUrl && <ApplyBanner collegeName={college.name} applyUrl={applyUrl} applyLabel={applyLabel} />}
             </div>
 
+            {showcase && <CampusHighlightsBoard data={showcase} collegeName={college.name} />}
+
+            {showcaseBrochures.length > 0 && showcase && (
+              <div id="downloads" ref={el => { sectionRefs.current["downloads"] = el; }} className="scroll-mt-32">
+                <BrochureDownloads data={showcase} onDownload={handleShowcaseDownload} />
+              </div>
+            )}
+
             {/* Courses & Fees — verified MBA programme portfolio */}
             <div id="courses" ref={el => { sectionRefs.current["courses"] = el; }} className="scroll-mt-32">
-              {programmes.length > 0 ? (
+              {showcase?.programme_groups?.length ? (
+                <ProgrammeCatalogue data={showcase} collegeName={college.name} />
+              ) : programmes.length > 0 ? (
                 <ProgrammePortfolioTable
                   programmes={programmes}
                   collegeSlug={college.slug}
@@ -1036,6 +1061,12 @@ const CollegeDetailPage = () => {
                 </Card>
               )}
             </div>
+
+            {showcase?.programme_details?.length ? (
+              <div id="programme_details" ref={el => { sectionRefs.current["programme_details"] = el; }} className="scroll-mt-32 space-y-6">
+                <ProgrammeDeepDive data={showcase} onDownload={handleShowcaseDownload} />
+              </div>
+            ) : null}
 
             {/* Term-wise Curriculum */}
             {curriculumTerms.length > 0 && (
@@ -1161,6 +1192,9 @@ const CollegeDetailPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {hasShowcasePlacements && showcase && <PlacementReportsShowcase data={showcase} onDownload={handleShowcaseDownload} />}
+                  {showcase && <KarmaYogaImpact data={showcase} />}
+                  {!hasShowcasePlacements && (<>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                     {[
                       { label: "Average Package", value: formatMoney(college.placement_avg) || "—", icon: TrendingUp, color: "from-blue-500/15 to-blue-500/5", iconColor: "text-blue-600" },
@@ -1236,6 +1270,7 @@ const CollegeDetailPage = () => {
                   <div className="mb-6">
                     <SectorDonut sectors={placementSectors} />
                   </div>
+                  </>)}
                   {salaryBands.length > 0 && (
                     <div className="mb-6">
                       <h3 className="font-heading font-semibold text-foreground mb-3">Salary Break-up Bands</h3>
@@ -1280,7 +1315,7 @@ const CollegeDetailPage = () => {
                       </div>
                     </div>
                   )}
-                  {placementRecruiters.length > 0 && (
+                  {placementRecruiters.length > 0 && !hasShowcasePlacements && (
                     <div>
                       <h3 className="font-heading font-semibold text-foreground mb-3">Top Recruiters</h3>
                       <div className="flex flex-wrap gap-2">
@@ -1309,7 +1344,7 @@ const CollegeDetailPage = () => {
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500/20 to-sky-500/5 flex items-center justify-center">
                         <Globe className="w-5 h-5 text-sky-600" />
                       </div>
-                      International Collaborations
+                      {stripText(internationalData.title) || "International Collaborations"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -1455,6 +1490,7 @@ const CollegeDetailPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {showcase?.rank_spotlight?.length ? <RankingSpotlight data={showcase} /> : (
                   <div className="grid sm:grid-cols-2 gap-3 mb-6">
                     {rankingsList.map((r: any, i: number) => (
                       <div key={i} className="relative bg-gradient-to-br from-amber-50/40 to-transparent dark:from-amber-950/10 rounded-xl p-4 flex items-center gap-4 border border-amber-200/40 dark:border-amber-900/30 hover:shadow-md hover:-translate-y-0.5 transition-all">
@@ -1468,11 +1504,13 @@ const CollegeDetailPage = () => {
                       </div>
                     ))}
                   </div>
+                  )}
                   {rankAccreditations.length > 0 && (
                     <div className="pt-4 border-t border-dashed border-border">
                       <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-emerald-600" /> Accreditations
                       </h3>
+                      {showcase?.accreditation_logos?.some((l) => l.logo) ? <LogoMarquee items={showcase.accreditation_logos} speed={28} tile="w-48 h-28" /> : (
                       <div className="flex flex-wrap gap-2">
                         {rankAccreditations.map((a: string) => (
                           <div key={a} className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500/15 to-emerald-500/5 border border-emerald-200/50 dark:border-emerald-900/30 rounded-lg px-3 py-1.5">
@@ -1481,6 +1519,7 @@ const CollegeDetailPage = () => {
                           </div>
                         ))}
                       </div>
+                      )}
                     </div>
                   )}
                   {rankCertificates.length > 0 && (
