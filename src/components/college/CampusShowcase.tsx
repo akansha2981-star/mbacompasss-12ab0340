@@ -225,7 +225,7 @@ export const CampusHighlightsBoard = ({ data, collegeName }: { data: CampusShowc
           <div className="text-center mb-5">
             <div className="text-xs font-bold uppercase tracking-[0.25em] text-primary">The School of Firsts</div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2">
             {firsts.map((f, i) => (
               <div key={i} className="flex items-center gap-1.5 rounded-xl bg-background/90 border border-border/60 px-3 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
                 <Laurel />
@@ -280,20 +280,25 @@ export const ProgrammeCatalogue = ({ data, collegeName }: { data: CampusShowcase
   const groups = data.programme_groups || [];
   if (!groups.length) return null;
   const total = groups.reduce((n, g) => n + g.programmes.length, 0);
+  // Groups with several programmes get full rows; single-programme groups sit side by side.
+  const multi = groups.filter((g) => g.programmes.length > 1);
+  const single = groups.filter((g) => g.programmes.length === 1);
   return (
-    <SectionShell icon={<GraduationCap className="w-5 h-5 text-primary" />} title={`Programmes at ${collegeName}`} subtitle={`${total} programmes across ${groups.length} learning formats. Deadlines are from the official admissions page.`}>
+    <SectionShell icon={<GraduationCap className="w-5 h-5 text-primary" />} title={`Programmes at ${collegeName}`} subtitle={`${total} programme${total === 1 ? "" : "s"}${groups.length > 1 ? ` across ${groups.length} learning formats` : ""}. Deadlines are from the official admissions page.`}>
       <div className="space-y-6">
-        {groups.map((g) => (
-          <div key={g.group}>
+        {[...multi.map((g) => [g]), ...(single.length ? [single] : [])].map((row, ri) => (
+          <div key={ri} className={row.length > 1 || row[0].programmes.length === 1 ? "grid gap-x-3 gap-y-6 md:grid-cols-2" : ""}>
+        {row.map((g) => (
+          <div key={g.group} className="flex flex-col">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{g.group}</span>
               <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent" />
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className={`grid gap-3 flex-1 ${g.programmes.length > 1 ? "md:grid-cols-2" : ""}`}>
               {g.programmes.map((p) => {
                 const left = p.deadline ? daysLeftIst(p.deadline) : null;
                 return (
-                  <article key={p.code} className="group relative flex flex-col rounded-2xl border border-border/60 bg-gradient-to-br from-background to-primary/5 p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition-all">
+                  <article key={p.code} className="group relative flex h-full flex-col rounded-2xl border border-border/60 bg-gradient-to-br from-background to-primary/5 p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition-all">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className="font-heading text-2xl font-extrabold text-foreground leading-tight">{p.code}</h3>
@@ -333,6 +338,8 @@ export const ProgrammeCatalogue = ({ data, collegeName }: { data: CampusShowcase
                 );
               })}
             </div>
+          </div>
+        ))}
           </div>
         ))}
       </div>

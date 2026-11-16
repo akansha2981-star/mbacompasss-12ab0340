@@ -568,6 +568,11 @@ const CollegeDetailPage = () => {
     toast({ title: "Download started" });
   }, "Sign in to download the official brochure.");
 
+  // Real brochure PDFs live in the downloads block; otherwise keep the legacy summary download.
+  const brochureAction = showcaseBrochures.length > 0
+    ? () => sectionRefs.current["downloads"]?.scrollIntoView({ behavior: "smooth", block: "start" })
+    : handleDownloadBrochure;
+
   // Tab nav / TOC — only include sections that actually render for this college
   const hasInternational = intlPartners.length > 0 || !!getSectionContent("international");
   const hasKnowledgePartners = knowledgePartners.length > 0 || !!getSectionContent("knowledge_partners");
@@ -811,7 +816,7 @@ const CollegeDetailPage = () => {
             {/* Premium Action Row */}
             <div className="flex flex-wrap items-center gap-3 mb-5">
               <Button
-                onClick={showcaseBrochures.length > 0 ? () => sectionRefs.current["downloads"]?.scrollIntoView({ behavior: "smooth", block: "start" }) : handleDownloadBrochure}
+                onClick={brochureAction}
                 size="lg"
                 className="bg-white text-primary hover:bg-white/95 font-bold shadow-2xl hover:shadow-white/20 hover:scale-[1.02] transition-all gap-2 px-6"
               >
@@ -2043,7 +2048,7 @@ const CollegeDetailPage = () => {
           applyUrl
             ? { icon: <GraduationCap />, label: "Apply", primary: true, onClick: () => window.open(applyUrl, "_blank", "noopener,noreferrer") }
             : { icon: <Phone />, label: "Enquire", primary: true, onClick: () => sectionRefs.current["overview"]?.scrollIntoView({ behavior: "smooth" }) },
-          { icon: <Download />, label: "Brochure", onClick: handleDownloadBrochure },
+          { icon: <Download />, label: "Brochure", onClick: brochureAction },
           { icon: <Share2 />, label: "Share", onClick: () => { if (navigator.share) navigator.share({ title: college.name, url: window.location.href }); else { navigator.clipboard.writeText(window.location.href); toast({ title: "Link copied!" }); } } },
         ]}
       />
