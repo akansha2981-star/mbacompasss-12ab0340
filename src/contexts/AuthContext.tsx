@@ -110,6 +110,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [allowedSections, setAllowedSections] = useState<string[] | null>(null);
   const resolvedAdminUserIdRef = useRef<string | null>(null);
 
+  // Google sign-ups: save the page the visitor signed up from (remembered before the redirect).
+  useEffect(() => {
+    if (!user) return;
+    void import("@/lib/signupSource").then((m) => m.applySignupSource(user)).catch(() => {});
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     let cancelled = false;
     // On role-gated pages (admin), never give up waiting for the session after a

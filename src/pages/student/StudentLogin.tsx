@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { userHasPurchasedCourse, NO_PURCHASE_MESSAGE } from "@/lib/studentAccess";
 import { getAuthRedirectUri, storePostAuthRedirect } from "@/lib/authRedirect";
+import { rememberSignupPage } from "@/lib/signupSource";
 import {
   GraduationCap,
   Sparkles,
@@ -116,6 +117,7 @@ export default function StudentLogin() {
     setError(null);
     setGoogleLoading(true);
     try {
+      rememberSignupPage();
       storePostAuthRedirect(redirectTo);
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: getAuthRedirectUri(),
@@ -132,6 +134,7 @@ export default function StudentLogin() {
     setError(null);
     setGoogleLoading(true);
     try {
+      rememberSignupPage();
       storePostAuthRedirect("/demo");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: getAuthRedirectUri(),

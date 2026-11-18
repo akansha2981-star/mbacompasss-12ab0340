@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthRedirectUri, getCurrentRelativeUrl, storePostAuthRedirect } from "@/lib/authRedirect";
+import { rememberSignupPage } from "@/lib/signupSource";
 
 interface LoginRequiredDialogProps {
   open: boolean;
@@ -149,6 +150,7 @@ const LoginRequiredDialog = ({ open, onOpenChange, message }: LoginRequiredDialo
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
+      rememberSignupPage();
       storePostAuthRedirect(getCurrentRelativeUrl());
       const { error } = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: getAuthRedirectUri(),

@@ -1,3 +1,4 @@
+import { rememberSignupPage } from "@/lib/signupSource";
 import { readFunctionError } from "@/lib/functionError";
 import { useState, useEffect } from "react";
 import { z } from "zod";
@@ -88,6 +89,7 @@ const InlineAuthPanel = ({
   const handleGoogle = async () => {
     setGoogleLoading(true);
     try {
+      rememberSignupPage();
       sessionStorage.setItem("postAuthRedirect", returnTo);
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin + returnTo,

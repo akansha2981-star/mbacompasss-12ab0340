@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthRedirectUri, normalizeRedirectPath, storePostAuthRedirect } from "@/lib/authRedirect";
+import { rememberSignupPage } from "@/lib/signupSource";
 import { getOtpCallNotice, getOtpCallToastDescription } from "@/lib/otpCopy";
 import mbahubLogo from "@/assets/brandLogo";
 
@@ -83,6 +84,7 @@ const AuthPage = () => {
   const handleGoogle = async () => {
     setGoogleLoading(true);
     try {
+      rememberSignupPage(redirectTo);
       storePostAuthRedirect(normalizeRedirectPath(redirectTo));
       const { error } = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: getAuthRedirectUri(),
