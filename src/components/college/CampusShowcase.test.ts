@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysLeftIst, parseCampusShowcase } from "./CampusShowcase";
+import { daysLeftIst, parseCampusShowcase, programmeCtcLines } from "./CampusShowcase";
 
 describe("programme deadline countdown (IST calendar)", () => {
   it("counts 10 days from 16 Nov 2026 to a 26 Nov 2026 deadline", () => {
@@ -22,5 +22,23 @@ describe("campus showcase links", () => {
     expect(d?.programme_groups?.[0].programmes[0].apply_url).toBe("");
     expect(d?.programme_groups?.[0].programmes[0].learn_url).toBe("https://x.edu/pgdm");
     expect(d?.brochures).toHaveLength(0);
+  });
+});
+
+describe("programme-wise headline packages", () => {
+  const reports = parseCampusShowcase({
+    placement_reports: [
+      { code: "PGDM", title: "PGDM placements 2026", highest: "40 LPA", average: "15 LPA" },
+      { code: "PGPM", title: "PGPM placements 2026", highest: "43 LPA", average: "18.1 LPA" },
+    ],
+  });
+  it("lists PGDM 40 LPA and PGPM 43 LPA as highest packages", () => {
+    expect(programmeCtcLines(reports, "highest")).toEqual([{ code: "PGDM", value: "₹40 L" }, { code: "PGPM", value: "₹43 L" }]);
+  });
+  it("lists PGPM average alongside PGDM average", () => {
+    expect(programmeCtcLines(reports, "average")).toEqual([{ code: "PGDM", value: "₹15 L" }, { code: "PGPM", value: "₹18.1 L" }]);
+  });
+  it("returns nothing when only one programme reports the figure", () => {
+    expect(programmeCtcLines(parseCampusShowcase({ placement_reports: [{ code: "PGDM", title: "t", highest: "24 LPA" }] }), "highest")).toEqual([]);
   });
 });

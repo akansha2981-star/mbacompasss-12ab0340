@@ -6,6 +6,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatMoney } from "@/lib/collegeMetrics";
 
 /**
  * Data-driven "campus showcase" blocks for college pages. Everything renders from the
@@ -101,6 +102,14 @@ export function parseCampusShowcase(raw: unknown): CampusShowcaseData | null {
     brochures: arr<any>(d.brochures).map((b) => ({ title: str(b?.title), description: str(b?.description), url: safeAsset(str(b?.url)), size_label: str(b?.size_label), filename: str(b?.filename) })).filter((b) => b.title && b.url),
   };
   return out;
+}
+
+/** Programme-wise CTC lines (e.g. PGPM / PGDM) for headline stats; empty unless 2+ programmes report the metric. */
+export function programmeCtcLines(data: CampusShowcaseData | null | undefined, metric: "highest" | "average"): { code: string; value: string }[] {
+  const lines = (data?.placement_reports || [])
+    .map((r) => ({ code: r.code, value: formatMoney(r[metric]) }))
+    .filter((l) => l.code && l.value);
+  return lines.length >= 2 ? lines : [];
 }
 
 /* ───────────────────────── shared pieces ───────────────────────── */

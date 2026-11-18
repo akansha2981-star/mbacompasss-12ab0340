@@ -39,7 +39,7 @@ import { numericStat, rankOnly, stripTBA } from "@/lib/textClip";
 import MobileActionBar from "@/components/mobile/MobileActionBar";
 import FloatingTOC from "@/components/mobile/FloatingTOC";
 import ProgrammePortfolioTable from "@/components/college/ProgrammePortfolioTable";
-import { parseCampusShowcase, CampusHighlightsBoard, ProgrammeCatalogue, ProgrammeDeepDive, PlacementReportsShowcase, RankingSpotlight, KarmaYogaImpact, BrochureDownloads, LogoMarquee } from "@/components/college/CampusShowcase";
+import { parseCampusShowcase, programmeCtcLines, CampusHighlightsBoard, ProgrammeCatalogue, ProgrammeDeepDive, PlacementReportsShowcase, RankingSpotlight, KarmaYogaImpact, BrochureDownloads, LogoMarquee } from "@/components/college/CampusShowcase";
 import { PlacementTrendChart, SectorDonut } from "@/components/college/PlacementCharts";
 import { collegeTitle, collegeDescription } from "@/lib/collegeSeo";
 import { normalizeCollegeSectionData } from "@/lib/collegeSectionData";
@@ -101,7 +101,18 @@ const SidebarApplyStrip = ({ collegeName, applyUrl, applyLabel }: { collegeName:
 );
 
 // Placement outcomes at a glance — shared between the desktop sidebar and the mobile stack.
-const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, reportUrl }: { college: any; topRecruiters: string[]; onViewPlacements: () => void; reportUrl?: string }) => (
+type CtcLine = { code: string; value: string };
+const SnapshotLines = ({ lines, tone }: { lines: CtcLine[]; tone: string }) => (
+  <div className="space-y-1 mt-0.5">
+    {lines.map((l) => (
+      <div key={l.code} className="flex items-baseline justify-between gap-2">
+        <span className="text-xs font-semibold text-muted-foreground">{l.code}</span>
+        <span className={`font-heading font-extrabold ${tone} text-base leading-tight whitespace-nowrap`}>{l.value}</span>
+      </div>
+    ))}
+  </div>
+);
+const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, reportUrl, avgLines = [], highestLines = [] }: { college: any; topRecruiters: string[]; onViewPlacements: () => void; reportUrl?: string; avgLines?: CtcLine[]; highestLines?: CtcLine[] }) => (
   <Card className="overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
     <CardContent className="pt-6">
       <div className="flex items-center gap-2 mb-4">
@@ -111,16 +122,16 @@ const PlacementSnapshotCard = ({ college, topRecruiters, onViewPlacements, repor
         <h4 className="font-heading font-bold text-foreground">Placement Snapshot</h4>
       </div>
       <div className="grid grid-cols-2 gap-2.5">
-        {college.placement_avg && (
-          <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 text-center">
-            <div className="font-heading font-extrabold text-primary text-lg leading-tight">{numericStat(college.placement_avg)}</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Average Package</div>
+        {(avgLines.length > 0 || college.placement_avg) && (
+          <div className={`rounded-xl bg-primary/5 border border-primary/10 p-3 ${avgLines.length ? "" : "text-center"}`}>
+            {avgLines.length ? <SnapshotLines lines={avgLines} tone="text-primary" /> : <div className="font-heading font-extrabold text-primary text-lg leading-tight">{numericStat(college.placement_avg)}</div>}
+            <div className={`text-xs uppercase tracking-wider text-muted-foreground font-semibold ${avgLines.length ? "mt-1.5 text-center" : "mt-0.5"}`}>Average Package</div>
           </div>
         )}
-        {college.placement_highest && (
-          <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
-            <div className="font-heading font-extrabold text-amber-700 text-lg leading-tight">{numericStat(college.placement_highest)}</div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mt-0.5">Highest Package</div>
+        {(highestLines.length > 0 || college.placement_highest) && (
+          <div className={`rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 ${highestLines.length ? "" : "text-center"}`}>
+            {highestLines.length ? <SnapshotLines lines={highestLines} tone="text-amber-700" /> : <div className="font-heading font-extrabold text-amber-700 text-lg leading-tight">{numericStat(college.placement_highest)}</div>}
+            <div className={`text-xs uppercase tracking-wider text-muted-foreground font-semibold ${highestLines.length ? "mt-1.5 text-center" : "mt-0.5"}`}>Highest Package</div>
           </div>
         )}
       </div>
@@ -409,6 +420,14 @@ const CollegeDetailPage = () => {
 
   // collegeJsonLd already computed above before early returns
 
+  // Campus showcase (programme cards, programme deep dive, placement reports, logo strips, downloads)
+  const showcase = parseCampusShowcase(getSection("campus_showcase")?.data);
+  // Programme-wise headline packages (e.g. PGPM + PGDM) when the showcase reports 2+ programmes.
+  const highestLines = programmeCtcLines(showcase, "highest");
+  const avgLines = programmeCtcLines(showcase, "average");
+  const joinLines = (lines: { code: string; value: string }[]) => lines.map((l) => `${l.code} ${l.value}`).join(" · ");
+  const noLines: { code: string; value: string }[] = [];
+
   // Q&A items from DB or fallback
   const qaItems = qaData.questions?.length > 0 ? qaData.questions.map((q: any) => ({ q: q.question, a: q.answer })) : [
     { q: `What is the fee structure at ${college.name}?`, a: `The total program fees at ${college.name} is ${college.fees || "available on request"}.` },
@@ -426,8 +445,8 @@ const CollegeDetailPage = () => {
   const answerFacts = [
     { label: "Location", value: [college.city, college.state].filter(Boolean).join(", ") || undefined },
     { label: "Total fees", value: formatMoney(college.fees) || undefined },
-    { label: "Average package", value: formatMoney(college.placement_avg) || undefined },
-    { label: "Highest package", value: formatMoney(college.placement_highest) || undefined },
+    { label: "Average package", value: (avgLines.length ? joinLines(avgLines) : formatMoney(college.placement_avg)) || undefined },
+    { label: "Highest package", value: (highestLines.length ? joinLines(highestLines) : formatMoney(college.placement_highest)) || undefined },
     { label: "NIRF rank", value: college.ranking ? `#${college.ranking}` : undefined },
     { label: "Exams accepted", value: exams.length ? exams.slice(0, 4).join(", ") : undefined },
   ].filter((f) => f.value) as { label: string; value: string }[];
@@ -557,8 +576,6 @@ const CollegeDetailPage = () => {
         .filter((p: any) => p.name)
     : [];
 
-  // Campus showcase (programme cards, programme deep dive, placement reports, logo strips, downloads)
-  const showcase = parseCampusShowcase(getSection("campus_showcase")?.data);
   const showcaseBrochures = showcase?.brochures?.length ? showcase.brochures : [];
   const hasShowcasePlacements = !!(showcase?.placement_reports?.length || showcase?.recruiter_logos?.length);
   const handleShowcaseDownload = gateBrochure((url: string, filename: string) => {
@@ -789,11 +806,11 @@ const CollegeDetailPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
               {[
                 ...(Number(college.ranking) > 0
-                  ? [{ label: "NIRF Ranking", value: rankOnly(college.ranking), source: "NIRF", icon: Award, year: new Date().getFullYear().toString() }]
-                  : [{ label: "Placement Rate", value: numericStat(placementData.placement_rate) || "Not disclosed", source: "Placement Report", icon: CheckCircle, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` }]),
-                { label: "Total Fees", value: formatMoney(college.fees) || "Not disclosed", source: "Brochure", icon: Banknote, year: new Date().getFullYear().toString() },
-                { label: "Avg Package", value: formatMoney(college.placement_avg) || "Not disclosed", source: "Placement Report", icon: TrendingUp, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
-                { label: "Highest Package", value: formatMoney(college.placement_highest) || "Not disclosed", source: "Placement Report", icon: Medal, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
+                  ? [{ label: "NIRF Ranking", value: rankOnly(college.ranking), lines: noLines, source: "NIRF", icon: Award, year: new Date().getFullYear().toString() }]
+                  : [{ label: "Placement Rate", value: numericStat(placementData.placement_rate) || "Not disclosed", lines: noLines, source: "Placement Report", icon: CheckCircle, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` }]),
+                { label: "Total Fees", value: formatMoney(college.fees) || "Not disclosed", lines: noLines, source: "Brochure", icon: Banknote, year: new Date().getFullYear().toString() },
+                { label: "Avg Package", value: formatMoney(college.placement_avg) || "Not disclosed", lines: avgLines, source: "Placement Report", icon: TrendingUp, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
+                { label: "Highest Package", value: formatMoney(college.placement_highest) || "Not disclosed", lines: highestLines, source: "Placement Report", icon: Medal, year: `${new Date().getFullYear() - 1}-${String(new Date().getFullYear()).slice(-2)}` },
               ].map(s => {
                 const Icon = s.icon;
                 return (
@@ -803,7 +820,18 @@ const CollegeDetailPage = () => {
                       <Icon className="w-3.5 h-3.5 text-primary-foreground/70 shrink-0" />
                       <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/70 truncate">{s.label}</span>
                     </div>
-                    <div className="font-heading font-extrabold text-primary-foreground text-sm sm:text-base md:text-lg leading-tight truncate" title={s.value}>{s.value}</div>
+                    {s.lines.length ? (
+                      <div className="space-y-0.5">
+                        {s.lines.map((l) => (
+                          <div key={l.code} className="flex items-baseline justify-between gap-2 min-w-0">
+                            <span className="text-xs font-semibold text-primary-foreground/75 truncate">{l.code}</span>
+                            <span className="font-heading font-extrabold text-primary-foreground text-sm sm:text-base leading-tight whitespace-nowrap">{l.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="font-heading font-extrabold text-primary-foreground text-sm sm:text-base md:text-lg leading-tight truncate" title={s.value}>{s.value}</div>
+                    )}
 
                     <div className="mt-1.5">
                       <CitationLink source={s.source} year={s.year} entityName={college.name} entityWebsite={(college as any).website} className="!bg-white/10 !border-white/20 !text-primary-foreground/80" />
@@ -933,6 +961,8 @@ const CollegeDetailPage = () => {
                   topRecruiters={topRecruiters}
                   onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
                   reportUrl={placementReportUrl}
+                  avgLines={avgLines}
+                  highestLines={highestLines}
                 />
               )}
               <QuickInfoCard college={college} accreditations={accreditations} applyUrl={applyUrl} applyLabel={applyLabel} quickItems={quickInfoItems} />
@@ -1967,6 +1997,8 @@ const CollegeDetailPage = () => {
                       topRecruiters={topRecruiters}
                       onViewPlacements={() => sectionRefs.current["placements"]?.scrollIntoView({ behavior: "smooth" })}
                       reportUrl={placementReportUrl}
+                      avgLines={avgLines}
+                      highestLines={highestLines}
                     />
                   </motion.div>
                 )}

@@ -50,3 +50,4 @@
 - Private freebie files require an owner-scoped freebie_file_access claim before URL signing; storage also rechecks publication and exact file identity, so sign-in alone never authorizes all resource files.
 - Hand-built long-form articles use the token-based ed-* editorial blocks in src/styles.css inside article HTML, because article bodies are sanitized HTML and cannot carry components or inline colours.
 - College pages render optional programme cards, programme deep dives, programme-wise placement reports, logo strips and brochure downloads from one `campus_showcase` college section parsed by src/components/college/CampusShowcase.tsx; each block hides without data, so other colleges are unaffected and content stays database-managed.
+- College hero and placement snapshot list programme-wise CTC from campus_showcase placement reports when 2+ programmes report them; the college columns stay the single cross-site value.
