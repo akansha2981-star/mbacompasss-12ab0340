@@ -357,7 +357,7 @@ export const ProgrammeCatalogue = ({ data, collegeName }: { data: CampusShowcase
 };
 
 /** Programme-wise deep dive: batch profile, term-wise curriculum, specializations, fees and eligibility. */
-export const ProgrammeDeepDive = ({ data, onDownload }: { data: CampusShowcaseData; onDownload?: (url: string, filename: string) => void }) => {
+export const ProgrammeDeepDive = ({ data, onDownload }: { data: CampusShowcaseData; onDownload?: (url: string, filename: string, source?: "downloads" | "programme_deep_dive" | "placement_report") => void }) => {
   const list = data.programme_details || [];
   const [active, setActive] = useState(list[0]?.code || "");
   const [term, setTerm] = useState(0);
@@ -388,7 +388,7 @@ export const ProgrammeDeepDive = ({ data, onDownload }: { data: CampusShowcaseDa
           {p.tagline && <p className="text-base text-muted-foreground mt-1">{p.tagline}</p>}
         </div>
         {p.brochure_url && (
-          <Button className="gap-2 font-bold shrink-0" onClick={() => onDownload?.(p.brochure_url!, `${p.code.toLowerCase()}-brochure.pdf`)}>
+          <Button className="gap-2 font-bold shrink-0" onClick={() => onDownload?.(p.brochure_url!, `${p.code.toLowerCase()}-brochure.pdf`, "programme_deep_dive")}>
             <FileDown className="w-4 h-4" /> {p.code} brochure (PDF)
           </Button>
         )}
@@ -546,7 +546,7 @@ export const ProgrammeDeepDive = ({ data, onDownload }: { data: CampusShowcaseDa
 };
 
 /** Programme-wise placement report cards with function split, roles, recruiters and report download. */
-export const PlacementReportsShowcase = ({ data, onDownload }: { data: CampusShowcaseData; onDownload?: (url: string, filename: string) => void }) => {
+export const PlacementReportsShowcase = ({ data, onDownload }: { data: CampusShowcaseData; onDownload?: (url: string, filename: string, source?: "downloads" | "programme_deep_dive" | "placement_report") => void }) => {
   const reports = data.placement_reports || [];
   const [active, setActive] = useState(reports[0]?.code || "");
   const r = reports.find((x) => x.code === active) || reports[0];
@@ -604,7 +604,7 @@ export const PlacementReportsShowcase = ({ data, onDownload }: { data: CampusSho
             {(r.report_url || r.learn_url) && (
               <div className="flex flex-wrap gap-2 border-t border-border/60 px-5 py-4 bg-background/60">
                 {r.report_url && (
-                  <Button className="gap-2 font-bold" onClick={() => onDownload?.(r.report_url!, `${r.code.toLowerCase()}-placement-report.pdf`)}>
+                  <Button className="gap-2 font-bold" onClick={() => onDownload?.(r.report_url!, `${r.code.toLowerCase()}-placement-report.pdf`, "placement_report")}>
                     <FileDown className="w-4 h-4" /> Download {r.code} report (PDF)
                   </Button>
                 )}
@@ -671,7 +671,7 @@ export const KarmaYogaImpact = ({ data }: { data: CampusShowcaseData }) => {
 };
 
 /** Download centre for official brochures and placement reports. */
-export const BrochureDownloads = ({ data, onDownload }: { data: CampusShowcaseData; onDownload?: (url: string, filename: string) => void }) => {
+export const BrochureDownloads = ({ data, onDownload }: { data: CampusShowcaseData; onDownload?: (url: string, filename: string, source?: "downloads" | "programme_deep_dive" | "placement_report") => void }) => {
   const items = data.brochures || [];
   if (!items.length) return null;
   return (
@@ -687,7 +687,7 @@ export const BrochureDownloads = ({ data, onDownload }: { data: CampusShowcaseDa
               <h3 className="font-heading font-bold text-foreground leading-snug">{b.title}</h3>
               {b.description && <p className="text-sm text-muted-foreground mt-0.5 leading-snug">{b.description}</p>}
               <div className="mt-3 flex items-center gap-3">
-                <Button size="sm" className="gap-1.5 font-bold" onClick={() => onDownload?.(b.url, b.filename || "brochure.pdf")}>
+                <Button size="sm" className="gap-1.5 font-bold" onClick={() => onDownload?.(b.url, b.filename || "brochure.pdf", "downloads")}>
                   <FileDown className="w-3.5 h-3.5" /> Download
                 </Button>
                 {b.size_label && <span className="text-xs text-muted-foreground">{b.size_label}</span>}

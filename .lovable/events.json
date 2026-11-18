@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.brochure_download_clicked": {
+      "event_schema_version": 1,
+      "description": "A visitor started a brochure or placement report download on a college page (campus showcase blocks).",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "college_slug",
+          "file",
+          "source"
+        ],
+        "properties": {
+          "college_slug": {
+            "type": "string",
+            "description": "Slug of the college page, e.g. great-lakes-institute-of-management-gurgaon"
+          },
+          "file": {
+            "type": "string",
+            "description": "Downloaded file name, e.g. pgdm-placement-report.pdf"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "downloads",
+              "programme_deep_dive",
+              "placement_report"
+            ],
+            "description": "Which block on the page held the link"
+          }
+        }
+      }
+    }
+  }
+}

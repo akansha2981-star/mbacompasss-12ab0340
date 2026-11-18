@@ -578,10 +578,15 @@ const CollegeDetailPage = () => {
 
   const showcaseBrochures = showcase?.brochures?.length ? showcase.brochures : [];
   const hasShowcasePlacements = !!(showcase?.placement_reports?.length || showcase?.recruiter_logos?.length);
-  const handleShowcaseDownload = gateBrochure((url: string, filename: string) => {
+  const handleShowcaseDownload = gateBrochure((url: string, filename: string, source?: string) => {
     const a = document.createElement("a");
     a.href = url; a.download = filename; a.rel = "noopener";
     document.body.appendChild(a); a.click(); a.remove();
+    window.__lovableEvents?.track?.("project.brochure_download_clicked", {
+      college_slug: college.slug,
+      file: filename,
+      source: source || "downloads",
+    });
     toast({ title: "Download started" });
   }, "Sign in to download the official brochure.");
 
