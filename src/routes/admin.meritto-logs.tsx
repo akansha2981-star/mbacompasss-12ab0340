@@ -4,7 +4,7 @@ import PublicPageSkeleton from "@/components/PublicPageSkeleton";
 
 export const Route = createFileRoute("/admin/meritto-logs")({
   head: () => ({ meta: [
-    { title: "Meritto Lead Delivery | MBA Compass Admin" },
+    { title: "GIM Meritto Lead Delivery | MBA Compass Admin" },
     { name: "description", content: "Manage Meritto lead submissions, delivery results and bulk uploads in MBA Compass." },
     { property: "og:title", content: "Meritto Lead Delivery | MBA Compass Admin" },
     { property: "og:description", content: "Manage Meritto lead submissions and delivery results." },
@@ -12,6 +12,6 @@ export const Route = createFileRoute("/admin/meritto-logs")({
     { name: "twitter:card", content: "summary" },
     { name: "robots", content: "noindex, nofollow" },
   ] }),
-  component: () => <AdminMerittoLogs />,
+  component: () => <AdminMerittoLogs key="gim" client="gim" />,
   pendingComponent: PublicPageSkeleton,
 });

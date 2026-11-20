@@ -25,3 +25,6 @@
 - [x] Rankings and "School of Firsts" blocks from website screenshots
 - [x] Chennai programme cards (PGPM, PGDM, PGPM-FBE, PGXPM, FPM, PGDM Online, Corporate L&D)
 - [x] Gurgaon programme portfolio cards from website screenshot
+
+## ABBS Meritto
+- [x] ABBS Meritto admin tab below GIM Meritto (manual push, bulk upload, retry, logs, export, own switch; admin-only, no website auto-push)

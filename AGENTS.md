@@ -53,3 +53,4 @@
 - College hero and placement snapshot list programme-wise CTC from campus_showcase placement reports when 2+ programmes report them; the college columns stay the single cross-site value.
 - Google sign-ups remember the originating page in localStorage before the OAuth redirect (src/lib/signupSource.ts) and AuthContext saves it to an empty profile signup_page_url only for accounts created minutes ago, because OAuth cannot carry signup metadata.
 - Campus showcase downloads emit project.brochure_download_clicked (college, file, block) from the page's shared download handler, so every brochure and placement-report link is counted in one place.
+- Meritto pushes are routed per client (gim default, abbs) via supabase/functions/_shared/merittoClients.ts; logs and bulk jobs carry a client column, and each client has its own secret and site_settings switch, so website-trigger leads (no client) stay on GIM only.

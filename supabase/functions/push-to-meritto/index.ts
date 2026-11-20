@@ -3,12 +3,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { isDailyLimit, nextIstMidnight } from "../_shared/merittoBulk.ts";
-
-const MERITTO_URL = "https://api.in4.nopaperforms.com/dataporting/7080/bschoolbuzz";
-const SOURCE = "bschoolbuzz";
-const COLLEGE_ID = "7080";
+import { MERITTO_CLIENTS, resolveMerittoClient, type MerittoClientConfig } from "../_shared/merittoClients.ts";
 
 type LeadInput = {
+  client?: string; // gim (default) | abbs — which Meritto account receives the lead
   log_id?: string;
   source: string; // e.g. business_inquiry, contact, demo_lead, signup
   name?: string;
@@ -41,7 +39,7 @@ function redact(body: Record<string, unknown>) {
   return clone;
 }
 
-async function callMeritto(secret: string, lead: LeadInput, cid: string) {
+async function callMeritto(secret: string, lead: LeadInput, cid: string, cfg: MerittoClientConfig) {
   // Meritto binds `source=bschoolbuzz` to the URL path — it cannot be changed.
   // To distinguish which of our domains the lead came from (bschoolbuzz /
   // bschoolbuzz.in / mbacompass.in), we tag the origin domain into multiple
@@ -57,8 +55,8 @@ async function callMeritto(secret: string, lead: LeadInput, cid: string) {
     name: lead.name ?? "",
     email: lead.email ?? "",
     mobile: sanitizeMobile(lead.mobile),
-    source: SOURCE,
-    college_id: COLLEGE_ID,
+    source: cfg.source,
+    college_id: cfg.collegeId,
     secret_key: secret,
     state: lead.state ?? "",
     city: lead.city ?? "",
@@ -75,7 +73,7 @@ async function callMeritto(secret: string, lead: LeadInput, cid: string) {
   };
 
   const startedAt = Date.now();
-  console.log(`[meritto][${cid}] → POST ${MERITTO_URL}`, {
+  console.log(`[meritto:${cfg.id}][${cid}] → POST ${cfg.url}`, {
     origin_domain: domain || null,
     lead_source: lead.source,
     payload: redact(body),
@@ -83,7 +81,7 @@ async function callMeritto(secret: string, lead: LeadInput, cid: string) {
 
   let res: Response;
   try {
-    res = await fetch(MERITTO_URL, {
+    res = await fetch(cfg.url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -164,20 +162,30 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
 async function runBulkTick(token: string): Promise<Response> {
-  const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); const secret = Deno.env.get("MERITTO_SECRET_KEY");
-  if (!url || !key || !secret) return json({ error: "not configured" }, 500);
+  const json = (b: unknown, st = 200) => new Response(JSON.stringify(b), { status: st, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return json({ error: "not configured" }, 500);
   const admin = createClient(url, key);
   const { data: w } = await admin.from("meritto_bulk_worker").select("token").eq("id", true).maybeSingle();
   if (!token || !w?.token || w.token !== token) return json({ error: "forbidden" }, 403);
 
-  const { data: sw } = await admin.from("site_settings").select("value").eq("key", "meritto_integration").maybeSingle();
-  if (!(sw?.value as { enabled?: boolean } | null)?.enabled) return json({ ok: true, skipped: "integration off" });
-
-  const { data: job } = await admin.from("meritto_bulk_jobs").select("*").eq("status", "running").order("created_at").limit(1).maybeSingle();
-  if (!job) return json({ ok: true, idle: true });
-
   const started = Date.now();
+  const results: Record<string, unknown> = {};
+  for (const cfg of Object.values(MERITTO_CLIENTS)) {
+    if (Date.now() - started > 40_000) break;
+    const secret = Deno.env.get(cfg.secretEnv);
+    if (!secret) { results[cfg.id] = { skipped: "secret missing" }; continue; }
+    const { data: sw } = await admin.from("site_settings").select("value").eq("key", cfg.switchKey).maybeSingle();
+    if (!(sw?.value as { enabled?: boolean } | null)?.enabled) { results[cfg.id] = { skipped: "integration off" }; continue; }
+    const { data: job } = await admin.from("meritto_bulk_jobs").select("*").eq("status", "running").eq("client", cfg.id).order("created_at").limit(1).maybeSingle();
+    if (!job) { results[cfg.id] = { idle: true }; continue; }
+    results[cfg.id] = await runBulkJob(admin, cfg, secret, job, started);
+  }
+  return json({ ok: true, ...results });
+}
+
+// deno-lint-ignore no-explicit-any
+async function runBulkJob(admin: any, cfg: MerittoClientConfig, secret: string, job: any, started: number) {
   let processed = 0;
   while (Date.now() - started < 40_000) {
     const { data: batch } = await admin.rpc("meritto_bulk_claim", { p_job: job.id, p_limit: 5 });
@@ -187,7 +195,7 @@ async function runBulkTick(token: string): Promise<Response> {
       const it = items[i];
       const lead: LeadInput = { ...it.lead, origin_domain: it.lead.origin_domain ?? job.origin_domain ?? undefined };
       let res: Awaited<ReturnType<typeof callMeritto>> | null = null;
-      try { res = await callMeritto(secret, lead, `bulk-${it.id.slice(0, 6)}`); } catch (e) {
+      try { res = await callMeritto(secret, lead, `bulk-${it.id.slice(0, 6)}`, cfg); } catch (e) {
         await admin.from("meritto_bulk_items").update({ status: "failed", error: `Network: ${String(e)}`, processed_at: new Date().toISOString(), locked_at: null }).eq("id", it.id);
         processed++; continue;
       }
@@ -195,10 +203,11 @@ async function runBulkTick(token: string): Promise<Response> {
         // Return this and the rest of the claimed rows to the queue; resume after midnight IST.
         await admin.from("meritto_bulk_items").update({ status: "pending", locked_at: null }).in("id", items.slice(i).map((x) => x.id));
         await admin.from("meritto_bulk_jobs").update({ status: "paused_limit", resume_at: nextIstMidnight(), last_error: res.json?.message ? `Meritto: ${res.json.message}` : `HTTP ${res.status}` }).eq("id", job.id);
-        return json({ ok: true, paused: true, processed });
+        return { paused: true, processed };
       }
       const errMsg = res.outcome === "success" ? null : (res.json?.message ? `Meritto: ${res.json.message}` : `HTTP ${res.status}`);
       const { data: log } = await admin.from("meritto_lead_logs").insert({
+        client: cfg.id,
         source: lead.source ?? "bulk_upload", name: lead.name, email: lead.email, mobile: lead.mobile, state: lead.state, city: lead.city,
         campus: lead.campus, course: lead.course, medium: lead.medium, campaign: lead.campaign,
         payload: redact(res.body), response: res.json, http_status: res.status, status: res.outcome, error: errMsg, last_attempt_at: new Date().toISOString(),
@@ -209,7 +218,7 @@ async function runBulkTick(token: string): Promise<Response> {
   }
   const { count } = await admin.from("meritto_bulk_items").select("id", { count: "exact", head: true }).eq("job_id", job.id).in("status", ["pending", "processing"]);
   if (!count) await admin.from("meritto_bulk_jobs").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", job.id).eq("status", "running");
-  return json({ ok: true, processed, remaining: count ?? 0 });
+  return { processed, remaining: count ?? 0 };
 }
 
 
@@ -255,20 +264,12 @@ Deno.serve(async (req) => {
 
 
 
-  const secret = Deno.env.get("MERITTO_SECRET_KEY");
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
   const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!SUPABASE_URL || !SERVICE_ROLE) {
     return new Response(JSON.stringify({ error: "Lead submission service is not configured" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  if (!secret) {
-    return new Response(JSON.stringify({ error: "MERITTO_SECRET_KEY missing" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
@@ -280,11 +281,25 @@ Deno.serve(async (req) => {
     const input = (await req.json()) as LeadInput & { retry_log_id?: string; skip_log?: boolean };
     const skipLog = !!input.skip_log;
 
+    // Which Meritto account receives this lead. Retries always use the client recorded on the log.
+    let cfg = resolveMerittoClient(input.client);
+    if (input.retry_log_id) {
+      const { data: lc } = await admin.from("meritto_lead_logs").select("client").eq("id", input.retry_log_id).maybeSingle();
+      if (lc) cfg = resolveMerittoClient(lc.client);
+    }
+    const secret = Deno.env.get(cfg.secretEnv);
+    if (!secret) {
+      return new Response(JSON.stringify({ error: `${cfg.label} Meritto secret key missing` }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Master switch (Admin → Meritto Integration). When off, nothing is sent or logged.
     const { data: switchRow } = await admin
       .from("site_settings")
       .select("value")
-      .eq("key", "meritto_integration")
+      .eq("key", cfg.switchKey)
       .maybeSingle();
     const enabled = !!(switchRow?.value as { enabled?: boolean } | null)?.enabled;
     if (!enabled) {
@@ -294,7 +309,7 @@ Deno.serve(async (req) => {
           ok: false,
           skipped: true,
           outcome: "skipped",
-          reason: "Meritto integration is switched off in Admin → Meritto Integration",
+          reason: `${cfg.label} Meritto integration is switched off in Admin → ${cfg.label} Meritto`,
           log_id: null,
           correlation_id: cid,
         }),
@@ -340,7 +355,7 @@ Deno.serve(async (req) => {
 
     // Ephemeral mode: push to Meritto WITHOUT persisting anything to our DB.
     if (skipLog && !input.retry_log_id) {
-      const result = await callMeritto(secret, input, cid);
+      const result = await callMeritto(secret, input, cid, cfg);
       console.log(`[meritto][${cid}] ephemeral done`, { ok: result.ok, outcome: result.outcome, http: result.status, ms: result.durationMs });
       return new Response(
         JSON.stringify({ ok: result.ok, outcome: result.outcome, status: result.status, log_id: null, response: result.json, correlation_id: cid, ephemeral: true }),
@@ -366,6 +381,7 @@ Deno.serve(async (req) => {
       }
       logId = data.id;
       lead = {
+        client: cfg.id,
         source: data.source,
         name: data.name ?? undefined,
         email: data.email ?? undefined,
@@ -383,6 +399,7 @@ Deno.serve(async (req) => {
       const { data: created } = await admin
         .from("meritto_lead_logs")
         .insert({
+          client: cfg.id,
           source: lead.source ?? "unknown",
           name: lead.name,
           email: lead.email,
@@ -402,7 +419,7 @@ Deno.serve(async (req) => {
       console.log(`[meritto][${cid}] created log ${logId}`);
     }
 
-    const result = await callMeritto(secret, lead, cid);
+    const result = await callMeritto(secret, lead, cid, cfg);
 
     const finalStatus = result.outcome; // success | duplicate | invalid | failed
     const errMsg = result.outcome === "success"

@@ -7260,6 +7260,7 @@ export type Database = {
       }
       meritto_bulk_jobs: {
         Row: {
+          client: string
           completed_at: string | null
           created_at: string
           created_by: string | null
@@ -7273,6 +7274,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -7286,6 +7288,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -7320,6 +7323,7 @@ export type Database = {
           campaign: string | null
           campus: string | null
           city: string | null
+          client: string
           course: string | null
           created_at: string
           email: string | null
@@ -7342,6 +7346,7 @@ export type Database = {
           campaign?: string | null
           campus?: string | null
           city?: string | null
+          client?: string
           course?: string | null
           created_at?: string
           email?: string | null
@@ -7364,6 +7369,7 @@ export type Database = {
           campaign?: string | null
           campus?: string | null
           city?: string | null
+          client?: string
           course?: string | null
           created_at?: string
           email?: string | null

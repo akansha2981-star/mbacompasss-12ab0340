@@ -74,6 +74,7 @@ import { Route as PublicXatScoreCalculatorRouteImport } from './routes/_public.x
 import { Route as PublicXatScoreVsPercentile2027RouteImport } from './routes/_public.xat-score-vs-percentile-2027'
 import { Route as PublicXlriCallPredictorRouteImport } from './routes/_public.xlri-call-predictor'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAbbsMerittoRouteImport } from './routes/admin.abbs-meritto'
 import { Route as AdminAdvertisementsRouteImport } from './routes/admin.advertisements'
 import { Route as AdminAiUsageRouteImport } from './routes/admin.ai-usage'
 import { Route as AdminAllLeadsUnifiedRouteImport } from './routes/admin.all-leads-unified'
@@ -718,6 +719,11 @@ const PublicXlriCallPredictorRoute = PublicXlriCallPredictorRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAbbsMerittoRoute = AdminAbbsMerittoRouteImport.update({
+  id: '/abbs-meritto',
+  path: '/abbs-meritto',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAdvertisementsRoute = AdminAdvertisementsRouteImport.update({
@@ -2378,6 +2384,7 @@ export interface FileRoutesByFullPath {
   '/xat-score-calculator': typeof PublicXatScoreCalculatorRoute
   '/xat-score-vs-percentile-2027': typeof PublicXatScoreVsPercentile2027Route
   '/xlri-call-predictor': typeof PublicXlriCallPredictorRoute
+  '/admin/abbs-meritto': typeof AdminAbbsMerittoRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/ai-usage': typeof AdminAiUsageRoute
   '/admin/all-leads-unified': typeof AdminAllLeadsUnifiedRoute
@@ -2741,6 +2748,7 @@ export interface FileRoutesByTo {
   '/xat-score-calculator': typeof PublicXatScoreCalculatorRoute
   '/xat-score-vs-percentile-2027': typeof PublicXatScoreVsPercentile2027Route
   '/xlri-call-predictor': typeof PublicXlriCallPredictorRoute
+  '/admin/abbs-meritto': typeof AdminAbbsMerittoRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/ai-usage': typeof AdminAiUsageRoute
   '/admin/all-leads-unified': typeof AdminAllLeadsUnifiedRoute
@@ -3102,6 +3110,7 @@ export interface FileRoutesById {
   '/_public/xat-score-calculator': typeof PublicXatScoreCalculatorRoute
   '/_public/xat-score-vs-percentile-2027': typeof PublicXatScoreVsPercentile2027Route
   '/_public/xlri-call-predictor': typeof PublicXlriCallPredictorRoute
+  '/admin/abbs-meritto': typeof AdminAbbsMerittoRoute
   '/admin/advertisements': typeof AdminAdvertisementsRoute
   '/admin/ai-usage': typeof AdminAiUsageRoute
   '/admin/all-leads-unified': typeof AdminAllLeadsUnifiedRoute
@@ -3476,6 +3485,7 @@ export interface FileRouteTypes {
     | '/xat-score-calculator'
     | '/xat-score-vs-percentile-2027'
     | '/xlri-call-predictor'
+    | '/admin/abbs-meritto'
     | '/admin/advertisements'
     | '/admin/ai-usage'
     | '/admin/all-leads-unified'
@@ -3839,6 +3849,7 @@ export interface FileRouteTypes {
     | '/xat-score-calculator'
     | '/xat-score-vs-percentile-2027'
     | '/xlri-call-predictor'
+    | '/admin/abbs-meritto'
     | '/admin/advertisements'
     | '/admin/ai-usage'
     | '/admin/all-leads-unified'
@@ -4199,6 +4210,7 @@ export interface FileRouteTypes {
     | '/_public/xat-score-calculator'
     | '/_public/xat-score-vs-percentile-2027'
     | '/_public/xlri-call-predictor'
+    | '/admin/abbs-meritto'
     | '/admin/advertisements'
     | '/admin/ai-usage'
     | '/admin/all-leads-unified'
@@ -4990,6 +5002,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/abbs-meritto': {
+      id: '/admin/abbs-meritto'
+      path: '/abbs-meritto'
+      fullPath: '/admin/abbs-meritto'
+      preLoaderRoute: typeof AdminAbbsMerittoRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/advertisements': {
@@ -7435,6 +7454,7 @@ const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 interface AdminRouteChildren {
+  AdminAbbsMerittoRoute: typeof AdminAbbsMerittoRoute
   AdminAdvertisementsRoute: typeof AdminAdvertisementsRoute
   AdminAiUsageRoute: typeof AdminAiUsageRoute
   AdminAllLeadsUnifiedRoute: typeof AdminAllLeadsUnifiedRoute
@@ -7565,6 +7585,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAbbsMerittoRoute: AdminAbbsMerittoRoute,
   AdminAdvertisementsRoute: AdminAdvertisementsRoute,
   AdminAiUsageRoute: AdminAiUsageRoute,
   AdminAllLeadsUnifiedRoute: AdminAllLeadsUnifiedRoute,

@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import ExportExcelButton from "@/components/admin/ExportExcelButton";
 import { submitMerittoWithWait } from "@/lib/merittoSubmission";
 import MerittoBulkJobPanel from "@/components/admin/MerittoBulkJobPanel";
+import { MERITTO_CLIENT_UI, type MerittoClientId } from "@/lib/merittoClients";
 
 const MERITTO_FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "name", label: "Name", required: true },
@@ -103,7 +104,9 @@ const toExportRow = (row: Log) => ({
   delivery_status: statusLabel(row.status),
 });
 
-export default function AdminMerittoLogs() {
+export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoClientId }) {
+  const clientUi = MERITTO_CLIENT_UI[client];
+  const clientLabel = clientUi.label;
   const [rows, setRows] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -147,23 +150,23 @@ export default function AdminMerittoLogs() {
     const { data } = await supabase
       .from("site_settings")
       .select("value")
-      .eq("key", "meritto_integration")
+      .eq("key", clientUi.switchKey)
       .maybeSingle();
     const val = (data?.value ?? null) as { enabled?: boolean } | null;
     setIntegrationEnabled(!!val?.enabled);
   };
 
-  useEffect(() => { void loadIntegrationSwitch(); }, []);
+  useEffect(() => { void loadIntegrationSwitch(); }, [client]);
 
   const toggleIntegration = async (next: boolean) => {
     setSwitchBusy(true);
     try {
       const { error } = await supabase
         .from("site_settings")
-        .upsert({ key: "meritto_integration", value: { enabled: next } }, { onConflict: "key" });
+        .upsert({ key: clientUi.switchKey, value: { enabled: next } }, { onConflict: "key" });
       if (error) throw error;
       setIntegrationEnabled(next);
-      toast.success(next ? "Meritto integration switched ON" : "Meritto integration switched OFF");
+      toast.success(next ? `${clientLabel} Meritto integration switched ON` : `${clientLabel} Meritto integration switched OFF`);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not update the switch");
     } finally {
@@ -173,7 +176,7 @@ export default function AdminMerittoLogs() {
 
   const guardEnabled = (): boolean => {
     if (!integrationEnabled) {
-      toast.error("Meritto integration is switched off. Turn it on to send leads.");
+      toast.error(`${clientLabel} Meritto integration is switched off. Turn it on to send leads.`);
       return false;
     }
     return true;
@@ -251,6 +254,7 @@ export default function AdminMerittoLogs() {
     try {
       const { data, error } = await submitMerittoWithWait(() => supabase.functions.invoke("push-to-meritto", {
         body: {
+          client,
           source: mapped.source || "bulk_upload",
           name: mapped.name || undefined,
           email: mapped.email || undefined,
@@ -286,7 +290,7 @@ export default function AdminMerittoLogs() {
     try {
       const { data: auth } = await supabase.auth.getUser();
       const { data: job, error } = await supabase.from("meritto_bulk_jobs")
-        .insert({ file_name: bulkFileName || null, origin_domain: originDomain, total: prepared.length, created_by: auth.user?.id ?? null })
+        .insert({ client, file_name: bulkFileName || null, origin_domain: originDomain, total: prepared.length, created_by: auth.user?.id ?? null })
         .select("id").single();
       if (error || !job) throw error ?? new Error("Could not create upload");
       const items = prepared.map((p, i) => {
@@ -351,7 +355,7 @@ export default function AdminMerittoLogs() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `meritto-bulk-results-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`;
+    a.download = `${client}-meritto-bulk-results-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -377,6 +381,7 @@ export default function AdminMerittoLogs() {
       const { data, error } = await supabase
         .from("meritto_lead_logs")
         .select("*")
+        .eq("client", client)
         .order("created_at", { ascending: false })
         .range(from, from + pageSize - 1);
       if (error) {
@@ -392,7 +397,7 @@ export default function AdminMerittoLogs() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [client]);
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -431,10 +436,10 @@ export default function AdminMerittoLogs() {
     setRetrying(id);
     try {
       const { data, error } = await submitMerittoWithWait(() => supabase.functions.invoke("push-to-meritto", {
-        body: { retry_log_id: id },
+        body: { client, retry_log_id: id },
       }), (seconds) => toast.info(`Submission limit reached — retrying in ${seconds} seconds. Keep this page open.`));
       if (error) throw error;
-      toast.success(data?.ok ? "Pushed to Meritto" : "Retry attempted — see details");
+      toast.success(data?.ok ? `Pushed to ${clientLabel} Meritto` : "Retry attempted — see details");
       await load();
     } catch (e: any) {
       toast.error(e.message ?? "Retry failed");
@@ -458,6 +463,7 @@ export default function AdminMerittoLogs() {
     try {
       const { data, error } = await submitMerittoWithWait(() => supabase.functions.invoke("push-to-meritto", {
         body: {
+          client,
           source: manual.source || "manual",
           name: manual.name || undefined,
           email: manual.email || undefined,
@@ -474,7 +480,7 @@ export default function AdminMerittoLogs() {
       }), (seconds) => toast.info(`Submission limit reached — retrying in ${seconds} seconds. Keep this page open.`));
       if (error) throw error;
       const oc = data?.outcome as string | undefined;
-      if (oc === "success") toast.success("Lead pushed to Meritto ✅");
+      if (oc === "success") toast.success(`Lead pushed to ${clientLabel} Meritto`);
       else if (oc === "duplicate") toast.info(`Already in Meritto — ${data?.response?.message ?? "duplicate"}`);
       else if (oc === "invalid") toast.error(`Invalid — ${data?.response?.message ?? "validation error"}`);
       else toast.error(`Failed — ${data?.response?.message ?? `HTTP ${data?.status}`}`);
@@ -493,8 +499,8 @@ export default function AdminMerittoLogs() {
       {submissionNotice && <p role="status" className="text-sm text-muted-foreground">{submissionNotice}</p>}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Meritto (NoPaperForms) Integration</h1>
-          <p className="text-sm text-muted-foreground">Leads are pushed to Meritto only while the switch below is on. Track delivery here.</p>
+          <h1 className="text-2xl font-bold">{clientLabel} Meritto (NoPaperForms) Integration</h1>
+          <p className="text-sm text-muted-foreground">Leads are pushed to {clientLabel}'s Meritto account only while the switch below is on. Track delivery here.</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setManualOpen(true)} disabled={!integrationEnabled}><Plus className="h-4 w-4 mr-2" />Push Manually</Button>
@@ -506,11 +512,15 @@ export default function AdminMerittoLogs() {
       <Card className={integrationEnabled ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}>
         <CardContent className="flex items-center justify-between gap-4 py-4 flex-wrap">
           <div>
-            <div className="font-semibold">Send leads to Meritto</div>
+            <div className="font-semibold">Send leads to {clientLabel} Meritto</div>
             <p className="text-sm text-muted-foreground">
               {integrationEnabled
-                ? "On — website leads, manual pushes and bulk uploads are delivered to Meritto."
-                : "Off — nothing is sent to Meritto. Website leads, manual pushes and bulk uploads are all paused."}
+                ? (clientUi.autoWebsiteLeads
+                  ? `On — website leads, manual pushes and bulk uploads are delivered to ${clientLabel} Meritto.`
+                  : `On — manual pushes and bulk uploads are delivered to ${clientLabel} Meritto. Website form leads are not sent here automatically.`)
+                : (clientUi.autoWebsiteLeads
+                  ? `Off — nothing is sent to ${clientLabel} Meritto. Website leads, manual pushes and bulk uploads are all paused.`
+                  : `Off — nothing is sent to ${clientLabel} Meritto. Manual pushes and bulk uploads are paused.`)}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -523,7 +533,7 @@ export default function AdminMerittoLogs() {
       </Card>
 
 
-      <MerittoBulkJobPanel refreshKey={jobRefresh} onActiveChange={onJobActive} />
+      <MerittoBulkJobPanel client={client} refreshKey={jobRefresh} onActiveChange={onJobActive} />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatCard icon={<Users className="h-4 w-4" />} label="Total leads" value={stats.total} />
@@ -570,20 +580,20 @@ export default function AdminMerittoLogs() {
         <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap">
           <div>
             <CardTitle className="text-base">Push History</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">Every recorded push with its latest Meritto delivery status.</p>
+            <p className="text-sm text-muted-foreground mt-1">Every recorded push with its latest {clientLabel} Meritto delivery status.</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <ExportExcelButton
               rows={filteredExportRows}
-              fileName="meritto-leads-filtered"
+              fileName={`${client}-meritto-leads-filtered`}
               sheetName="Filtered Leads"
               columns={EXPORT_COLUMNS}
               label="Download filtered"
             />
             <ExportExcelButton
               rows={exportRows}
-              fileName="meritto-all-leads"
-              sheetName="All Meritto Leads"
+              fileName={`${client}-meritto-all-leads`}
+              sheetName={`All ${clientLabel} Meritto Leads`}
               columns={EXPORT_COLUMNS}
               label="Download all leads"
               variant="default"
@@ -594,7 +604,7 @@ export default function AdminMerittoLogs() {
           {loading ? (
             <div className="p-8 text-center text-muted-foreground">Loading…</div>
           ) : filtered.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">No leads yet. As soon as a user submits any form, it will show here.</div>
+            <div className="p-8 text-center text-muted-foreground">{clientUi.autoWebsiteLeads ? "No leads yet. As soon as a user submits any form, it will show here." : `No leads yet. Leads you push manually or by bulk upload to ${clientLabel} will show here.`}</div>
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
@@ -678,7 +688,7 @@ export default function AdminMerittoLogs() {
       <Dialog open={manualOpen} onOpenChange={setManualOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Push a lead manually to Meritto</DialogTitle>
+            <DialogTitle>Push a lead manually to {clientLabel} Meritto</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <ManualField label="Name" value={manual.name} onChange={(v) => setManual({ ...manual, name: v })} placeholder="John Doe" />
@@ -705,7 +715,7 @@ export default function AdminMerittoLogs() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setManualOpen(false)}>Cancel</Button>
             <Button onClick={pushManual} disabled={manualBusy}>
-              <Send className="h-4 w-4 mr-2" />{manualBusy ? "Pushing…" : "Push to Meritto"}
+              <Send className="h-4 w-4 mr-2" />{manualBusy ? "Pushing…" : `Push to ${clientLabel} Meritto`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -714,7 +724,7 @@ export default function AdminMerittoLogs() {
       <Dialog open={bulkOpen} onOpenChange={(o) => { if (bulkBusy) return; setBulkOpen(o); if (!o) resetBulk(); }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Bulk upload leads to Meritto</DialogTitle>
+            <DialogTitle>Bulk upload leads to {clientLabel} Meritto</DialogTitle>
           </DialogHeader>
 
           <div className="flex items-center gap-2 text-xs mb-2">

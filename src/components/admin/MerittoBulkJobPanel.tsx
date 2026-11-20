@@ -14,13 +14,13 @@ type Counts = Partial<Record<"pending" | "processing" | "success" | "duplicate" 
 
 export const isActiveBulkJob = (status?: string | null) => status === "running" || status === "paused_limit";
 
-export default function MerittoBulkJobPanel({ refreshKey, onActiveChange }: { refreshKey: number; onActiveChange: (active: boolean) => void }) {
+export default function MerittoBulkJobPanel({ client = "gim", refreshKey, onActiveChange }: { client?: "gim" | "abbs"; refreshKey: number; onActiveChange: (active: boolean) => void }) {
   const [job, setJob] = useState<Job | null>(null);
   const [counts, setCounts] = useState<Counts>({});
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from("meritto_bulk_jobs").select("*").order("created_at", { ascending: false }).limit(1).maybeSingle();
+    const { data } = await supabase.from("meritto_bulk_jobs").select("*").eq("client", client).order("created_at", { ascending: false }).limit(1).maybeSingle();
     const j = (data as Job | null) ?? null;
     setJob(j);
     onActiveChange(isActiveBulkJob(j?.status));
@@ -28,7 +28,7 @@ export default function MerittoBulkJobPanel({ refreshKey, onActiveChange }: { re
       const { data: c } = await supabase.rpc("meritto_bulk_job_counts", { p_job: j.id });
       setCounts((c as Counts) ?? {});
     }
-  }, [onActiveChange]);
+  }, [onActiveChange, client]);
 
   useEffect(() => { void load(); }, [load, refreshKey]);
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function MerittoBulkJobPanel({ refreshKey, onActiveChange }: { re
     const esc = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
     const lines = [["row", "status", "http", "error", ...keys].join(","), ...all.map((r) => [r.row_no, r.status, r.http_status ?? "", esc(r.error), ...keys.map((k) => esc(r.lead?.[k]))].join(","))];
     const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" }));
-    const a = document.createElement("a"); a.href = url; a.download = `meritto-bulk-${job.id.slice(0, 8)}.csv`; a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement("a"); a.href = url; a.download = `${client}-meritto-bulk-${job.id.slice(0, 8)}.csv`; a.click(); URL.revokeObjectURL(url);
   };
 
   const statusText =
