@@ -28,3 +28,4 @@
 
 ## ABBS Meritto
 - [x] ABBS Meritto admin tab below GIM Meritto (manual push, bulk upload, retry, logs, export, own switch; admin-only, no website auto-push)
+- [x] ABBS Meritto: required Specialization (10 exact ABBS values, course Post Graduate Programs) in manual push and bulk upload

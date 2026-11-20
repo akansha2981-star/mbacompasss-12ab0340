@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import ExportExcelButton from "@/components/admin/ExportExcelButton";
 import { submitMerittoWithWait } from "@/lib/merittoSubmission";
 import MerittoBulkJobPanel from "@/components/admin/MerittoBulkJobPanel";
-import { MERITTO_CLIENT_UI, type MerittoClientId } from "@/lib/merittoClients";
+import { MERITTO_CLIENT_OPTIONS, MERITTO_CLIENT_UI, canonicalSpecialization, merittoClientFieldError, type MerittoClientId } from "@/lib/merittoClients";
 
 const MERITTO_FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "name", label: "Name", required: true },
@@ -26,6 +26,7 @@ const MERITTO_FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "city", label: "City" },
   { key: "campus", label: "Campus / Program" },
   { key: "course", label: "Course" },
+  { key: "specialization", label: "Specialization" },
   { key: "medium", label: "Medium" },
   { key: "campaign", label: "Campaign" },
   { key: "source", label: "Source" },
@@ -107,6 +108,7 @@ const toExportRow = (row: Log) => ({
 export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoClientId }) {
   const clientUi = MERITTO_CLIENT_UI[client];
   const clientLabel = clientUi.label;
+  const clientOptions = MERITTO_CLIENT_OPTIONS[client];
   const [rows, setRows] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -124,7 +126,8 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
     state: "",
     city: "",
     campus: "",
-    course: "",
+    course: MERITTO_CLIENT_OPTIONS[client].defaultCourse ?? "",
+    specialization: "",
     medium: "website",
     campaign: "manual_push",
     extraJson: "",
@@ -142,6 +145,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
   const [integrationEnabled, setIntegrationEnabled] = useState<boolean>(false);
   const [switchBusy, setSwitchBusy] = useState<boolean>(false);
   const [bulkFileName, setBulkFileName] = useState("");
+  const [defaultSpecialization, setDefaultSpecialization] = useState("");
   const [jobRefresh, setJobRefresh] = useState(0);
   const [jobActive, setJobActive] = useState(false);
   const onJobActive = useCallback((a: boolean) => setJobActive(a), []);
@@ -225,7 +229,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
       const digits = r.mobile.replace(/\D/g, "");
       if (digits.length < 10) return "Mobile must have at least 10 digits";
     }
-    return null;
+    return merittoClientFieldError(client, r);
   };
 
   const onBulkFile = async (file: File) => {
@@ -246,6 +250,9 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
         const src = bulkMapping[t.key];
         mapped[t.key] = src ? (r[src] ?? "").trim() : "";
       }
+      if (!mapped.specialization && defaultSpecialization.trim()) mapped.specialization = defaultSpecialization.trim();
+      if (clientOptions.specializations.length && mapped.specialization) mapped.specialization = canonicalSpecialization(client, mapped.specialization) || mapped.specialization;
+      if (!mapped.course && clientOptions.defaultCourse) mapped.course = clientOptions.defaultCourse;
       return { mapped, raw: r, error: validateRow(mapped) };
     });
   };
@@ -263,6 +270,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
           city: mapped.city || undefined,
           campus: mapped.campus || undefined,
           course: mapped.course || undefined,
+          specialization: mapped.specialization || undefined,
           medium: mapped.medium || "website",
           campaign: mapped.campaign || "bulk_upload",
           origin_domain: originDomain,
@@ -295,7 +303,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
       if (error || !job) throw error ?? new Error("Could not create upload");
       const items = prepared.map((p, i) => {
         const lead: Record<string, string> = { source: p.mapped.source || "bulk_upload", medium: p.mapped.medium || "website", campaign: p.mapped.campaign || "bulk_upload" };
-        for (const k of ["name", "email", "mobile", "state", "city", "campus", "course"]) if (p.mapped[k]) lead[k] = p.mapped[k];
+        for (const k of ["name", "email", "mobile", "state", "city", "campus", "course", "specialization"]) if (p.mapped[k]) lead[k] = p.mapped[k];
         return { job_id: job.id, row_no: i + 2, lead, status: p.error ? "invalid" : "pending", error: p.error, processed_at: p.error ? new Date().toISOString() : null };
       });
       for (let i = 0; i < items.length; i += 500) {
@@ -454,6 +462,8 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
       toast.error("Enter at least name, email or mobile");
       return;
     }
+    const fieldError = merittoClientFieldError(client, manual);
+    if (fieldError) { toast.error(fieldError); return; }
     let extra: Record<string, unknown> | undefined;
     if (manual.extraJson.trim()) {
       try { extra = JSON.parse(manual.extraJson); }
@@ -472,6 +482,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
           city: manual.city || undefined,
           campus: manual.campus || undefined,
           course: manual.course || undefined,
+          specialization: manual.specialization || undefined,
           medium: manual.medium || undefined,
           campaign: manual.campaign || undefined,
           origin_domain: originDomain,
@@ -485,7 +496,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
       else if (oc === "invalid") toast.error(`Invalid — ${data?.response?.message ?? "validation error"}`);
       else toast.error(`Failed — ${data?.response?.message ?? `HTTP ${data?.status}`}`);
       setManualOpen(false);
-      setManual({ ...manual, name: "", email: "", mobile: "", state: "", city: "", campus: "", course: "", extraJson: "" });
+      setManual({ ...manual, name: "", email: "", mobile: "", state: "", city: "", campus: "", course: clientOptions.defaultCourse ?? "", specialization: "", extraJson: "" });
       await load();
     } catch (e: any) {
       toast.error(e.message ?? "Push failed");
@@ -665,6 +676,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
                 <Field label="State" value={selected.state} />
                 <Field label="City" value={selected.city} />
                 <Field label="Course" value={selected.course} />
+                <Field label="Specialization" value={selected.payload?.specialization} />
                 <Field label="Campaign" value={selected.campaign} />
                 <Field label="Retries" value={String(selected.retry_count)} />
                 <Field label="Last attempt" value={selected.last_attempt_at ? new Date(selected.last_attempt_at).toLocaleString() : "-"} />
@@ -698,6 +710,11 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
             <ManualField label="City" value={manual.city} onChange={(v) => setManual({ ...manual, city: v })} placeholder="Mumbai" />
             <ManualField label="Campus" value={manual.campus} onChange={(v) => setManual({ ...manual, campus: v })} placeholder="MBA Compass" />
             <ManualField label="Course" value={manual.course} onChange={(v) => setManual({ ...manual, course: v })} placeholder="MBA / PGDM" />
+            {clientOptions.specializations.length ? (
+              <SpecializationSelect label="Specialization (required)" options={clientOptions.specializations} value={manual.specialization} onChange={(v) => setManual({ ...manual, specialization: v })} />
+            ) : (
+              <ManualField label="Specialization" value={manual.specialization} onChange={(v) => setManual({ ...manual, specialization: v })} placeholder="Marketing" />
+            )}
             <ManualField label="Source (tag)" value={manual.source} onChange={(v) => setManual({ ...manual, source: v })} placeholder="manual" />
             <ManualField label="Medium" value={manual.medium} onChange={(v) => setManual({ ...manual, medium: v })} placeholder="website" />
             <ManualField label="Campaign" value={manual.campaign} onChange={(v) => setManual({ ...manual, campaign: v })} placeholder="manual_push" />
@@ -759,7 +776,7 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
               </div>
               <div className="rounded-md border bg-muted/40 p-3">
                 <div className="font-medium mb-1">Step 1 — Download the sample CSV</div>
-                <p className="text-xs text-muted-foreground mb-2">Uses the exact field names Meritto expects: name, email, mobile, state, city, campus, course, medium, campaign, source. If your CSV uses different headers, you'll map them in the next step.</p>
+                <p className="text-xs text-muted-foreground mb-2">Uses the exact field names Meritto expects: name, email, mobile, state, city, campus, course, specialization, medium, campaign, source.{clientUi.requiresSpecialization ? ` ${clientLabel} requires a specialization on every lead.` : ""} If your CSV uses different headers, you'll map them in the next step.</p>
                 <a href="/meritto-bulk-sample.csv" download>
                   <Button size="sm" variant="outline"><Download className="h-3 w-3 mr-1" />Download sample.csv</Button>
                 </a>
@@ -782,10 +799,16 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
                 <div className="rounded-md border p-3 bg-muted/30">
                   <div className="text-xs text-muted-foreground">Detected {bulkRaw.length} rows and {bulkHeaders.length} columns. Map each Meritto field to a column in your CSV.</div>
                 </div>
+                {clientUi.requiresSpecialization && (
+                  <div className="rounded-md border p-3">
+                    <SpecializationSelect label="Default specialization (used when a row has none)" options={clientOptions.specializations} value={defaultSpecialization} onChange={setDefaultSpecialization} />
+                    {clientOptions.defaultCourse && <p className="text-xs text-muted-foreground mt-1">Rows without a course are sent as "{clientOptions.defaultCourse}".</p>}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {MERITTO_FIELDS.map((f) => (
                     <div key={f.key}>
-                      <Label className="text-xs">{f.label}{f.required && <span className="text-red-500"> *</span>}</Label>
+                      <Label className="text-xs">{f.label}{(f.required || (f.key === "specialization" && clientUi.requiresSpecialization)) && <span className="text-red-500"> *</span>}</Label>
                       <Select value={bulkMapping[f.key] ?? "__none"} onValueChange={(v) => setBulkMapping({ ...bulkMapping, [f.key]: v === "__none" ? "" : v })}>
                         <SelectTrigger><SelectValue placeholder="Select column" /></SelectTrigger>
                         <SelectContent>
@@ -907,6 +930,21 @@ export default function AdminMerittoLogs({ client = "gim" }: { client?: MerittoC
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function SpecializationSelect({ label, options, value, onChange }: { label: string; options: readonly string[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <Label className="text-xs">{label}</Label>
+      <Select value={value || "__none"} onValueChange={(v) => onChange(v === "__none" ? "" : v)}>
+        <SelectTrigger><SelectValue placeholder="Select specialization" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__none">Select specialization</SelectItem>
+          {options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

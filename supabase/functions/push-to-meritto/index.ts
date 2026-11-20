@@ -16,6 +16,7 @@ type LeadInput = {
   city?: string;
   campus?: string;
   course?: string;
+  specialization?: string; // required by some clients (e.g. ABBS)
   medium?: string;
   campaign?: string;
   origin_domain?: string; // e.g. bschoolbuzz.in, mbacompass.in — tracked via sub_source
@@ -62,6 +63,7 @@ async function callMeritto(secret: string, lead: LeadInput, cid: string, cfg: Me
     city: lead.city ?? "",
     campus: lead.campus ?? "",
     course: lead.course ?? "",
+    ...(lead.specialization ? { specialization: lead.specialization } : {}),
     medium,
     campaign,
     sub_source: domain || "bschoolbuzz",
@@ -390,6 +392,7 @@ Deno.serve(async (req) => {
         city: data.city ?? undefined,
         campus: data.campus ?? undefined,
         course: data.course ?? undefined,
+        specialization: ((data.payload as { specialization?: string } | null)?.specialization) || undefined,
         medium: data.medium ?? undefined,
         campaign: data.campaign ?? undefined,
       };

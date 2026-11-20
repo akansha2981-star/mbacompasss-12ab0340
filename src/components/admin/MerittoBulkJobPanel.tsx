@@ -72,7 +72,7 @@ export default function MerittoBulkJobPanel({ client = "gim", refreshKey, onActi
       all.push(...(data ?? []));
       if ((data ?? []).length < 1000) break;
     }
-    const keys = ["name", "email", "mobile", "state", "city", "campus", "course", "medium", "campaign", "source"];
+    const keys = ["name", "email", "mobile", "state", "city", "campus", "course", "specialization", "medium", "campaign", "source"];
     const esc = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
     const lines = [["row", "status", "http", "error", ...keys].join(","), ...all.map((r) => [r.row_no, r.status, r.http_status ?? "", esc(r.error), ...keys.map((k) => esc(r.lead?.[k]))].join(","))];
     const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" }));
