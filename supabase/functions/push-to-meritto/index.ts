@@ -163,6 +163,8 @@ function rateLimit(ip: string, max = 5, windowMs = 60_000): boolean {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
+const BULK_TICK_BUDGET_MS = 40_000;
+
 async function runBulkTick(token: string): Promise<Response> {
   const json = (b: unknown, st = 200) => new Response(JSON.stringify(b), { status: st, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -173,23 +175,36 @@ async function runBulkTick(token: string): Promise<Response> {
 
   const started = Date.now();
   const results: Record<string, unknown> = {};
+  // Find every client with a running job first, then share the run budget between them,
+  // so one client's large queue can never starve another client's upload.
+  // deno-lint-ignore no-explicit-any
+  const active: { cfg: MerittoClientConfig; secret: string; job: any }[] = [];
   for (const cfg of Object.values(MERITTO_CLIENTS)) {
-    if (Date.now() - started > 40_000) break;
     const secret = Deno.env.get(cfg.secretEnv);
     if (!secret) { results[cfg.id] = { skipped: "secret missing" }; continue; }
     const { data: sw } = await admin.from("site_settings").select("value").eq("key", cfg.switchKey).maybeSingle();
     if (!(sw?.value as { enabled?: boolean } | null)?.enabled) { results[cfg.id] = { skipped: "integration off" }; continue; }
     const { data: job } = await admin.from("meritto_bulk_jobs").select("*").eq("status", "running").eq("client", cfg.id).order("created_at").limit(1).maybeSingle();
     if (!job) { results[cfg.id] = { idle: true }; continue; }
-    results[cfg.id] = await runBulkJob(admin, cfg, secret, job, started);
+    active.push({ cfg, secret, job });
+  }
+  // Rotate who goes first each minute so neither client is always second.
+  const shift = active.length ? Math.floor(Date.now() / 60_000) % active.length : 0;
+  const ordered = [...active.slice(shift), ...active.slice(0, shift)];
+  for (let i = 0; i < ordered.length; i++) {
+    const { cfg, secret, job } = ordered[i];
+    const left = BULK_TICK_BUDGET_MS - (Date.now() - started);
+    if (left <= 0) break;
+    const deadline = Date.now() + Math.floor(left / (ordered.length - i));
+    results[cfg.id] = await runBulkJob(admin, cfg, secret, job, deadline);
   }
   return json({ ok: true, ...results });
 }
 
 // deno-lint-ignore no-explicit-any
-async function runBulkJob(admin: any, cfg: MerittoClientConfig, secret: string, job: any, started: number) {
+async function runBulkJob(admin: any, cfg: MerittoClientConfig, secret: string, job: any, deadline: number) {
   let processed = 0;
-  while (Date.now() - started < 40_000) {
+  while (Date.now() < deadline) {
     const { data: batch } = await admin.rpc("meritto_bulk_claim", { p_job: job.id, p_limit: 5 });
     const items = (batch ?? []) as { id: string; lead: LeadInput }[];
     if (!items.length) break;
