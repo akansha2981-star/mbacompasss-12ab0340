@@ -24,7 +24,8 @@ export type CoachingSeoTemplate = {
   breadcrumbs: Breadcrumb[];
 };
 
-const YEAR = new Date().getFullYear() + (new Date().getMonth() >= 6 ? 1 : 0); // roll to next season in H2
+// Computed per call: edge runtimes freeze Date at module scope (it reads 1970 there).
+const seasonYear = () => { const now = new Date(); return now.getFullYear() + (now.getMonth() >= 6 ? 1 : 0); }; // roll to next season in H2
 
 // ---------- Exam hubs ----------
 
@@ -196,7 +197,7 @@ export function getExamHubSeo(slug: string): CoachingSeoTemplate {
   if (!meta) {
     // Unknown exam slug — safe generic template
     return {
-      title: `${pretty} Coaching Institutes in India ${YEAR} — Fees, Reviews & Batches | MBA Compass`,
+      title: `${pretty} Coaching Institutes in India ${seasonYear()} — Fees, Reviews & Batches | MBA Compass`,
       description: `Compare the best ${pretty} coaching institutes in India. See fees, batches, faculty and student reviews. Enrol in top ${pretty} preparation programs.`,
       h1: `Best ${pretty} Coaching Institutes in India`,
       primaryKeyword: `${pretty} coaching`,
@@ -212,9 +213,9 @@ export function getExamHubSeo(slug: string): CoachingSeoTemplate {
   }
 
   return {
-    title: `Best ${meta.code} Coaching Institutes in India ${YEAR} — Fees, Reviews & Batches | MBA Compass`,
-    description: `Compare the top ${meta.code} coaching institutes in India for ${YEAR}. Verified fees, batch schedules, faculty and real student reviews to help you crack the ${meta.full}.`,
-    h1: `Best ${meta.code} Coaching Institutes in India ${YEAR}`,
+    title: `Best ${meta.code} Coaching Institutes in India ${seasonYear()} — Fees, Reviews & Batches | MBA Compass`,
+    description: `Compare the top ${meta.code} coaching institutes in India for ${seasonYear()}. Verified fees, batch schedules, faculty and real student reviews to help you crack the ${meta.full}.`,
+    h1: `Best ${meta.code} Coaching Institutes in India ${seasonYear()}`,
     primaryKeyword: meta.primary,
     secondaryKeyword: meta.secondary,
     keywords: [meta.primary, meta.secondary, ...meta.extras],
@@ -326,7 +327,7 @@ export function getModeHubSeo(slug: string): CoachingSeoTemplate {
 
   if (!meta) {
     return {
-      title: `${pretty} MBA Coaching Institutes in India ${YEAR} | MBA Compass`,
+      title: `${pretty} MBA Coaching Institutes in India ${seasonYear()} | MBA Compass`,
       description: `Explore the best ${pretty.toLowerCase()} MBA coaching institutes in India. Compare fees, faculty, schedules and reviews.`,
       h1: `Best ${pretty} MBA Coaching Institutes in India`,
       primaryKeyword: `${pretty.toLowerCase()} MBA coaching`,
@@ -341,9 +342,9 @@ export function getModeHubSeo(slug: string): CoachingSeoTemplate {
   }
 
   return {
-    title: `Best ${meta.label} MBA Coaching Institutes in India ${YEAR} — Fees & Reviews | MBA Compass`,
-    description: `Compare the top ${meta.label.toLowerCase()} MBA coaching institutes in India for ${YEAR}. Verified fees, batch schedules, faculty and real student reviews for ${meta.primary}.`,
-    h1: `Best ${meta.label} MBA Coaching Institutes in India ${YEAR}`,
+    title: `Best ${meta.label} MBA Coaching Institutes in India ${seasonYear()} — Fees & Reviews | MBA Compass`,
+    description: `Compare the top ${meta.label.toLowerCase()} MBA coaching institutes in India for ${seasonYear()}. Verified fees, batch schedules, faculty and real student reviews for ${meta.primary}.`,
+    h1: `Best ${meta.label} MBA Coaching Institutes in India ${seasonYear()}`,
     primaryKeyword: meta.primary,
     secondaryKeyword: meta.secondary,
     keywords: [meta.primary, meta.secondary, ...meta.extras],
@@ -390,9 +391,9 @@ export function getRegionHubSeo(regionSlug: string, kind: "city" | "state" = "ci
   ];
 
   return {
-    title: `Best MBA & CAT Coaching Institutes in ${pretty} ${YEAR} — Fees, Reviews & Batches | MBA Compass`,
-    description: `Find the top MBA and CAT coaching institutes in ${pretty} for ${YEAR}. Compare fees, faculty, batch schedules and verified student reviews for coaching centres in ${pretty}.`,
-    h1: `Best MBA Coaching Institutes in ${pretty} ${YEAR}`,
+    title: `Best MBA & CAT Coaching Institutes in ${pretty} ${seasonYear()} — Fees, Reviews & Batches | MBA Compass`,
+    description: `Find the top MBA and CAT coaching institutes in ${pretty} for ${seasonYear()}. Compare fees, faculty, batch schedules and verified student reviews for coaching centres in ${pretty}.`,
+    h1: `Best MBA Coaching Institutes in ${pretty} ${seasonYear()}`,
     primaryKeyword: primary,
     secondaryKeyword: secondary,
     keywords: [primary, secondary, ...extras],
@@ -424,11 +425,16 @@ export function getCoachingListingSeo(ctx: ListingContext = {}): CoachingSeoTemp
       ? ctx.state
       : "India";
 
-  const catPrefix =
-    ctx.categoryName && ctx.categoryName !== "all" ? `${ctx.categoryName} ` : "";
+  // "CAT Coaching" / "GMAT Preparation" category names already describe the
+  // exam; use their base as the exam token so headings never repeat "Coaching".
+  const catBase =
+    ctx.categoryName && ctx.categoryName !== "all"
+      ? ctx.categoryName.replace(/\s+(coaching|preparation|prep)\s*$/i, "").trim()
+      : "";
   const modeSuffix = ctx.mode && ctx.mode !== "all" ? ` (${ctx.mode})` : "";
   const examMeta = ctx.examSlug ? EXAMS[ctx.examSlug.toLowerCase()] : undefined;
-  const examToken = examMeta ? examMeta.code : "MBA";
+  const catPrefix = catBase && examMeta ? `${catBase} ` : "";
+  const examToken = examMeta ? examMeta.code : catBase || "MBA";
 
   const primaryKeyword = examMeta
     ? `${examMeta.code} coaching in ${location}`
@@ -439,11 +445,11 @@ export function getCoachingListingSeo(ctx: ListingContext = {}): CoachingSeoTemp
 
   const h1 = `Best ${catPrefix}${examToken} Coaching Institutes in ${location}`;
 
-  const title = `Best ${catPrefix}${examToken} Coaching Institutes in ${location}${modeSuffix} ${YEAR} | MBA Compass`;
+  const title = `Best ${catPrefix}${examToken} Coaching Institutes in ${location}${modeSuffix} ${seasonYear()} | MBA Compass`;
 
   const description = ctx.resultCount
-    ? `Compare ${ctx.resultCount}+ ${catPrefix}${examToken} coaching institutes in ${location}. Verified fees, ratings, success rates and real student reviews for ${YEAR}.`
-    : `Compare the top ${catPrefix}${examToken} coaching institutes in ${location}. Verified fees, ratings, success rates and real student reviews for ${YEAR}.`;
+    ? `Compare ${ctx.resultCount}+ ${catPrefix}${examToken} coaching institutes in ${location}. Verified fees, ratings, success rates and real student reviews for ${seasonYear()}.`
+    : `Compare the top ${catPrefix}${examToken} coaching institutes in ${location}. Verified fees, ratings, success rates and real student reviews for ${seasonYear()}.`;
 
   const keywords = [
     primaryKeyword,

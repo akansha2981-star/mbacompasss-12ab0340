@@ -92,6 +92,33 @@ export function useParams<
 
 // ---------- useSearchParams (@/lib/router-compat compat) ----------
 
+// TanStack JSON-encodes search values: a string that looks like a number is
+// written as "4.5" (with quotes). react-router callers expect raw strings, so
+// reads unwrap quoted strings and writes send plain decimals as numbers, which
+// keeps URLs like ?rating=4.5 clean and stops quotes stacking on each update.
+export function decodeCompatSearchValue(value: string): string {
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    try {
+      const parsed = JSON.parse(value);
+      if (typeof parsed === "string") return parsed;
+    } catch {
+      /* keep raw */
+    }
+  }
+  return value;
+}
+
+export function encodeCompatSearchValue(value: string): string | number {
+  return /^-?\d+(\.\d+)?$/.test(value) && String(Number(value)) === value ? Number(value) : value;
+}
+
+function compatParams(searchStr: string | undefined): URLSearchParams {
+  const raw = new URLSearchParams(searchStr ?? "");
+  const out = new URLSearchParams();
+  raw.forEach((v, k) => out.append(k, decodeCompatSearchValue(v)));
+  return out;
+}
+
 export function useSearchParams(): [
   URLSearchParams,
   (
@@ -102,7 +129,7 @@ export function useSearchParams(): [
   const loc = tsLocation();
   const nav = tsNavigate();
   const router = useRouter();
-  const params = useMemo(() => new URLSearchParams(loc.searchStr ?? ""), [loc.searchStr]);
+  const params = useMemo(() => compatParams(loc.searchStr), [loc.searchStr]);
   const setParams = useCallback(
     (
       init: URLSearchParams | Record<string, string> | ((prev: URLSearchParams) => URLSearchParams),
@@ -112,16 +139,16 @@ export function useSearchParams(): [
       // snapshot — react-router passes call-time params, and chained updates
       // within one tick must see each other's writes.
       const live = router.state.location;
-      const current = new URLSearchParams(live.searchStr ?? "");
+      const current = compatParams(live.searchStr);
       const next =
         typeof init === "function"
           ? init(current)
           : init instanceof URLSearchParams
             ? init
             : new URLSearchParams(init);
-      const searchObj: Record<string, string> = {};
+      const searchObj: Record<string, string | number> = {};
       next.forEach((v, k) => {
-        searchObj[k] = v;
+        searchObj[k] = encodeCompatSearchValue(v);
       });
       nav({ to: live.pathname, search: searchObj as never, replace: opts?.replace });
     },

@@ -216,3 +216,13 @@ export const suggestedCollegesQuery = (excludeSlug?: string) => queryOptions({
   },
   staleTime: 10 * 60 * 1000,
 });
+
+/** Coaching categories (public). Shared by useCategories and the /category/:slug loader. */
+export const categoriesQuery = queryOptions({
+  queryKey: ["categories"],
+  queryFn: async () => {
+    const { data, error } = await supabase.from("categories").select("*").order("name");
+    if (error) throw error;
+    return data || [];
+  },
+});

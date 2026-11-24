@@ -21,11 +21,12 @@ import { directoryPage, directoryPageUrl, pageRows, DIRECTORY_PAGE_SIZE } from "
 import DirectoryPagination from "@/components/listing/DirectoryPagination";
 import PageKeywords from "@/components/PageKeywords";
 import { getLocationImage } from "@/data/cityImages";
-import { FEE_BUCKETS, FEE_BUCKET_LABELS, matchesFeeBucket, getEffectiveFeesLakhs, specMatches, locationMatches } from "@/lib/filterHelpers";
+import { FEE_BUCKETS, FEE_BUCKET_LABELS, matchesFeeBucket, specMatches, locationMatches } from "@/lib/filterHelpers";
 import { CoachingCompareProvider } from "@/contexts/CoachingCompareContext";
 import CompareDrawer from "@/components/coaching/CompareDrawer";
 import CoachingMapView from "@/components/coaching/CoachingMapView";
 import { matchesCoachingHub, matchesCoachingExam, type CoachingHub } from "@/lib/coachingHub";
+import { coachingFeeLakhs, instituteMatchesCategory, matchesMinRating } from "@/lib/coachingCategory";
 
 const modes = ["Online", "Offline", "Hybrid"];
 const toSlug = (value: string) => value.toLowerCase().trim().replace(/\s+/g, "-");
@@ -88,7 +89,7 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
       if (key === "state") next.delete("city");
       next.delete("page");
       return next;
-    }, { replace: true });
+    }, { replace: key === "q" }); // dropdowns push history so browser Back undoes them
   }, [setSearchParams, hubLockedKeys, leaveHub]);
 
   const removeFilter = useCallback((key: string) => {
@@ -99,12 +100,12 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
       next.delete("page");
       if (key === "state") next.delete("city");
       return next;
-    }, { replace: true });
+    });
   }, [setSearchParams, hubLockedKeys, leaveHub]);
 
   const clearAllFilters = useCallback(() => {
     if (hub) { navigate("/coaching"); return; }
-    setSearchParams({}, { replace: true });
+    setSearchParams({});
   }, [setSearchParams, hub, navigate]);
 
   const currentCityPage = useMemo(() => {
@@ -168,21 +169,18 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
     }
     if (selectedCategory !== "all") {
       const cat = categories.find((c: any) => c.slug === selectedCategory);
-      if (cat) list = list.filter((i: any) => i.category_id === cat.id);
+      if (cat) list = list.filter((i: any) => instituteMatchesCategory(i, cat));
     }
-    if (selectedFee !== "all") list = list.filter((i: any) => matchesFeeBucket(getEffectiveFeesLakhs(i), selectedFee));
+    if (selectedFee !== "all") list = list.filter((i: any) => matchesFeeBucket(coachingFeeLakhs(i), selectedFee));
     if (selectedSpec !== "all") list = list.filter((i: any) => specMatches(i.specializations, selectedSpec));
-    if (minRating !== "all") {
-      const min = parseFloat(minRating);
-      if (!Number.isNaN(min)) list = list.filter((i: any) => (i.rating || 0) >= min);
-    }
+    if (minRating !== "all") list = list.filter((i: any) => matchesMinRating(i, minRating));
     if (quick === "verified" || quick === "featured") list = list.filter((i: any) => i.featured);
     if (quick === "offer") list = list.filter((i: any) => i.offer || i.discount);
     if (sortBy === "rating") list.sort((a, b) => (b.rating || 0) - (a.rating || 0) || String(a.id).localeCompare(String(b.id)));
     if (sortBy === "reviews") list.sort((a, b) => (b.total_reviews || 0) - (a.total_reviews || 0));
     if (sortBy === "success") list.sort((a, b) => (b.success_rate || 0) - (a.success_rate || 0));
     if (sortBy === "fees-low") {
-      list.sort((a, b) => (getEffectiveFeesLakhs(a) ?? Infinity) - (getEffectiveFeesLakhs(b) ?? Infinity));
+      list.sort((a, b) => (coachingFeeLakhs(a) ?? Infinity) - (coachingFeeLakhs(b) ?? Infinity));
     }
     return list;
   }, [allInstitutes, hub, selectedExam, search, selectedCity, selectedState, selectedMode, selectedCategory, selectedFee, selectedSpec, sortBy, categories, currentCityPage, minRating, quick]);
@@ -198,13 +196,14 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
       chips.push({ key: "category", label: cat?.name || selectedCategory });
     }
     if (selectedFee !== "all") chips.push({ key: "fee", label: FEE_BUCKET_LABELS[selectedFee] || selectedFee });
+    if (minRating !== "all") chips.push({ key: "rating", label: `${minRating}+ rating` });
     if (selectedSpec !== "all") {
       const sp = specOptions.find(s => s.slug === selectedSpec);
       chips.push({ key: "specialization", label: sp?.name || selectedSpec });
     }
     if (search) chips.push({ key: "q", label: `"${search}"` });
     return chips;
-  }, [selectedState, selectedCity, selectedMode, selectedCategory, selectedFee, selectedSpec, search, categories, specOptions]);
+  }, [selectedState, selectedCity, selectedMode, selectedCategory, selectedFee, minRating, selectedSpec, search, categories, specOptions]);
 
   // Dynamic SEO — sourced from central coaching SEO template library
   const seoTemplate = useMemo(() => {
@@ -407,7 +406,9 @@ const CoachingPage = ({ hub }: { hub?: CoachingHub }) => {
               <Building2 className="w-3.5 h-3.5" /> All Coaching ({allInstitutes.length})
             </button>
             {categories.map((cat: any) => {
-              const catCount = allInstitutes.filter((i: any) => i.category_id === cat.id).length;
+              const catCount = allInstitutes.filter((i: any) => instituteMatchesCategory(i, cat)).length;
+              // Categories without listings stay off the tabs unless opened directly.
+              if (!catCount && selectedCategory !== cat.slug) return null;
               return (
                 <button
                   key={cat.slug}

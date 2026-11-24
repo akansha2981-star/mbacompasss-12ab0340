@@ -2,7 +2,7 @@ import { useParams, Link, useSearchParams, useNavigate } from "@/lib/router-comp
 import { useMemo } from "react";
 import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { getLocationImage, isGeneratedBanner } from "@/data/cityImages";
-import { MapPin, ArrowRight, GraduationCap, TrendingUp, Search, Filter, Star, Award, Building2, Users, Monitor, Building, Wifi, Share2 } from "lucide-react";
+import { MapPin, ArrowRight, GraduationCap, TrendingUp, Search, Filter, Star, Award, Building2, Users, Monitor, Building, Wifi, Share2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,11 @@ import LCPImagePreload from "@/components/LCPImagePreload";
 import { useResolvedSeo } from "@/hooks/useResolvedSeo";
 import PageKeywords from "@/components/PageKeywords";
 import AIGistSection from "@/components/AIGistSection";
-import { FEE_BUCKETS, matchesFeeBucket, getEffectiveFeesLakhs, specMatches, locationMatches } from "@/lib/filterHelpers";
+import { FEE_BUCKETS, FEE_BUCKET_LABELS, specMatches } from "@/lib/filterHelpers";
+import { applyCoachingFilters, coachingFeeLakhs, instituteMatchesCategory, MIN_RATING_OPTIONS } from "@/lib/coachingCategory";
 import SiteBreadcrumbs from "@/components/SiteBreadcrumbs";
+import { CoachingCompareProvider } from "@/contexts/CoachingCompareContext";
+import CompareDrawer from "@/components/coaching/CompareDrawer";
 
 const modes = ["Online", "Offline", "Hybrid"];
 
@@ -50,24 +53,36 @@ const CategoryPage = () => {
   const queryFee = searchParams.get("fee") || "all";
   const querySpec = searchParams.get("specialization") || "all";
   const querySort = searchParams.get("sort") || "rating";
+  const queryRating = searchParams.get("rating") || "all";
 
-  const { data: institutes = [], isLoading: institutesLoading } = useInstitutes(slug);
+  // All listings are loaded once (same cache as /coaching) and the category is
+  // resolved from linked category_id or the institute's own course records.
+  const { data: allInstitutes = [], isLoading: institutesLoading } = useInstitutes();
   const { data: categories = [] } = useCategories();
   const { data: allCityPages = [] } = useCityPages();
   const { data: specOptions = [] } = useSpecializations("coaching");
 
   const isLoading = institutesLoading;
   const category = categories.find((c: any) => c.slug === slug);
+  const institutes = useMemo(
+    () => (category ? (allInstitutes as any[]).filter((i) => instituteMatchesCategory(i, category)) : []),
+    [allInstitutes, category],
+  );
 
+  // Dropdown changes add a history entry so browser Back steps through them;
+  // typing in search replaces the entry to avoid one entry per keystroke.
   const setFilter = (key: string, value: string) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
-      if (value === "all" || value === "" || value === "rating") next.delete(key);
+      if (value === "all" || value === "" || (key === "sort" && value === "rating")) next.delete(key);
       else next.set(key, value);
       if (key === "state") next.delete("city");
       return next;
-    }, { replace: true });
+    }, { replace: key === "q" });
   };
+
+  const removeFilter = (key: string) => setFilter(key, "all");
+  const clearFilters = () => setSearchParams(() => new URLSearchParams());
 
   const cityPage = useMemo(() => {
     if (queryCity !== "all") {
@@ -105,34 +120,45 @@ const CategoryPage = () => {
       );
     }
 
-    if (queryCity !== "all") {
-      list = list.filter((i) => locationMatches(i.city, queryCity, cityPage?.city_aliases));
-    }
-
-    if (queryState !== "all") {
-      const stateFilter = queryState.trim().toLowerCase();
-      list = list.filter((i) => (i.state || "").trim().toLowerCase() === stateFilter);
-    }
+    list = applyCoachingFilters(list, {
+      state: queryState,
+      city: queryCity,
+      cityAliases: cityPage?.city_aliases,
+      fee: queryFee,
+      minRating: queryRating,
+    });
 
     if (queryMode !== "all") {
       const modeFilter = queryMode.trim().toLowerCase();
       list = list.filter((i) => (i.mode || "").trim().toLowerCase() === modeFilter);
     }
 
-    if (queryFee !== "all") list = list.filter((i: any) => matchesFeeBucket(getEffectiveFeesLakhs(i), queryFee));
     if (querySpec !== "all") list = list.filter((i: any) => specMatches(i.specializations, querySpec));
     if (querySort === "rating") list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     if (querySort === "reviews") list.sort((a, b) => (b.total_reviews || 0) - (a.total_reviews || 0));
     if (querySort === "success") list.sort((a, b) => (b.success_rate || 0) - (a.success_rate || 0));
-    if (querySort === "fees-low") list.sort((a, b) => (getEffectiveFeesLakhs(a) ?? Infinity) - (getEffectiveFeesLakhs(b) ?? Infinity));
+    if (querySort === "fees-low") list.sort((a, b) => (coachingFeeLakhs(a) ?? Infinity) - (coachingFeeLakhs(b) ?? Infinity));
 
     return list;
-  }, [institutes, querySearch, querySort, queryCity, queryState, queryMode, queryFee, querySpec, cityPage]);
+  }, [institutes, querySearch, querySort, queryCity, queryState, queryMode, queryFee, querySpec, queryRating, cityPage]);
 
   const availableCities = useMemo(() => {
-    const cities = [...new Set(institutes.map((i: any) => i.city).filter(Boolean))].sort() as string[];
+    const inState = queryState === "all"
+      ? institutes
+      : institutes.filter((i: any) => (i.state || "").trim().toLowerCase() === queryState.trim().toLowerCase());
+    const cities = [...new Set(inState.map((i: any) => i.city).filter(Boolean))].sort() as string[];
     return queryCity !== "all" && !cities.includes(queryCity) ? [queryCity, ...cities] : cities;
-  }, [institutes, queryCity]);
+  }, [institutes, queryCity, queryState]);
+
+  const activeFilters = [
+    queryState !== "all" && { key: "state", label: queryState },
+    queryCity !== "all" && { key: "city", label: queryCity },
+    queryMode !== "all" && { key: "mode", label: queryMode },
+    queryFee !== "all" && { key: "fee", label: FEE_BUCKET_LABELS[queryFee] || queryFee },
+    queryRating !== "all" && { key: "rating", label: `${queryRating}+ rating` },
+    querySpec !== "all" && { key: "specialization", label: specOptions.find((s) => s.slug === querySpec)?.name || querySpec },
+    querySearch && { key: "q", label: `"${querySearch}"` },
+  ].filter(Boolean) as { key: string; label: string }[];
 
   const availableStates = useMemo(() => {
     const states = [...new Set(institutes.map((i: any) => i.state).filter(Boolean))].sort() as string[];
@@ -200,7 +226,9 @@ const CategoryPage = () => {
     ? cityPage.hero_image_url
     : getLocationImage(queryCity !== "all" ? queryCity : cityPage?.name, queryState !== "all" ? queryState : cityPage?.state);
 
+  // Listing cards use the coaching compare tray, so they need its provider.
   return (
+    <CoachingCompareProvider>
     <div className="min-h-screen bg-background">
       <SEOHead {...resolvedSeo} />
       <LCPImagePreload src={lcpHeroUrl} width={1280} quality={75} version={cityPage?.updated_at} />
@@ -230,8 +258,8 @@ const CategoryPage = () => {
         <div className="container mx-auto px-4 relative z-10">
           <SiteBreadcrumbs
             items={[
-              { name: "Cities", url: "/colleges" },
-              { name: cityPage?.name || "Region", url: `/category/${cityPage?.slug || ""}` },
+              { name: "MBA Coaching", url: "/coaching" },
+              { name: category?.name || "Category", url: `/category/${slug}` },
             ]}
             className="mb-4 text-primary-foreground/80 [&_a:hover]:text-white"
           />
@@ -315,8 +343,8 @@ const CategoryPage = () => {
             <span className="ml-auto text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full font-medium">{filtered.length} results</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Search coaching by name, city, state..." value={querySearch} onChange={e => setFilter("q", e.target.value)} className="pl-9 rounded-xl" />
             </div>
@@ -345,6 +373,13 @@ const CategoryPage = () => {
               <SelectTrigger className="w-full sm:w-40 rounded-xl"><SelectValue placeholder="Fees" /></SelectTrigger>
               <SelectContent>{FEE_BUCKETS.map(b => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}</SelectContent>
             </Select>
+            <Select value={queryRating} onValueChange={(v) => setFilter("rating", v)}>
+              <SelectTrigger className="w-full sm:w-36 rounded-xl" aria-label="Minimum rating"><SelectValue placeholder="Rating" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any Rating</SelectItem>
+                {MIN_RATING_OPTIONS.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
             {specOptions.length > 0 && (
               <Select value={querySpec} onValueChange={(v) => setFilter("specialization", v)}>
                 <SelectTrigger className="w-full sm:w-44 rounded-xl"><SelectValue placeholder="Specialization" /></SelectTrigger>
@@ -355,7 +390,7 @@ const CategoryPage = () => {
               </Select>
             )}
             <Select value={querySort} onValueChange={(v) => setFilter("sort", v)}>
-              <SelectTrigger className="w-full sm:w-44 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-40 rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="rating">Sort by Rating</SelectItem>
                 <SelectItem value="fees-low">Fees: Low to High</SelectItem>
@@ -364,6 +399,27 @@ const CategoryPage = () => {
               </SelectContent>
             </Select>
           </div>
+
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-border">
+              <span className="text-xs font-semibold text-muted-foreground">Active:</span>
+              {activeFilters.map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => removeFilter(f.key)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
+                  aria-label={`Remove ${f.label}`}
+                >
+                  {f.label}
+                  <X className="w-3 h-3" />
+                </button>
+              ))}
+              <button type="button" onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground underline ml-1">
+                Clear All
+              </button>
+            </div>
+          )}
         </div>
 
         {filtered.length > 0 ? (
@@ -375,8 +431,19 @@ const CategoryPage = () => {
         ) : (
           <div className="text-center py-20 bg-card rounded-2xl border border-border">
             <Building2 className="w-16 h-16 text-muted-foreground/15 mx-auto mb-4" />
-            <h3 className="font-heading font-bold text-foreground text-lg mb-2">No coaching institutes found</h3>
-            <p className="text-muted-foreground text-sm">No coaching institutes match your filters{hasLocationFilter ? ` for ${displayName}` : ""}. Try adjusting your selection.</p>
+            {institutes.length === 0 ? (
+              <>
+                <h3 className="font-heading font-bold text-foreground text-lg mb-2">No {categoryLabel || "coaching"} institutes listed yet</h3>
+                <p className="text-muted-foreground text-sm">We have not published any {categoryLabel || ""} coaching listings in this category so far.</p>
+                <Link to="/coaching" className="inline-block mt-4 text-sm text-primary font-medium hover:underline">Browse all MBA coaching institutes</Link>
+              </>
+            ) : (
+              <>
+                <h3 className="font-heading font-bold text-foreground text-lg mb-2">No coaching institutes found</h3>
+                <p className="text-muted-foreground text-sm">No {categoryLabel} coaching institutes match all of your filters{hasLocationFilter ? ` in ${displayName}` : ""}. Try a wider fee range or a lower minimum rating.</p>
+                <button type="button" onClick={clearFilters} className="mt-4 text-sm text-primary font-medium hover:underline">Clear All Filters</button>
+              </>
+            )}
           </div>
         )}
 
@@ -416,7 +483,9 @@ const CategoryPage = () => {
           <PageKeywords contentType="cityPage" recordId={cityPage.id} fallbackKeywords={keywords} />
         )}
       </div>
+      <CompareDrawer />
     </div>
+    </CoachingCompareProvider>
   );
 };
 

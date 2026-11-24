@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { collegesListingQuery, institutesQuery, suggestedCollegesQuery } from "@/lib/queries/listingQueries";
+import { categoriesQuery, collegesListingQuery, institutesQuery, suggestedCollegesQuery } from "@/lib/queries/listingQueries";
 
 // Query definition lives in @/lib/queries/listingQueries so the /coaching route
 // loader can prefetch it server-side under the identical query key.
@@ -62,14 +62,7 @@ export const useFeaturedInstitutes = () => {
 };
 
 export const useCategories = () => {
-  return useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("categories").select("*").order("name");
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  return useQuery(categoriesQuery);
 };
 
 // Listing variant — uses RPC `colleges_listing()` which trims description to 250 chars

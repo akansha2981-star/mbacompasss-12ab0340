@@ -2,7 +2,7 @@ import { publicPageHead } from "@/lib/publicPageHead";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import CoachingPage from "@/pages/CoachingPage";
 import PublicPageSkeleton from "@/components/PublicPageSkeleton";
-import { institutesQuery } from "@/lib/queries/listingQueries";
+import { categoriesQuery, institutesQuery } from "@/lib/queries/listingQueries";
 import { directoryPage, directoryPageUrl, DIRECTORY_PAGE_SIZE } from "@/lib/directoryPagination";
 import NotFound from "@/pages/NotFound";
 
@@ -13,7 +13,11 @@ export const Route = createFileRoute("/_public/coaching/")({
   // CoachingPage calls useInstitutes() with no argument, so the key is
   // ["institutes", undefined] — prefetched here with the identical key.
   loader: async ({ context, deps }) => {
-    const rows = await context.queryClient.ensureQueryData(institutesQuery());
+    // Categories are prefetched too so ?category= links render filtered on first load.
+    const [rows] = await Promise.all([
+      context.queryClient.ensureQueryData(institutesQuery()),
+      context.queryClient.ensureQueryData(categoriesQuery),
+    ]);
     if (deps.page > 1 && (deps.page - 1) * DIRECTORY_PAGE_SIZE >= rows.length) throw notFound();
   },
   component: () => <CoachingPage />,
