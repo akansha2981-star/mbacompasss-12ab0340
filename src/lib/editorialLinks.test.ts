@@ -24,4 +24,11 @@ describe("editorial entity matching", () => {
   it("prefers longest full names over overlapping short names", () => {
     expect(createEditorialMatcher([...pool, { label: "IIM", url: "/college/iim", kind: "colleges", aliases: [] }])("IIM Ahmedabad")[0]?.target.url).toBe("/college/iim-ahmedabad");
   });
+  it("keeps exact offsets when matches follow punctuation or another match", () => {
+    const matches = createEditorialMatcher(pool)("(CAT) CAT");
+    expect(matches.map(({ start, end, text }) => ({ start, end, text }))).toEqual([
+      { start: 1, end: 4, text: "CAT" },
+      { start: 6, end: 9, text: "CAT" },
+    ]);
+  });
 });

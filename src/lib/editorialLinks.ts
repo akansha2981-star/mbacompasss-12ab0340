@@ -26,17 +26,21 @@ export function createEditorialMatcher(targets: EditorialTarget[]) {
   }
   const unique = new Map([...names].filter(([, values]) => values.length === 1).map(([key, values]) => [key, values[0]]));
   const pattern = [...unique.values()].sort((a, b) => b.name.length - a.name.length).map(v => escape(v.name).replace(/\s+/g, "\\s+"));
-  const regex = pattern.length ? new RegExp(`(?<![\\p{L}\\p{N}])(?:${pattern.join("|")})(?![\\p{L}\\p{N}])`, "giu") : null;
+  const regex = pattern.length ? new RegExp(`(^|[^\\p{L}\\p{N}])(${pattern.join("|")})(?![\\p{L}\\p{N}])`, "giu") : null;
   return (text: string): EditorialMatch[] => {
     if (!regex) return [];
     regex.lastIndex = 0;
     const result: EditorialMatch[] = [];
     for (const match of text.matchAll(regex)) {
-      const entry = unique.get(normal(match[0]));
+      const prefix = match[1] || "";
+      const matchedText = match[2];
+      if (!matchedText) continue;
+      const entry = unique.get(normal(matchedText));
       if (!entry) continue;
       // Short uppercase abbreviations are case-sensitive: CAT is an exam, cat is not.
-      if (/^[A-Z.]{3,6}$/.test(entry.name) && match[0] !== entry.name) continue;
-      result.push({ start: match.index, end: match.index + match[0].length, text: match[0], target: entry.target });
+      if (/^[A-Z.]{3,6}$/.test(entry.name) && matchedText !== entry.name) continue;
+      const start = match.index + prefix.length;
+      result.push({ start, end: start + matchedText.length, text: matchedText, target: entry.target });
     }
     return result;
   };

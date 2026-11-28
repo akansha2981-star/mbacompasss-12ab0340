@@ -66,7 +66,7 @@ export function analyzeBlogDeterministic(a: {
   const bannedFound = BANNED_PHRASES.filter((p) => new RegExp(`\\b${esc(p)}\\b`, "i").test(lower));
 
   // Repetition: identical sentences or sentence openers repeated.
-  const sentences = text.split(/(?<=[.!?])\s+/).map((s) => s.trim().toLowerCase()).filter((s) => s.length > 30);
+  const sentences = text.replace(/([.!?])\s+/g, "$1\u0000").split("\u0000").map((s) => s.trim().toLowerCase()).filter((s) => s.length > 30);
   const seen = new Map<string, number>();
   sentences.forEach((s) => seen.set(s, (seen.get(s) || 0) + 1));
   const repeated = [...seen.values()].filter((n) => n > 1).length;

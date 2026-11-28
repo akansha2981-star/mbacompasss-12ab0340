@@ -57,7 +57,8 @@ function classifySentence(s: string): "positive" | "warning" | "neutral" {
 function extractTakeaways(text: string) {
   if (!text) return [];
   return text
-    .split(/(?<=[.!?])\s+/)
+    .replace(/([.!?])\s+/g, "$1\u0000")
+    .split("\u0000")
     .map((s) => s.trim())
     .filter((s) => s.length > 25 && s.length < 240)
     .slice(0, 6)

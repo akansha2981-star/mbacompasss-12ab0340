@@ -18,7 +18,7 @@ export function splitLongParagraphs(html: string): string {
         continue;
       }
       if (depth > 0) { current += part; continue; }
-      const sentences = part.split(/(?<=[.!?])\s+(?=[A-Z“"\d])/);
+      const sentences = part.replace(/([.!?])\s+(?=[A-Z“"\d])/g, "$1\u0000").split("\u0000");
       sentences.forEach((sentence, index) => {
         current += sentence;
         const abbreviation = /\b(?:Mr|Mrs|Ms|Dr|Prof|Rs|No|St|vs|etc|e\.g|i\.e)\.$/i.test(sentence);

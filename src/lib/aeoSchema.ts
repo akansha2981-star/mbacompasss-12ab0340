@@ -281,7 +281,7 @@ export const deriveDirectAnswer = (...candidates: (string | null | undefined)[])
     const text = clean(c);
     if (!text || text.length < 60) continue;
     // Take whole sentences up to ~360 chars so the answer never truncates mid-word.
-    const sentences = text.split(/(?<=[.!?])\s+/);
+    const sentences = text.replace(/([.!?])\s+/g, "$1\u0000").split("\u0000");
     let out = "";
     for (const s of sentences) {
       if ((out + " " + s).trim().length > 360 && out.length >= 90) break;
